@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <defs>
+    <linearGradient id="warmDiamondGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ff2f3a" />
+      <stop offset="50%" stop-color="#ff6b4a" />
+      <stop offset="100%" stop-color="#ffb347" />
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="1.5" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+  <rect width="32" height="32" rx="8" fill="#07080a" />
+  <polygon points="16,4 28,16 16,28 4,16" fill="url(#warmDiamondGrad)" filter="url(#glow)" />
+  <polygon points="16,8 24,16 16,24 8,16" fill="#07080a" opacity="0.3" />
+  <polygon points="16,11 21,16 16,21 11,16" fill="url(#warmDiamondGrad)" opacity="0.9" />
+</svg>
+

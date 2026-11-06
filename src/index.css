@@ -1,0 +1,507 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Living Warm Aurora Design Tokens */
+  --bg: #07080a;
+  --bg-2: #0d0f14;
+  --surface: #0e1117;
+  --surface-2: #161922;
+  --border: rgba(255, 255, 255, 0.08);
+  --border-subtle: rgba(255, 255, 255, 0.04);
+  --text: #ffffff;
+  --muted: #9c9c9d;
+  
+  /* Strictly Warm Chroma: Crimson, Coral, Amber */
+  --crimson: #ff2f3a;
+  --coral: #ff6b4a;
+  --amber: #ffb347;
+
+  /* Backward compatibility mappings for components using legacy vars */
+  --gold: #ffb347;
+  --gold-strong: #ff6b4a;
+  --on-gold: #07080a;
+  --ok: #90f0e0;
+  --warn: #ffb347;
+  --danger: #ff2f3a;
+  --focus: #ffb347;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+/* Geist Mono only for shortcut chips, small captions and code-like labels */
+.font-mono, kbd, code {
+  font-family: 'Geist Mono', ui-monospace, SFMono-Regular, monospace;
+}
+
+/* Global Focus-visible ring in amber on every interactive element */
+*:focus-visible {
+  outline: 2px solid #ffb347 !important;
+  outline-offset: 2px !important;
+}
+
+/* --------------------------------------------------------------------------
+   1. ANIMATED AURORA BACKGROUND ARCHITECTURE (Living Warm Aurora)
+   -------------------------------------------------------------------------- */
+.aurora-layer {
+  background-color: #07080a;
+  z-index: 0;
+}
+
+.aurora-blade {
+  position: absolute;
+  mix-blend-mode: screen;
+  pointer-events: none;
+  border-radius: 50%;
+  will-change: transform, opacity;
+  filter: blur(85px);
+}
+
+/* Blade 1: Crimson core to coral */
+.blade-1 {
+  width: 70vw;
+  height: 120vh;
+  left: -20vw;
+  top: -30vh;
+  background: radial-gradient(ellipse at 40% 40%, rgba(255, 47, 58, 0.42) 0%, rgba(255, 107, 74, 0.22) 50%, rgba(7, 8, 10, 0) 80%);
+  animation: aurora-drift-1 18s ease-in-out infinite alternate;
+}
+
+/* Blade 2: Crimson to Amber Diagonal Stream */
+.blade-2 {
+  width: 80vw;
+  height: 140vh;
+  left: 15vw;
+  top: -40vh;
+  background: linear-gradient(135deg, rgba(255, 47, 58, 0.38) 0%, rgba(255, 107, 74, 0.28) 40%, rgba(255, 179, 71, 0.18) 75%, rgba(7, 8, 10, 0) 100%);
+  animation: aurora-drift-2 22s ease-in-out infinite alternate;
+}
+
+/* Blade 3: Coral & Amber Warm Flare */
+.blade-3 {
+  width: 60vw;
+  height: 100vh;
+  right: -10vw;
+  bottom: -20vh;
+  background: radial-gradient(ellipse at 60% 60%, rgba(255, 107, 74, 0.32) 0%, rgba(255, 179, 71, 0.22) 45%, rgba(7, 8, 10, 0) 75%);
+  animation: aurora-drift-3 15s ease-in-out infinite alternate;
+}
+
+/* Blade 4: Deep Crimson Accent Streak */
+.blade-4 {
+  width: 50vw;
+  height: 90vh;
+  left: 20vw;
+  bottom: 5vh;
+  background: linear-gradient(45deg, rgba(255, 47, 58, 0.28) 0%, rgba(255, 107, 74, 0.18) 50%, rgba(7, 8, 10, 0) 85%);
+  animation: aurora-drift-4 20s ease-in-out infinite alternate;
+}
+
+/* Blade 5: Golden Amber Top Breath */
+.blade-5 {
+  width: 45vw;
+  height: 60vh;
+  right: 15vw;
+  top: -10vh;
+  background: radial-gradient(circle at 50% 50%, rgba(255, 179, 71, 0.28) 0%, rgba(255, 107, 74, 0.14) 50%, rgba(7, 8, 10, 0) 75%);
+  animation: aurora-drift-5 17s ease-in-out infinite alternate;
+}
+
+/* Keyframes - animate ONLY transform and opacity */
+/* 0% is full bloom */
+@keyframes aurora-drift-1 {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(-15deg) scale(1);
+    opacity: 0.95;
+  }
+  50% {
+    transform: translate3d(4vw, 5vh, 0) rotate(-8deg) scale(1.06);
+    opacity: 0.72;
+  }
+  100% {
+    transform: translate3d(-3vw, 8vh, 0) rotate(-22deg) scale(0.92);
+    opacity: 0.85;
+  }
+}
+
+@keyframes aurora-drift-2 {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(25deg) scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: translate3d(-5vw, 6vh, 0) rotate(32deg) scale(1.04);
+    opacity: 0.7;
+  }
+  100% {
+    transform: translate3d(6vw, -4vh, 0) rotate(18deg) scale(0.96);
+    opacity: 0.88;
+  }
+}
+
+@keyframes aurora-drift-3 {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(-10deg) scale(1);
+    opacity: 0.9;
+  }
+  50% {
+    transform: translate3d(-6vw, -5vh, 0) rotate(-3deg) scale(1.1);
+    opacity: 0.65;
+  }
+  100% {
+    transform: translate3d(4vw, 3vh, 0) rotate(-16deg) scale(0.95);
+    opacity: 0.82;
+  }
+}
+
+@keyframes aurora-drift-4 {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(40deg) scale(1);
+    opacity: 0.85;
+  }
+  50% {
+    transform: translate3d(5vw, -4vh, 0) rotate(46deg) scale(0.92);
+    opacity: 0.62;
+  }
+  100% {
+    transform: translate3d(-4vw, 6vh, 0) rotate(34deg) scale(1.05);
+    opacity: 0.8;
+  }
+}
+
+@keyframes aurora-drift-5 {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: translate3d(-3vw, 4vh, 0) scale(1.12);
+    opacity: 0.58;
+  }
+  100% {
+    transform: translate3d(5vw, -3vh, 0) scale(0.96);
+    opacity: 0.75;
+  }
+}
+
+/* Film Grain Overlay with SVG feTurbulence */
+.aurora-grain {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.045;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}
+
+/* Radial Vignette */
+.aurora-vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(circle at 50% 50%, rgba(7, 8, 10, 0.15) 25%, rgba(7, 8, 10, 0.72) 72%, #07080a 100%);
+}
+
+/* Pause State (During Export, Print Mode, or Tab Hidden) */
+.aurora-paused .aurora-blade {
+  animation-play-state: paused !important;
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .aurora-blade {
+    animation: none !important;
+    opacity: 0.8 !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   2. BUTTONS DESIGN SYSTEM (Keycap, Ghost Pill, Destructive)
+   -------------------------------------------------------------------------- */
+/* Primary: Keycap-Raised Button */
+.btn-keycap,
+.btn-primary {
+  background-color: #e6e6e6;
+  color: #2f3031;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 8px;
+  padding: 6px 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: none;
+  cursor: pointer;
+  user-select: none;
+  box-shadow: 
+    0 0 0 2px #000,
+    0 0 14px rgba(255, 255, 255, 0.19),
+    inset 0 1px 0 #fff,
+    inset 0 -1px 0 rgba(0, 0, 0, 0.35);
+  transition: transform 0.08s ease, box-shadow 0.08s ease;
+}
+
+.btn-keycap:hover:not(:disabled),
+.btn-primary:hover:not(:disabled) {
+  background-color: #f2f2f2;
+  box-shadow: 
+    0 0 0 2px #000,
+    0 0 18px rgba(255, 255, 255, 0.28),
+    inset 0 1px 0 #fff,
+    inset 0 -1px 0 rgba(0, 0, 0, 0.35);
+}
+
+.btn-keycap:active:not(:disabled),
+.btn-primary:active:not(:disabled) {
+  transform: translateY(1px);
+  box-shadow: 
+    0 0 0 2px #000,
+    inset 0 1px 0 rgba(0, 0, 0, 0.2);
+}
+
+.btn-keycap:disabled,
+.btn-primary:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  box-shadow: 0 0 0 2px #000;
+}
+
+/* Secondary: Ghost Pill Button */
+.btn-ghost-pill,
+.btn-secondary {
+  background-color: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--muted);
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 9999px;
+  padding: 6px 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.15s ease-in-out;
+  cursor: pointer;
+  user-select: none;
+}
+
+.btn-ghost-pill:hover:not(:disabled),
+.btn-secondary:hover:not(:disabled) {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+}
+
+.btn-ghost-pill:disabled,
+.btn-secondary:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* Destructive: Ghost with Crimson text & ring, never filled red */
+.btn-danger {
+  background-color: transparent;
+  border: 1px solid rgba(255, 47, 58, 0.3);
+  color: #ff2f3a;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 8px;
+  padding: 6px 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.15s ease-in-out;
+  cursor: pointer;
+}
+
+.btn-danger:hover:not(:disabled) {
+  background-color: rgba(255, 47, 58, 0.1);
+  border-color: rgba(255, 47, 58, 0.6);
+  color: #ff6b4a;
+}
+
+/* --------------------------------------------------------------------------
+   3. PANELS, MODALS & INPUTS (Dark Glass & Hairline Borders)
+   -------------------------------------------------------------------------- */
+.glass-panel,
+.medscope-card {
+  background-color: rgba(13, 15, 20, 0.85);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  box-shadow: 0 20px 60px rgba(255, 47, 58, 0.12);
+}
+
+.input-field {
+  background-color: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 13px;
+  font-family: 'Inter', sans-serif;
+  transition: all 0.15s ease;
+  outline: none;
+}
+
+.input-field:focus {
+  border-color: #ffb347;
+  box-shadow: 0 0 0 1px #ffb347;
+}
+
+/* Hero Headline class-scoped 64px */
+.hero-headline {
+  font-size: 64px !important;
+  font-weight: 600;
+  line-height: 1.1;
+  color: #ffffff;
+}
+
+@media (max-width: 767px) {
+  .hero-headline {
+    font-size: 38px !important;
+  }
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+  .input-field {
+    font-size: 16px !important;
+  }
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 179, 71, 0.35);
+}
+
+/* --------------------------------------------------------------------------
+   4. PRINT MODE SPEC (Strictly untouched & pristine)
+   -------------------------------------------------------------------------- */
+@page {
+  size: 210mm 297mm;
+  margin: 0;
+}
+
+.print-all-weeks-container {
+  display: none !important;
+}
+
+@page {
+  size: A4;
+  margin: 0;
+}
+
+@media print {
+  .aurora-layer,
+  [data-no-print] {
+    display: none !important;
+  }
+
+  html,
+  body,
+  #app,
+  #app > div {
+    width: 210mm !important;
+    height: auto !important;
+    min-height: auto !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    background: transparent !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  header,
+  aside,
+  nav,
+  .work-area,
+  .preview-container,
+  button {
+    display: none !important;
+  }
+
+  .print-all-weeks-container {
+    display: block !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+  }
+
+  .print-page-wrapper {
+    display: block !important;
+    width: 210mm !important;
+    height: 297mm !important;
+    min-width: 210mm !important;
+    max-width: 210mm !important;
+    min-height: 297mm !important;
+    max-height: 297mm !important;
+    page-break-after: always !important;
+    break-after: page !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    position: relative !important;
+    overflow: hidden !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  .print-page-wrapper:last-child {
+    page-break-after: auto !important;
+    break-after: auto !important;
+  }
+
+  .print-page-wrapper .schedule-page,
+  .print-target {
+    width: 1414px !important;
+    height: 2000px !important;
+    min-width: 1414px !important;
+    max-width: 1414px !important;
+    min-height: 2000px !important;
+    max-height: 2000px !important;
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    transform: scale(0.5613) !important;
+    transform-origin: top left !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    page-break-after: avoid !important;
+    break-after: avoid !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+}

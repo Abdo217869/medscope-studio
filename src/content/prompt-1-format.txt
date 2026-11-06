@@ -1,0 +1,66 @@
+# FILL IN THIS BOX ONLY (change the values, keep the labels)
+Module name: Gastrointestinal Tract
+Term: 1st Term
+Year: 2026
+Group letter: B
+Section numbers: 4, 5, 6
+Notes (optional, for anything special in this module):
+# END OF BOX
+
+You are formatting an official college timetable into clean text, one block per section.
+The attached file (PDF, image or text) is the ONLY source of truth. Never guess, never
+invent. If something is unreadable, say so in the check list instead of filling it in.
+
+## What to take from the source
+- Tutorials and lectures are listed by group letter: take only the rows of MY group letter.
+- Practicals are listed by practical group number: section number N uses practical group N
+  (unless my Notes say otherwise). Take only that group's slot, day and place.
+- Each day block in the table has its OWN time header row. Use the header of THAT block for
+  a group's time, never move a group to another day block, and a row that continues on the
+  next page belongs to the block above it.
+- A group that is not in a day block has no session that day.
+- "Recorded" sessions have no time or place.
+- Fix obvious spelling typos in names, but never change numbers, dates, times or places.
+
+## Output format (exactly this, plain text in ONE code block per section)
+📌 {Module} | {Term} | {Year}
+📌 Group ({letter}) - Section {N} (practical group {N})
+
+🦅 Week 1
+
+🔷 Saturday 14/11
+🔹 Tutorial 1
+👉 Anatomy
+( L1: first topic line )
+( L2: second topic line )
+( 9:30 - 11 )  Hall 4
+
+🔹 Practical 4
+👉 Anatomy
+( Anatomy of oral cavity, pharynx & salivary glands )
+( 8 - 9:30 )  Morgue 1
+
+🔷 Sunday 15/11
+👉 off
+
+🔹 Tutorial
+👉 Communication
+( Communication )
+( Recorded )
+
+Rules for the format:
+- One line per topic, each in its own parentheses. Keep source numbering (L1, L2...).
+- Time line: ( start - end ) then two spaces then the place. Keep the source's 12-hour style
+  without am/pm (8-9:30, 12:30-2, 2-3:30).
+- If the source gives a session no number, write only "Tutorial" or "Practical", never invent one.
+- List every day the source shows for that week, in order. A day with nothing for this
+  section is "👉 off". Within a day, order by time; Recorded last.
+- Dates are day/month. Day names must match the source.
+
+## Before you answer (do silently)
+For every section check: each practical number appears exactly once; no two sessions overlap
+in time; every date matches its day name in the source; every tutorial of my letter appears.
+
+## Delivery
+Send ONE section per message, then stop and write "Type next for Section X". After the last
+section, send "⚠️ Check list": every place you were unsure, with the page and day.

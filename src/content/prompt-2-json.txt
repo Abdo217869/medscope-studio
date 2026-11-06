@@ -1,0 +1,45 @@
+You convert the formatted timetable text below into ONE JSON file for the Medscope Timetable
+Studio tool. The text is the only source. Do not add, change or guess anything. Output the
+JSON in ONE code block, then a short "Discrepancies" list, nothing else.
+
+## How to read the text
+- The header lines "📌 {Module} | {Term} | {Year}" and "📌 Group (X) - Section N (practical
+  group N)" give module title, term, year, group letter and section numbers. Use them.
+- 🦅 = week number, 🔷 = day (day/month), 🔹 = session type and number, 👉 = subject,
+  ( ... ) lines = topics, then the ( time ) line with the place. "off" = no session.
+- Times are 12-hour without am/pm: hours 8, 9, 10, 11 are morning, 12 is noon, 1 to 7 are
+  afternoon (add 12): 12:30-2 = 12:30-14:00, 3:30-5 = 15:30-17:00. Write times as HH:MM.
+- Year comes from the header. Dates become YYYY-MM-DD. Compute the real weekday of each date;
+  if it does not match the day name in the text, keep the date and list it in Discrepancies.
+
+## JSON rules
+- "module": {"title", "term", "weekdays": ["Sat","Sun","Mon","Tue","Wed","Thu"]}.
+- "sections": one object per section in the text:
+  {"id":"4","letter":"B","number":4,"practicalGroup":4,"label":"Group (B) Section 4"}
+  (id is the section number as a string; labels use the group letter and section number).
+- "subjects": {"name","color"} with fixed colors Anatomy #a01040, Histology #f0b0d0,
+  Physiology #90f0e0, Biochemistry #c0f080, Communication #f0e0a0, Radiology #d0c0f0.
+  Any other subject gets #d9d9d9.
+- "sessionTypes": [{"key":"tut","label":"Tut."},{"key":"prac","label":"Practical."},
+  {"key":"lec","label":"Lec."}] (Tutorial=tut, Practical=prac, Lecture=lec).
+- "weeks": [{"n":1,"sessions":[...]}]. Session fields: date, type, number, subject, topics
+  (array, one entry per topic line, without the parentheses), scope, start, end, place,
+  status ("normal" or "recorded"), note ("").
+- If the text gives no number, OMIT "number". Never invent one.
+- Recorded: status "recorded", start "", end "", place "".
+- Day marked off: add no session.
+- Scope: {"sections":["4","5","6"]}. If several sections in the text have the SAME date, type,
+  number, subject, topics, time and place, write ONE session listing all of those sections.
+  If anything differs (even only the time), write separate sessions.
+- Keep every session; do not drop or merge different ones.
+
+## Check silently before answering
+Every session in the text exists in the JSON and vice versa; counts per section match; no
+section has two overlapping normal sessions; the JSON is valid.
+
+## Discrepancies
+List every date/weekday mismatch, missing place or time, and anything you were unsure about.
+If none, write "None".
+
+TEXT:
+(paste the formatted text of all sections here)

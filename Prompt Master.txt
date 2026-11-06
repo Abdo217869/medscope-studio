@@ -1,0 +1,128 @@
+# Project: Schedule Page Generator (static web app)
+
+## Goal
+A free, client-side web app that lets a small team (5-6 people) turn a university
+module timetable into one PDF per section, with one page per week. The visual
+design must be fully themeable because the brand identity will change soon.
+Everything in the generated pages is in English.
+
+## Hard constraints
+- 100% free: no paid APIs, no backend, no login. Deployable to GitHub Pages.
+- All data lives in the browser (localStorage) and is shared via JSON import/export.
+- Single-page app. Vite + vanilla JS (or Preact) + Tailwind. No heavy frameworks.
+- Libraries allowed: html-to-image or html2canvas, jsPDF, JSZip, qrcode (all free).
+- UI in English, desktop-first.
+
+## Data model (JSON, this is the import/export format)
+{
+  "module": { "title": "EGU", "term": "3rd Term", "weekdays": ["Sat","Sun","Mon","Tue","Wed","Thu"] },
+  "sections": [ { "id": "A1", "letter": "A", "number": 1, "practicalGroup": 1,
+                  "label": "Group (a) Section 1" } ],
+  "subjects": [ { "name": "Anatomy", "color": "#d6003b" } ],
+  "sessionTypes": [ { "key": "tut", "label": "Tut." }, { "key": "prac", "label": "Practical." },
+                    { "key": "lec", "label": "Lec." } ],
+  "weeks": [ { "n": 1, "sessions": [
+    { "date": "2026-09-12", "type": "tut", "number": 1, "subject": "Anatomy",
+      "topics": ["pituitary, Thyroid & pelvic"],
+      "scope": { "letter": "A" },
+      "start": "08:00", "end": "09:30", "place": "Hall 4",
+      "status": "normal", "note": "" } ] } ]
+}
+- scope is one of: {"all":true} | {"letter":"A"} | {"practicalGroups":[5,6]} | {"sections":["A1"]}.
+  A section's page shows every session whose scope matches its letter, its practicalGroup,
+  its id, or "all". This must support: tutorials per letter group, practicals per numbered
+  group, and shared sessions such as "Groups 5&6".
+- status is "normal" | "recorded" | "leave" (study leave/holiday, uses note as label).
+- topics is an array. Each item is either a plain string or {"label":"L1","text":"..."}.
+  A tutorial with several lectures uses one item per lecture, with its label (L1, L2, L3).
+
+## Page rendering spec (match the 3 reference images in /reference)
+- Fixed-size page (default A4 portrait, configurable). Full-bleed background image.
+- Header: top-left "Week N" + term; center module title and the section label
+  (e.g. "Group (a) Section 1"); top-right QR code + logo.
+- Table with 4 columns: Day | Topic | Place | Time. Semi-transparent cells over the
+  background (use rgba, NOT backdrop-filter, so export works).
+- Rows are one per day in module.weekdays order. Day cell = day name + date as d/m.
+  Rows stretch so the table fills the page height; OFF rows get a smaller weight.
+- Days with no sessions for that section render "OFF" centered in Topic, empty Place/Time.
+- Sessions within a day are SORTED BY START TIME, not by number; recorded ones go last.
+- Topic cell per session: "<type label><number> > <Subject>" where the type label is
+  gold + underlined, ">" is plain, the subject uses its subject color; below it the topics
+  in smaller underlined text inside parentheses (multiple topics = one per line).
+- Place cell: consecutive sessions with the same place in the same day are merged into one
+  merged cell; otherwise separate sub-rows with a thin divider. Time cell lists each
+  session's time aligned to its session.
+- Recorded sessions show "Recorded" merged across Place+Time. Leave shows its note.
+- Footer: left text and right text (both configurable), page number bottom-right.
+- Normalize place strings on display (e.g. "lab 4" -> "Lab 4").
+- Auto-shrink fonts if a day has many sessions so nothing overflows the page.
+- NEVER abbreviate, truncate, or use ellipsis on topic text. Each topic is rendered in
+  full on its own line (label in bold, e.g. "L1: Anatomy of oral cavity (tongue, palate)"),
+  wrapping onto more lines if needed. If content is tall, shrink fonts down to a
+  configurable minimum size and give that row more height (rows are weighted by content).
+  If it still overflows at the minimum font size, show a validator ERROR for that page
+  so the user can fix it (never cut text silently).
+
+## Theme system
+- Theme = JSON: background image (upload), logo (upload), QR (upload image OR generate
+  from a URL), header/footer texts, fonts (Google Fonts picker), table colors and opacity,
+  header/gold accent colors, subject color map, page size, margins.
+- Multiple saved themes, export/import as JSON, one-click "apply to all sections".
+- Live preview that re-renders instantly on any change.
+
+## Screens
+1. Setup: module title, term, sections (letter/number/practicalGroup/label), subjects+colors.
+2. Import: paste or upload JSON (validate against the schema, show readable errors).
+   Also a "Download template JSON" button.
+3. Editor: week tabs; a spreadsheet-like table of sessions (add, edit, duplicate, delete,
+   filter by scope/section) next to a live preview of the selected section's page.
+4. Validator panel: list of issues, each clickable and jumping to the offending session.
+5. Export: choose sections/weeks, then "Export PDF" (one section) or "Export all (ZIP)".
+
+## Validator rules (errors block export unless overridden; warnings do not)
+- ERROR: two sessions overlap in time for the same section on the same day.
+- ERROR: date's weekday is not in module.weekdays or doesn't fit the week.
+- ERROR: session missing subject, number, or (place+time unless status != normal).
+- ERROR: scope.practicalGroups contains a group that matches no section; or a section's
+  practicalGroup never appears in a practical series that others have (coverage check:
+  each practical number should appear exactly once per section).
+- WARNING: same type+number+subject duplicated with different topics (likely typo).
+- WARNING: subject not in the subject list (no color).
+- WARNING: place text normalized, or inconsistent casing across sessions.
+- WARNING: a week has no sessions for a section, or the last week ends mid-week.
+- WARNING: a session with an empty scope group value (e.g. "Group" with no number).
+
+## Export
+- One PDF per section, one page per week, rendered from the same DOM as the preview so
+  WYSIWYG. Wait for document.fonts.ready and convert images to data URLs first (avoid
+  canvas tainting). Rasterize at 2-3x scale, then assemble with jsPDF.
+- "Export all" produces a ZIP named <module>_<term>_<section>.pdf.
+- Two export modes, selectable in the UI:
+  A) "Image PDF" (default): one click, rasterized as described above, supports ZIP of all sections.
+  B) "Print mode" (vector, selectable text, sharp at any zoom): a print-only view of the
+     selected section, using @page { size: <page size>; margin: 0 }, one page per week
+     (break-after: page), print-color-adjust: exact, UI hidden. Show a hint to enable
+     "Background graphics" in the browser print dialog and choose "Save as PDF".
+     Print mode handles one section at a time (the browser can't batch it).
+  Both modes render from the same page component so they look identical.
+- Add a validator ERROR if any page overflows in either mode.
+
+## Build in phases, each with a runnable result
+Phase 1: data model, renderer, theme, live preview, PDF export of one section.
+  ACCEPTANCE: load /reference/fixture.json and reproduce the 3 reference pages closely.
+Phase 2: JSON import/export + schema validation + editor table.
+Phase 3: validator + clickable issues.
+Phase 4: theme manager, batch ZIP export, localStorage persistence, polish.
+Stop after each phase and let me test before continuing.
+
+## Fixture for Phase 1 (EGU, Week 1, from the reference images)
+Module title "EGU", term "3rd Term". Sections A1, A2, A3 (letter A, label "Group (a) Section N").
+Scope letter A: Sat 12/9 Tut.1 Anatomy "pituitary, Thyroid & pelvic" Hall 4 8-9:30;
+Sun 13/9 Tut.2 Histology "pituitary & thyroid" Hall 4 8-9:30; Sun 13/9 Tut.3 Physiology
+"Anterior pituitary gland" Hall 4 9:30-11; Mon 14/9 and Wed 16/9 OFF.
+Tue 15/9 Practical.1 Anatomy "thyroid & parathyroid and pituitary" Morgue 1:
+A1 8-9:30, A2 9:30-11, A3 11-12:30.
+Thu 17/9 Practical.2 Physiology "abnormality of pituitary gland" Lab 4 and
+Practical.3 Histology "pituitary thyroid & parathyroid" Lab 8:
+A1: P2 8-9:30, P3 9:30-11. A2: P3 8-9:30, P2 9:30-11. A3: P2 11-12:30, P3 12:30-2.
+Footer left "Dr.Omar Medhat", right "Medscope Alex Medicine".

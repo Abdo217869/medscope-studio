@@ -1,0 +1,6188 @@
+{
+  "module": {
+    "title": "Gastrointestinal Tract",
+    "term": "1st Term",
+    "weekdays": [
+      "Sat",
+      "Sun",
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu"
+    ]
+  },
+  "sections": [
+    {
+      "id": "1",
+      "letter": "A",
+      "number": 1,
+      "practicalGroup": 1,
+      "label": "Group (A) Section 1"
+    },
+    {
+      "id": "2",
+      "letter": "A",
+      "number": 2,
+      "practicalGroup": 2,
+      "label": "Group (A) Section 2"
+    },
+    {
+      "id": "3",
+      "letter": "A",
+      "number": 3,
+      "practicalGroup": 3,
+      "label": "Group (A) Section 3"
+    },
+    {
+      "id": "4",
+      "letter": "B",
+      "number": 4,
+      "practicalGroup": 4,
+      "label": "Group (B) Section 4"
+    },
+    {
+      "id": "5",
+      "letter": "B",
+      "number": 5,
+      "practicalGroup": 5,
+      "label": "Group (B) Section 5"
+    },
+    {
+      "id": "6",
+      "letter": "B",
+      "number": 6,
+      "practicalGroup": 6,
+      "label": "Group (B) Section 6"
+    },
+    {
+      "id": "7",
+      "letter": "C",
+      "number": 7,
+      "practicalGroup": 7,
+      "label": "Group (C) Section 7"
+    },
+    {
+      "id": "8",
+      "letter": "C",
+      "number": 8,
+      "practicalGroup": 8,
+      "label": "Group (C) Section 8"
+    },
+    {
+      "id": "9",
+      "letter": "C",
+      "number": 9,
+      "practicalGroup": 9,
+      "label": "Group (C) Section 9"
+    },
+    {
+      "id": "10",
+      "letter": "D",
+      "number": 10,
+      "practicalGroup": 10,
+      "label": "Group (D) Section 10"
+    },
+    {
+      "id": "11",
+      "letter": "D",
+      "number": 11,
+      "practicalGroup": 11,
+      "label": "Group (D) Section 11"
+    },
+    {
+      "id": "12",
+      "letter": "D",
+      "number": 12,
+      "practicalGroup": 12,
+      "label": "Group (D) Section 12"
+    }
+  ],
+  "subjects": [
+    {
+      "name": "Anatomy",
+      "color": "#a01040"
+    },
+    {
+      "name": "Histology",
+      "color": "#f0b0d0"
+    },
+    {
+      "name": "Physiology",
+      "color": "#90f0e0"
+    },
+    {
+      "name": "Biochemistry",
+      "color": "#c0f080"
+    },
+    {
+      "name": "Communication",
+      "color": "#f0e0a0"
+    },
+    {
+      "name": "Radiology",
+      "color": "#d0c0f0"
+    }
+  ],
+  "sessionTypes": [
+    {
+      "key": "tut",
+      "label": "Tut."
+    },
+    {
+      "key": "prac",
+      "label": "Practical."
+    },
+    {
+      "key": "lec",
+      "label": "Lec."
+    }
+  ],
+  "weeks": [
+    {
+      "n": 1,
+      "sessions": [
+        {
+          "date": "2026-11-10",
+          "type": "prac",
+          "number": 1,
+          "subject": "Anatomy",
+          "topics": [
+            "Mandible and norma lateralis"
+          ],
+          "scope": {
+            "practicalGroups": [
+              1
+            ]
+          },
+          "start": "08:00",
+          "end": "09:30",
+          "place": "Morgue 1",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-10",
+          "type": "prac",
+          "number": 2,
+          "subject": "Biochemistry",
+          "topics": [
+            "Determination of blood sodium & potassium level by colorimeter"
+          ],
+          "scope": {
+            "practicalGroups": [
+              2
+            ]
+          },
+          "start": "08:00",
+          "end": "09:30",
+          "place": "Lab 9",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-10",
+          "type": "prac",
+          "number": 1,
+          "subject": "Anatomy",
+          "topics": [
+            "Mandible and norma lateralis"
+          ],
+          "scope": {
+            "practicalGroups": [
+              2
+            ]
+          },
+          "start": "09:30",
+          "end": "11:00",
+          "place": "Morgue 1",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-10",
+          "type": "prac",
+          "number": 2,
+          "subject": "Biochemistry",
+          "topics": [
+            "Determination of blood sodium & potassium level by colorimeter"
+          ],
+          "scope": {
+            "practicalGroups": [
+              1
+            ]
+          },
+          "start": "09:30",
+          "end": "11:00",
+          "place": "Lab 9",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-10",
+          "type": "prac",
+          "number": 1,
+          "subject": "Anatomy",
+          "topics": [
+            "Mandible and norma lateralis"
+          ],
+          "scope": {
+            "practicalGroups": [
+              3
+            ]
+          },
+          "start": "11:00",
+          "end": "12:30",
+          "place": "Morgue 1",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-10",
+          "type": "prac",
+          "number": 2,
+          "subject": "Biochemistry",
+          "topics": [
+            "Determination of blood sodium & potassium level by colorimeter"
+          ],
+          "scope": {
+            "practicalGroups": [
+              4
+            ]
+          },
+          "start": "11:00",
+          "end": "12:30",
+          "place": "Lab 9",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-10",
+          "type": "prac",
+          "number": 1,
+          "subject": "Anatomy",
+          "topics": [
+            "Mandible and norma lateralis"
+          ],
+          "scope": {
+            "practicalGroups": [
+              4
+            ]
+          },
+          "start": "12:30",
+          "end": "14:00",
+          "place": "Morgue 1",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-10",
+          "type": "prac",
+          "number": 2,
+          "subject": "Biochemistry",
+          "topics": [
+            "Determination of blood sodium & potassium level by colorimeter"
+          ],
+          "scope": {
+            "practicalGroups": [
+              3
+            ]
+          },
+          "start": "12:30",
+          "end": "14:00",
+          "place": "Lab 9",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-10",
+          "type": "tut",
+          "subject": "Communication",
+          "topics": [
+            "Communication"
+          ],
+          "scope": {
+            "practicalGroups": [
+              1,
+              2,
+              3,
+              4
+            ]
+          },
+          "start": "",
+          "end": "",
+          "place": "",
+          "status": "recorded",
+          "note": ""
+        },
+        {
+          "date": "2026-11-11",
+          "type": "prac",
+          "number": 1,
+          "subject": "Anatomy",
+          "topics": [
+            "Mandible and norma lateralis"
+          ],
+          "scope": {
+            "practicalGroups": [
+              5
+            ]
+          },
+          "start": "11:00",
+          "end": "12:30",
+          "place": "Morgue 1",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-11",
+          "type": "prac",
+          "number": 2,
+          "subject": "Biochemistry",
+          "topics": [
+            "Determination of blood sodium & potassium level by colorimeter"
+          ],
+          "scope": {
+            "practicalGroups": [
+              6
+            ]
+          },
+          "start": "11:00",
+          "end": "12:30",
+          "place": "Lab 9",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-11",
+          "type": "prac",
+          "number": 1,
+          "subject": "Anatomy",
+          "topics": [
+            "Mandible and norma lateralis"
+          ],
+          "scope": {
+            "practicalGroups": [
+              6
+            ]
+          },
+          "start": "12:30",
+          "end": "14:00",
+          "place": "Morgue 1",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-11",
+          "type": "prac",
+          "number": 2,
+          "subject": "Biochemistry",
+          "topics": [
+            "Determination of blood sodium & potassium level by colorimeter"
+          ],
+          "scope": {
+            "practicalGroups": [
+              5
+            ]
+          },
+          "start": "12:30",
+          "end": "14:00",
+          "place": "Lab 9",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-11",
+          "type": "prac",
+          "number": 1,
+          "subject": "Anatomy",
+          "topics": [
+            "Mandible and norma lateralis"
+          ],
+          "scope": {
+            "practicalGroups": [
+              7
+            ]
+          },
+          "start": "14:00",
+          "end": "15:30",
+          "place": "Morgue 1",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-11",
+          "type": "prac",
+          "number": 2,
+          "subject": "Biochemistry",
+          "topics": [
+            "Determination of blood sodium & potassium level by colorimeter"
+          ],
+          "scope": {
+            "practicalGroups": [
+              8
+            ]
+          },
+          "start": "14:00",
+          "end": "15:30",
+          "place": "Lab 9",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-11",
+          "type": "prac",
+          "number": 1,
+          "subject": "Anatomy",
+          "topics": [
+            "Mandible and norma lateralis"
+          ],
+          "scope": {
+            "practicalGroups": [
+              8
+            ]
+          },
+          "start": "15:30",
+          "end": "17:00",
+          "place": "Morgue 1",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-11",
+          "type": "prac",
+          "number": 2,
+          "subject": "Biochemistry",
+          "topics": [
+            "Determination of blood sodium & potassium level by colorimeter"
+          ],
+          "scope": {
+            "practicalGroups": [
+              7
+            ]
+          },
+          "start": "15:30",
+          "end": "17:00",
+          "place": "Lab 9",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-11",
+          "type": "tut",
+          "subject": "Communication",
+          "topics": [
+            "Communication"
+          ],
+          "scope": {
+            "practicalGroups": [
+              5,
+              6,
+              7,
+              8
+            ]
+          },
+          "start": "",
+          "end": "",
+          "place": "",
+          "status": "recorded",
+          "note": ""
+        },
+        {
+          "date": "2026-11-12",
+          "type": "prac",
+          "number": 1,
+          "subject": "Anatomy",
+          "topics": [
+            "Mandible and norma lateralis"
+          ],
+          "scope": {
+            "practicalGroups": [
+              9
+            ]
+          },
+          "start": "08:00",
+          "end": "09:30",
+          "place": "Morgue 1",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-12",
+          "type": "prac",
+          "number": 2,
+          "subject": "Biochemistry",
+          "topics": [
+            "Determination of blood sodium & potassium level by colorimeter"
+          ],
+          "scope": {
+            "practicalGroups": [
+              10
+            ]
+          },
+          "start": "08:00",
+          "end": "09:30",
+          "place": "Lab 9",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-12",
+          "type": "prac",
+          "number": 1,
+          "subject": "Anatomy",
+          "topics": [
+            "Mandible and norma lateralis"
+          ],
+          "scope": {
+            "practicalGroups": [
+              10
+            ]
+          },
+          "start": "09:30",
+          "end": "11:00",
+          "place": "Morgue 1",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-12",
+          "type": "prac",
+          "number": 2,
+          "subject": "Biochemistry",
+          "topics": [
+            "Determination of blood sodium & potassium level by colorimeter"
+          ],
+          "scope": {
+            "practicalGroups": [
+              9
+            ]
+          },
+          "start": "09:30",
+          "end": "11:00",
+          "place": "Lab 9",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-12",
+          "type": "prac",
+          "number": 1,
+          "subject": "Anatomy",
+          "topics": [
+            "Mandible and norma lateralis"
+          ],
+          "scope": {
+            "practicalGroups": [
+              11
+            ]
+          },
+          "start": "11:00",
+          "end": "12:30",
+          "place": "Morgue 1",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-12",
+          "type": "prac",
+          "number": 2,
+          "subject": "Biochemistry",
+          "topics": [
+            "Determination of blood sodium & potassium level by colorimeter"
+          ],
+          "scope": {
+            "practicalGroups": [
+              12
+            ]
+          },
+          "start": "11:00",
+          "end": "12:30",
+          "place": "Lab 9",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-12",
+          "type": "prac",
+          "number": 1,
+          "subject": "Anatomy",
+          "topics": [
+            "Mandible and norma lateralis"
+          ],
+          "scope": {
+            "practicalGroups": [
+              12
+            ]
+          },
+          "start": "12:30",
+          "end": "14:00",
+          "place": "Morgue 1",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-12",
+          "type": "prac",
+          "number": 2,
+          "subject": "Biochemistry",
+          "topics": [
+            "Determination of blood sodium & potassium level by colorimeter"
+          ],
+          "scope": {
+            "practicalGroups": [
+              11
+            ]
+          },
+          "start": "12:30",
+          "end": "14:00",
+          "place": "Lab 9",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-12",
+          "type": "tut",
+          "subject": "Communication",
+          "topics": [
+            "Communication"
+          ],
+          "scope": {
+            "practicalGroups": [
+              9,
+              10,
+              11,
+              12
+            ]
+          },
+          "start": "",
+          "end": "",
+          "place": "",
+          "status": "recorded",
+          "note": ""
+        }
+      ]
+    },
+    {
+      "n": 2,
+      "sessions": [
+        {
+          "date": "2026-11-14",
+          "type": "tut",
+          "number": 1,
+          "subject": "Anatomy",
+          "topics": [
+            "L1: Anatomy of oral cavity (tongue, palate)",
+            "L2: Anatomy of salivary glands"
+          ],
+          "scope": {
+            "letter": "C"
+          },
+          "start": "08:00",
+          "end": "09:30",
+          "place": "Hall 6",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-14",
+          "type": "tut",
+          "number": 1,
+          "subject": "Anatomy",
+          "topics": [
+            "L1: Anatomy of oral cavity (tongue, palate)",
+            "L2: Anatomy of salivary glands"
+          ],
+          "scope": {
+            "letter": "B"
+          },
+          "start": "08:00",
+          "end": "09:30",
+          "place": "Hall 5",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-14",
+          "type": "tut",
+          "number": 2,
+          "subject": "Histology",
+          "topics": [
+            "L1: Histological structure of lip & tongue",
+            "L2: Histological structure of salivary glands",
+            "L3: General histological plan of the alimentary tube & esophagus"
+          ],
+          "scope": {
+            "letter": "A"
+          },
+          "start": "08:00",
+          "end": "09:30",
+          "place": "Hall 4",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-14",
+          "type": "tut",
+          "number": 2,
+          "subject": "Histology",
+          "topics": [
+            "L1: Histological structure of lip & tongue",
+            "L2: Histological structure of salivary glands",
+            "L3: General histological plan of the alimentary tube & esophagus"
+          ],
+          "scope": {
+            "letter": "D"
+          },
+          "start": "08:00",
+          "end": "09:30",
+          "place": "Main Hall",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-14",
+          "type": "tut",
+          "number": 1,
+          "subject": "Anatomy",
+          "topics": [
+            "L1: Anatomy of oral cavity (tongue, palate)",
+            "L2: Anatomy of salivary glands"
+          ],
+          "scope": {
+            "letter": "A"
+          },
+          "start": "09:30",
+          "end": "11:00",
+          "place": "Hall 4",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-14",
+          "type": "tut",
+          "number": 1,
+          "subject": "Anatomy",
+          "topics": [
+            "L1: Anatomy of oral cavity (tongue, palate)",
+            "L2: Anatomy of salivary glands"
+          ],
+          "scope": {
+            "letter": "D"
+          },
+          "start": "09:30",
+          "end": "11:00",
+          "place": "Main Hall",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-14",
+          "type": "tut",
+          "number": 2,
+          "subject": "Histology",
+          "topics": [
+            "L1: Histological structure of lip & tongue",
+            "L2: Histological structure of salivary glands",
+            "L3: General histological plan of the alimentary tube & esophagus"
+          ],
+          "scope": {
+            "letter": "C"
+          },
+          "start": "09:30",
+          "end": "11:00",
+          "place": "Hall 6",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-14",
+          "type": "tut",
+          "number": 2,
+          "subject": "Histology",
+          "topics": [
+            "L1: Histological structure of lip & tongue",
+            "L2: Histological structure of salivary glands",
+            "L3: General histological plan of the alimentary tube & esophagus"
+          ],
+          "scope": {
+            "letter": "B"
+          },
+          "start": "09:30",
+          "end": "11:00",
+          "place": "Hall 5",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-15",
+          "type": "tut",
+          "number": 3,
+          "subject": "Biochemistry",
+          "topics": [
+            "L1: General protein metabolism",
+            "L2: Metabolism of ammonia & urea cycle",
+            "L3: Glycine & serine AA"
+          ],
+          "scope": {
+            "letter": "C"
+          },
+          "start": "08:00",
+          "end": "09:30",
+          "place": "Hall 4",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-15",
+          "type": "tut",
+          "number": 3,
+          "subject": "Biochemistry",
+          "topics": [
+            "L1: General protein metabolism",
+            "L2: Metabolism of ammonia & urea cycle",
+            "L3: Glycine & serine AA"
+          ],
+          "scope": {
+            "letter": "D"
+          },
+          "start": "08:00",
+          "end": "09:30",
+          "place": "Hall 5",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-15",
+          "type": "tut",
+          "number": 3,
+          "subject": "Biochemistry",
+          "topics": [
+            "L1: General protein metabolism",
+            "L2: Metabolism of ammonia & urea cycle",
+            "L3: Glycine & serine AA"
+          ],
+          "scope": {
+            "letter": "A"
+          },
+          "start": "09:30",
+          "end": "11:00",
+          "place": "Hall 4",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-15",
+          "type": "tut",
+          "number": 3,
+          "subject": "Biochemistry",
+          "topics": [
+            "L1: General protein metabolism",
+            "L2: Metabolism of ammonia & urea cycle",
+            "L3: Glycine & serine AA"
+          ],
+          "scope": {
+            "letter": "B"
+          },
+          "start": "09:30",
+          "end": "11:00",
+          "place": "Hall 5",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-17",
+          "type": "prac",
+          "number": 4,
+          "subject": "Anatomy",
+          "topics": [
+            "Anatomy of oral cavity, pharynx & salivary glands"
+          ],
+          "scope": {
+            "practicalGroups": [
+              3
+            ]
+          },
+          "start": "08:00",
+          "end": "09:30",
+          "place": "Morgue 1",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-17",
+          "type": "prac",
+          "number": 5,
+          "subject": "Histology",
+          "topics": [
+            "Histology of the oral cavity"
+          ],
+          "scope": {
+            "practicalGroups": [
+              4
+            ]
+          },
+          "start": "08:00",
+          "end": "09:30",
+          "place": "Lab 7",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-17",
+          "type": "prac",
+          "number": 6,
+          "subject": "Biochemistry",
+          "topics": [
+            "Determination of toxic and nutritional elements by atomic absorption spectroscopy"
+          ],
+          "scope": {
+            "practicalGroups": [
+              5,
+              6
+            ]
+          },
+          "start": "08:00",
+          "end": "09:30",
+          "place": "Hall 6",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-17",
+          "type": "prac",
+          "number": 4,
+          "subject": "Anatomy",
+          "topics": [
+            "Anatomy of oral cavity, pharynx & salivary glands"
+          ],
+          "scope": {
+            "practicalGroups": [
+              4
+            ]
+          },
+          "start": "09:30",
+          "end": "11:00",
+          "place": "Morgue 1",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-17",
+          "type": "prac",
+          "number": 5,
+          "subject": "Histology",
+          "topics": [
+            "Histology of the oral cavity"
+          ],
+          "scope": {
+            "practicalGroups": [
+              3
+            ]
+          },
+          "start": "09:30",
+          "end": "11:00",
+          "place": "Lab 7",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-17",
+          "type": "prac",
+          "number": 6,
+          "subject": "Biochemistry",
+          "topics": [
+            "Determination of toxic and nutritional elements by atomic absorption spectroscopy"
+          ],
+          "scope": {
+            "practicalGroups": [
+              7,
+              8
+            ]
+          },
+          "start": "09:30",
+          "end": "11:00",
+          "place": "Hall 6",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-17",
+          "type": "prac",
+          "number": 4,
+          "subject": "Anatomy",
+          "topics": [
+            "Anatomy of oral cavity, pharynx & salivary glands"
+          ],
+          "scope": {
+            "practicalGroups": [
+              1
+            ]
+          },
+          "start": "11:00",
+          "end": "12:30",
+          "place": "Morgue 1",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-17",
+          "type": "prac",
+          "number": 5,
+          "subject": "Histology",
+          "topics": [
+            "Histology of the oral cavity"
+          ],
+          "scope": {
+            "practicalGroups": [
+              2
+            ]
+          },
+          "start": "11:00",
+          "end": "12:30",
+          "place": "Lab 7",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-17",
+          "type": "prac",
+          "number": 4,
+          "subject": "Anatomy",
+          "topics": [
+            "Anatomy of oral cavity, pharynx & salivary glands"
+          ],
+          "scope": {
+            "practicalGroups": [
+              2
+            ]
+          },
+          "start": "12:30",
+          "end": "14:00",
+          "place": "Morgue 1",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-17",
+          "type": "prac",
+          "number": 5,
+          "subject": "Histology",
+          "topics": [
+            "Histology of the oral cavity"
+          ],
+          "scope": {
+            "practicalGroups": [
+              1
+            ]
+          },
+          "start": "12:30",
+          "end": "14:00",
+          "place": "Lab 7",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-18",
+          "type": "prac",
+          "number": 4,
+          "subject": "Anatomy",
+          "topics": [
+            "Anatomy of oral cavity, pharynx & salivary glands"
+          ],
+          "scope": {
+            "practicalGroups": [
+              7
+            ]
+          },
+          "start": "11:00",
+          "end": "12:30",
+          "place": "Morgue 1",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-18",
+          "type": "prac",
+          "number": 5,
+          "subject": "Histology",
+          "topics": [
+            "Histology of the oral cavity"
+          ],
+          "scope": {
+            "practicalGroups": [
+              8
+            ]
+          },
+          "start": "11:00",
+          "end": "12:30",
+          "place": "Lab 7",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-18",
+          "type": "prac",
+          "number": 6,
+          "subject": "Biochemistry",
+          "topics": [
+            "Determination of toxic and nutritional elements by atomic absorption spectroscopy"
+          ],
+          "scope": {
+            "practicalGroups": [
+              9,
+              10
+            ]
+          },
+          "start": "11:00",
+          "end": "12:30",
+          "place": "Hall 6",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-18",
+          "type": "prac",
+          "number": 4,
+          "subject": "Anatomy",
+          "topics": [
+            "Anatomy of oral cavity, pharynx & salivary glands"
+          ],
+          "scope": {
+            "practicalGroups": [
+              8
+            ]
+          },
+          "start": "12:30",
+          "end": "14:00",
+          "place": "Morgue 1",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-18",
+          "type": "prac",
+          "number": 5,
+          "subject": "Histology",
+          "topics": [
+            "Histology of the oral cavity"
+          ],
+          "scope": {
+            "practicalGroups": [
+              7
+            ]
+          },
+          "start": "12:30",
+          "end": "14:00",
+          "place": "Lab 7",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-18",
+          "type": "prac",
+          "number": 6,
+          "subject": "Biochemistry",
+          "topics": [
+            "Determination of toxic and nutritional elements by atomic absorption spectroscopy"
+          ],
+          "scope": {
+            "practicalGroups": [
+              11,
+              12
+            ]
+          },
+          "start": "12:30",
+          "end": "14:00",
+          "place": "Hall 6",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-18",
+          "type": "prac",
+          "number": 4,
+          "subject": "Anatomy",
+          "topics": [
+            "Anatomy of oral cavity, pharynx & salivary glands"
+          ],
+          "scope": {
+            "practicalGroups": [
+              5
+            ]
+          },
+          "start": "14:00",
+          "end": "15:30",
+          "place": "Morgue 1",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-18",
+          "type": "prac",
+          "number": 5,
+          "subject": "Histology",
+          "topics": [
+            "Histology of the oral cavity"
+          ],
+          "scope": {
+            "practicalGroups": [
+              6
+            ]
+          },
+          "start": "14:00",
+          "end": "15:30",
+          "place": "Lab 7",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-18",
+          "type": "prac",
+          "number": 4,
+          "subject": "Anatomy",
+          "topics": [
+            "Anatomy of oral cavity, pharynx & salivary glands"
+          ],
+          "scope": {
+            "practicalGroups": [
+              6
+            ]
+          },
+          "start": "15:30",
+          "end": "17:00",
+          "place": "Morgue 1",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-18",
+          "type": "prac",
+          "number": 5,
+          "subject": "Histology",
+          "topics": [
+            "Histology of the oral cavity"
+          ],
+          "scope": {
+            "practicalGroups": [
+              5
+            ]
+          },
+          "start": "15:30",
+          "end": "17:00",
+          "place": "Lab 7",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-19",
+          "type": "prac",
+          "number": 4,
+          "subject": "Anatomy",
+          "topics": [
+            "Anatomy of oral cavity, pharynx & salivary glands"
+          ],
+          "scope": {
+            "practicalGroups": [
+              11
+            ]
+          },
+          "start": "08:00",
+          "end": "09:30",
+          "place": "Morgue 1",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-19",
+          "type": "prac",
+          "number": 5,
+          "subject": "Histology",
+          "topics": [
+            "Histology of the oral cavity"
+          ],
+          "scope": {
+            "practicalGroups": [
+              12
+            ]
+          },
+          "start": "08:00",
+          "end": "09:30",
+          "place": "Lab 7",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-19",
+          "type": "prac",
+          "number": 6,
+          "subject": "Biochemistry",
+          "topics": [
+            "Determination of toxic and nutritional elements by atomic absorption spectroscopy"
+          ],
+          "scope": {
+            "practicalGroups": [
+              1,
+              2
+            ]
+          },
+          "start": "08:00",
+          "end": "09:30",
+          "place": "Hall 6",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-19",
+          "type": "prac",
+          "number": 4,
+          "subject": "Anatomy",
+          "topics": [
+            "Anatomy of oral cavity, pharynx & salivary glands"
+          ],
+          "scope": {
+            "practicalGroups": [
+              12
+            ]
+          },
+          "start": "09:30",
+          "end": "11:00",
+          "place": "Morgue 1",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-19",
+          "type": "prac",
+          "number": 5,
+          "subject": "Histology",
+          "topics": [
+            "Histology of the oral cavity"
+          ],
+          "scope": {
+            "practicalGroups": [
+              11
+            ]
+          },
+          "start": "09:30",
+          "end": "11:00",
+          "place": "Lab 7",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-19",
+          "type": "prac",
+          "number": 6,
+          "subject": "Biochemistry",
+          "topics": [
+            "Determination of toxic and nutritional elements by atomic absorption spectroscopy"
+          ],
+          "scope": {
+            "practicalGroups": [
+              3,
+              4
+            ]
+          },
+          "start": "09:30",
+          "end": "11:00",
+          "place": "Hall 6",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-19",
+          "type": "prac",
+          "number": 4,
+          "subject": "Anatomy",
+          "topics": [
+            "Anatomy of oral cavity, pharynx & salivary glands"
+          ],
+          "scope": {
+            "practicalGroups": [
+              9
+            ]
+          },
+          "start": "11:00",
+          "end": "12:30",
+          "place": "Morgue 1",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-19",
+          "type": "prac",
+          "number": 5,
+          "subject": "Histology",
+          "topics": [
+            "Histology of the oral cavity"
+          ],
+          "scope": {
+            "practicalGroups": [
+              10
+            ]
+          },
+          "start": "11:00",
+          "end": "12:30",
+          "place": "Lab 7",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-19",
+          "type": "prac",
+          "number": 4,
+          "subject": "Anatomy",
+          "topics": [
+            "Anatomy of oral cavity, pharynx & salivary glands"
+          ],
+          "scope": {
+            "practicalGroups": [
+              10
+            ]
+          },
+          "start": "12:30",
+          "end": "14:00",
+          "place": "Morgue 1",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-19",
+          "type": "prac",
+          "number": 5,
+          "subject": "Histology",
+          "topics": [
+            "Histology of the oral cavity"
+          ],
+          "scope": {
+            "practicalGroups": [
+              9
+            ]
+          },
+          "start": "12:30",
+          "end": "14:00",
+          "place": "Lab 7",
+          "status": "normal",
+          "note": ""
+        }
+      ]
+    },
+    {
+      "n": 3,
+      "sessions": [
+        {
+          "date": "2026-11-21",
+          "type": "tut",
+          "number": 4,
+          "subject": "Anatomy",
+          "topics": [
+            "L3: Anatomy of pharynx",
+            "L4: Infratemporal fossa (1)",
+            "L5: Infratemporal fossa (2)"
+          ],
+          "scope": {
+            "letter": "C"
+          },
+          "start": "08:00",
+          "end": "09:30",
+          "place": "Hall 6",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-21",
+          "type": "tut",
+          "number": 4,
+          "subject": "Anatomy",
+          "topics": [
+            "L3: Anatomy of pharynx",
+            "L4: Infratemporal fossa (1)",
+            "L5: Infratemporal fossa (2)"
+          ],
+          "scope": {
+            "letter": "B"
+          },
+          "start": "08:00",
+          "end": "09:30",
+          "place": "Hall 5",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-21",
+          "type": "tut",
+          "number": 5,
+          "subject": "Physiology",
+          "topics": [
+            "L1: Introduction & salivary secretion",
+            "L2: Functions & regulation of salivary secretion",
+            "L3: Esophagus & deglutition"
+          ],
+          "scope": {
+            "letter": "A"
+          },
+          "start": "08:00",
+          "end": "09:30",
+          "place": "Hall 4",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-21",
+          "type": "tut",
+          "number": 5,
+          "subject": "Physiology",
+          "topics": [
+            "L1: Introduction & salivary secretion",
+            "L2: Functions & regulation of salivary secretion",
+            "L3: Esophagus & deglutition"
+          ],
+          "scope": {
+            "letter": "D"
+          },
+          "start": "08:00",
+          "end": "09:30",
+          "place": "Main Hall",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-21",
+          "type": "tut",
+          "number": 4,
+          "subject": "Anatomy",
+          "topics": [
+            "L3: Anatomy of pharynx",
+            "L4: Infratemporal fossa (1)",
+            "L5: Infratemporal fossa (2)"
+          ],
+          "scope": {
+            "letter": "A"
+          },
+          "start": "09:30",
+          "end": "11:00",
+          "place": "Hall 4",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-21",
+          "type": "tut",
+          "number": 4,
+          "subject": "Anatomy",
+          "topics": [
+            "L3: Anatomy of pharynx",
+            "L4: Infratemporal fossa (1)",
+            "L5: Infratemporal fossa (2)"
+          ],
+          "scope": {
+            "letter": "D"
+          },
+          "start": "09:30",
+          "end": "11:00",
+          "place": "Main Hall",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-21",
+          "type": "tut",
+          "number": 5,
+          "subject": "Physiology",
+          "topics": [
+            "L1: Introduction & salivary secretion",
+            "L2: Functions & regulation of salivary secretion",
+            "L3: Esophagus & deglutition"
+          ],
+          "scope": {
+            "letter": "C"
+          },
+          "start": "09:30",
+          "end": "11:00",
+          "place": "Hall 6",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-21",
+          "type": "tut",
+          "number": 5,
+          "subject": "Physiology",
+          "topics": [
+            "L1: Introduction & salivary secretion",
+            "L2: Functions & regulation of salivary secretion",
+            "L3: Esophagus & deglutition"
+          ],
+          "scope": {
+            "letter": "B"
+          },
+          "start": "09:30",
+          "end": "11:00",
+          "place": "Hall 5",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-22",
+          "type": "tut",
+          "number": 6,
+          "subject": "Anatomy",
+          "topics": [
+            "L6: Anterior abdominal wall",
+            "L7: Rectus sheath & inguinal canal",
+            "L8: Posterior abdominal wall (muscles, nerves, aorta & IVC)"
+          ],
+          "scope": {
+            "letter": "A"
+          },
+          "start": "08:00",
+          "end": "09:30",
+          "place": "Hall 4",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-22",
+          "type": "tut",
+          "number": 6,
+          "subject": "Anatomy",
+          "topics": [
+            "L6: Anterior abdominal wall",
+            "L7: Rectus sheath & inguinal canal",
+            "L8: Posterior abdominal wall (muscles, nerves, aorta & IVC)"
+          ],
+          "scope": {
+            "letter": "B"
+          },
+          "start": "08:00",
+          "end": "09:30",
+          "place": "Hall 5",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-22",
+          "type": "tut",
+          "number": 6,
+          "subject": "Anatomy",
+          "topics": [
+            "L6: Anterior abdominal wall",
+            "L7: Rectus sheath & inguinal canal",
+            "L8: Posterior abdominal wall (muscles, nerves, aorta & IVC)"
+          ],
+          "scope": {
+            "letter": "C"
+          },
+          "start": "09:30",
+          "end": "11:00",
+          "place": "Hall 4",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-22",
+          "type": "tut",
+          "number": 6,
+          "subject": "Anatomy",
+          "topics": [
+            "L6: Anterior abdominal wall",
+            "L7: Rectus sheath & inguinal canal",
+            "L8: Posterior abdominal wall (muscles, nerves, aorta & IVC)"
+          ],
+          "scope": {
+            "letter": "D"
+          },
+          "start": "09:30",
+          "end": "11:00",
+          "place": "Hall 5",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-24",
+          "type": "prac",
+          "number": 7,
+          "subject": "Histology",
+          "topics": [
+            "Histology of the salivary glands"
+          ],
+          "scope": {
+            "practicalGroups": [
+              1
+            ]
+          },
+          "start": "08:00",
+          "end": "09:30",
+          "place": "Lab 8",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-24",
+          "type": "prac",
+          "number": 8,
+          "subject": "Anatomy",
+          "topics": [
+            "Anatomy of infratemporal fossa and pharynx"
+          ],
+          "scope": {
+            "practicalGroups": [
+              3
+            ]
+          },
+          "start": "08:00",
+          "end": "09:30",
+          "place": "Morgue 1",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-24",
+          "type": "prac",
+          "number": 9,
+          "subject": "Physiology",
+          "topics": [
+            "Measurement and interpretation of BMI, waist circumference, waist/hip ratio"
+          ],
+          "scope": {
+            "practicalGroups": [
+              4
+            ]
+          },
+          "start": "08:00",
+          "end": "09:30",
+          "place": "Lab 4",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-24",
+          "type": "prac",
+          "number": 7,
+          "subject": "Histology",
+          "topics": [
+            "Histology of the salivary glands"
+          ],
+          "scope": {
+            "practicalGroups": [
+              2
+            ]
+          },
+          "start": "09:30",
+          "end": "11:00",
+          "place": "Lab 8",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-24",
+          "type": "prac",
+          "number": 8,
+          "subject": "Anatomy",
+          "topics": [
+            "Anatomy of infratemporal fossa and pharynx"
+          ],
+          "scope": {
+            "practicalGroups": [
+              1
+            ]
+          },
+          "start": "09:30",
+          "end": "11:00",
+          "place": "Morgue 1",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-24",
+          "type": "prac",
+          "number": 9,
+          "subject": "Physiology",
+          "topics": [
+            "Measurement and interpretation of BMI, waist circumference, waist/hip ratio"
+          ],
+          "scope": {
+            "practicalGroups": [
+              3
+            ]
+          },
+          "start": "09:30",
+          "end": "11:00",
+          "place": "Lab 4",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-24",
+          "type": "prac",
+          "number": 7,
+          "subject": "Histology",
+          "topics": [
+            "Histology of the salivary glands"
+          ],
+          "scope": {
+            "practicalGroups": [
+              4
+            ]
+          },
+          "start": "11:00",
+          "end": "12:30",
+          "place": "Lab 8",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-24",
+          "type": "prac",
+          "number": 8,
+          "subject": "Anatomy",
+          "topics": [
+            "Anatomy of infratemporal fossa and pharynx"
+          ],
+          "scope": {
+            "practicalGroups": [
+              2
+            ]
+          },
+          "start": "11:00",
+          "end": "12:30",
+          "place": "Morgue 1",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-24",
+          "type": "prac",
+          "number": 9,
+          "subject": "Physiology",
+          "topics": [
+            "Measurement and interpretation of BMI, waist circumference, waist/hip ratio"
+          ],
+          "scope": {
+            "practicalGroups": [
+              1
+            ]
+          },
+          "start": "11:00",
+          "end": "12:30",
+          "place": "Lab 4",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-24",
+          "type": "prac",
+          "number": 7,
+          "subject": "Histology",
+          "topics": [
+            "Histology of the salivary glands"
+          ],
+          "scope": {
+            "practicalGroups": [
+              3
+            ]
+          },
+          "start": "12:30",
+          "end": "14:00",
+          "place": "Lab 8",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-24",
+          "type": "prac",
+          "number": 8,
+          "subject": "Anatomy",
+          "topics": [
+            "Anatomy of infratemporal fossa and pharynx"
+          ],
+          "scope": {
+            "practicalGroups": [
+              4
+            ]
+          },
+          "start": "12:30",
+          "end": "14:00",
+          "place": "Morgue 1",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-24",
+          "type": "prac",
+          "number": 9,
+          "subject": "Physiology",
+          "topics": [
+            "Measurement and interpretation of BMI, waist circumference, waist/hip ratio"
+          ],
+          "scope": {
+            "practicalGroups": [
+              2
+            ]
+          },
+          "start": "12:30",
+          "end": "14:00",
+          "place": "Lab 4",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-25",
+          "type": "prac",
+          "number": 7,
+          "subject": "Histology",
+          "topics": [
+            "Histology of the salivary glands"
+          ],
+          "scope": {
+            "practicalGroups": [
+              5
+            ]
+          },
+          "start": "11:00",
+          "end": "12:30",
+          "place": "Lab 8",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-25",
+          "type": "prac",
+          "number": 8,
+          "subject": "Anatomy",
+          "topics": [
+            "Anatomy of infratemporal fossa and pharynx"
+          ],
+          "scope": {
+            "practicalGroups": [
+              7
+            ]
+          },
+          "start": "11:00",
+          "end": "12:30",
+          "place": "Morgue 1",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-25",
+          "type": "prac",
+          "number": 9,
+          "subject": "Physiology",
+          "topics": [
+            "Measurement and interpretation of BMI, waist circumference, waist/hip ratio"
+          ],
+          "scope": {
+            "practicalGroups": [
+              8
+            ]
+          },
+          "start": "11:00",
+          "end": "12:30",
+          "place": "Lab 4",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-25",
+          "type": "prac",
+          "number": 7,
+          "subject": "Histology",
+          "topics": [
+            "Histology of the salivary glands"
+          ],
+          "scope": {
+            "practicalGroups": [
+              6
+            ]
+          },
+          "start": "12:30",
+          "end": "14:00",
+          "place": "Lab 8",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-25",
+          "type": "prac",
+          "number": 8,
+          "subject": "Anatomy",
+          "topics": [
+            "Anatomy of infratemporal fossa and pharynx"
+          ],
+          "scope": {
+            "practicalGroups": [
+              5
+            ]
+          },
+          "start": "12:30",
+          "end": "14:00",
+          "place": "Morgue 1",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-25",
+          "type": "prac",
+          "number": 9,
+          "subject": "Physiology",
+          "topics": [
+            "Measurement and interpretation of BMI, waist circumference, waist/hip ratio"
+          ],
+          "scope": {
+            "practicalGroups": [
+              7
+            ]
+          },
+          "start": "12:30",
+          "end": "14:00",
+          "place": "Lab 4",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-25",
+          "type": "prac",
+          "number": 7,
+          "subject": "Histology",
+          "topics": [
+            "Histology of the salivary glands"
+          ],
+          "scope": {
+            "practicalGroups": [
+              8
+            ]
+          },
+          "start": "14:00",
+          "end": "15:30",
+          "place": "Lab 8",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-25",
+          "type": "prac",
+          "number": 8,
+          "subject": "Anatomy",
+          "topics": [
+            "Anatomy of infratemporal fossa and pharynx"
+          ],
+          "scope": {
+            "practicalGroups": [
+              6
+            ]
+          },
+          "start": "14:00",
+          "end": "15:30",
+          "place": "Morgue 1",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-25",
+          "type": "prac",
+          "number": 9,
+          "subject": "Physiology",
+          "topics": [
+            "Measurement and interpretation of BMI, waist circumference, waist/hip ratio"
+          ],
+          "scope": {
+            "practicalGroups": [
+              5
+            ]
+          },
+          "start": "14:00",
+          "end": "15:30",
+          "place": "Lab 4",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-25",
+          "type": "prac",
+          "number": 7,
+          "subject": "Histology",
+          "topics": [
+            "Histology of the salivary glands"
+          ],
+          "scope": {
+            "practicalGroups": [
+              7
+            ]
+          },
+          "start": "15:30",
+          "end": "17:00",
+          "place": "Lab 8",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-25",
+          "type": "prac",
+          "number": 8,
+          "subject": "Anatomy",
+          "topics": [
+            "Anatomy of infratemporal fossa and pharynx"
+          ],
+          "scope": {
+            "practicalGroups": [
+              8
+            ]
+          },
+          "start": "15:30",
+          "end": "17:00",
+          "place": "Morgue 1",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-25",
+          "type": "prac",
+          "number": 9,
+          "subject": "Physiology",
+          "topics": [
+            "Measurement and interpretation of BMI, waist circumference, waist/hip ratio"
+          ],
+          "scope": {
+            "practicalGroups": [
+              6
+            ]
+          },
+          "start": "15:30",
+          "end": "17:00",
+          "place": "Lab 4",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-26",
+          "type": "prac",
+          "number": 7,
+          "subject": "Histology",
+          "topics": [
+            "Histology of the salivary glands"
+          ],
+          "scope": {
+            "practicalGroups": [
+              9
+            ]
+          },
+          "start": "08:00",
+          "end": "09:30",
+          "place": "Lab 8",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-26",
+          "type": "prac",
+          "number": 8,
+          "subject": "Anatomy",
+          "topics": [
+            "Anatomy of infratemporal fossa and pharynx"
+          ],
+          "scope": {
+            "practicalGroups": [
+              11
+            ]
+          },
+          "start": "08:00",
+          "end": "09:30",
+          "place": "Morgue 1",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-26",
+          "type": "prac",
+          "number": 9,
+          "subject": "Physiology",
+          "topics": [
+            "Measurement and interpretation of BMI, waist circumference, waist/hip ratio"
+          ],
+          "scope": {
+            "practicalGroups": [
+              12
+            ]
+          },
+          "start": "08:00",
+          "end": "09:30",
+          "place": "Lab 4",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-26",
+          "type": "prac",
+          "number": 7,
+          "subject": "Histology",
+          "topics": [
+            "Histology of the salivary glands"
+          ],
+          "scope": {
+            "practicalGroups": [
+              10
+            ]
+          },
+          "start": "09:30",
+          "end": "11:00",
+          "place": "Lab 8",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-26",
+          "type": "prac",
+          "number": 8,
+          "subject": "Anatomy",
+          "topics": [
+            "Anatomy of infratemporal fossa and pharynx"
+          ],
+          "scope": {
+            "practicalGroups": [
+              9
+            ]
+          },
+          "start": "09:30",
+          "end": "11:00",
+          "place": "Morgue 1",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-26",
+          "type": "prac",
+          "number": 9,
+          "subject": "Physiology",
+          "topics": [
+            "Measurement and interpretation of BMI, waist circumference, waist/hip ratio"
+          ],
+          "scope": {
+            "practicalGroups": [
+              11
+            ]
+          },
+          "start": "09:30",
+          "end": "11:00",
+          "place": "Lab 4",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-26",
+          "type": "prac",
+          "number": 7,
+          "subject": "Histology",
+          "topics": [
+            "Histology of the salivary glands"
+          ],
+          "scope": {
+            "practicalGroups": [
+              12
+            ]
+          },
+          "start": "11:00",
+          "end": "12:30",
+          "place": "Lab 8",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-26",
+          "type": "prac",
+          "number": 8,
+          "subject": "Anatomy",
+          "topics": [
+            "Anatomy of infratemporal fossa and pharynx"
+          ],
+          "scope": {
+            "practicalGroups": [
+              10
+            ]
+          },
+          "start": "11:00",
+          "end": "12:30",
+          "place": "Morgue 1",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-26",
+          "type": "prac",
+          "number": 9,
+          "subject": "Physiology",
+          "topics": [
+            "Measurement and interpretation of BMI, waist circumference, waist/hip ratio"
+          ],
+          "scope": {
+            "practicalGroups": [
+              9
+            ]
+          },
+          "start": "11:00",
+          "end": "12:30",
+          "place": "Lab 4",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-26",
+          "type": "prac",
+          "number": 7,
+          "subject": "Histology",
+          "topics": [
+            "Histology of the salivary glands"
+          ],
+          "scope": {
+            "practicalGroups": [
+              11
+            ]
+          },
+          "start": "12:30",
+          "end": "14:00",
+          "place": "Lab 8",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-26",
+          "type": "prac",
+          "number": 8,
+          "subject": "Anatomy",
+          "topics": [
+            "Anatomy of infratemporal fossa and pharynx"
+          ],
+          "scope": {
+            "practicalGroups": [
+              12
+            ]
+          },
+          "start": "12:30",
+          "end": "14:00",
+          "place": "Morgue 1",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-26",
+          "type": "prac",
+          "number": 9,
+          "subject": "Physiology",
+          "topics": [
+            "Measurement and interpretation of BMI, waist circumference, waist/hip ratio"
+          ],
+          "scope": {
+            "practicalGroups": [
+              10
+            ]
+          },
+          "start": "12:30",
+          "end": "14:00",
+          "place": "Lab 4",
+          "status": "normal",
+          "note": ""
+        }
+      ]
+    },
+    {
+      "n": 4,
+      "sessions": [
+        {
+          "date": "2026-11-28",
+          "type": "tut",
+          "number": 7,
+          "subject": "Biochemistry",
+          "topics": [
+            "L4: Phenylalanine & tyrosine AA 1",
+            "L5: Phenylalanine & tyrosine AA 2",
+            "L6: Tryptophan AA"
+          ],
+          "scope": {
+            "letter": "C"
+          },
+          "start": "08:00",
+          "end": "09:30",
+          "place": "Hall 6",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-28",
+          "type": "tut",
+          "number": 7,
+          "subject": "Biochemistry",
+          "topics": [
+            "L4: Phenylalanine & tyrosine AA 1",
+            "L5: Phenylalanine & tyrosine AA 2",
+            "L6: Tryptophan AA"
+          ],
+          "scope": {
+            "letter": "B"
+          },
+          "start": "08:00",
+          "end": "09:30",
+          "place": "Hall 5",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-28",
+          "type": "tut",
+          "number": 8,
+          "subject": "Anatomy",
+          "topics": [
+            "L9: Peritoneum",
+            "L10: Anatomy of esophagus & stomach",
+            "L11: Anatomy of duodenum & coeliac trunk"
+          ],
+          "scope": {
+            "letter": "A"
+          },
+          "start": "08:00",
+          "end": "09:30",
+          "place": "Hall 4",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-28",
+          "type": "tut",
+          "number": 8,
+          "subject": "Anatomy",
+          "topics": [
+            "L9: Peritoneum",
+            "L10: Anatomy of esophagus & stomach",
+            "L11: Anatomy of duodenum & coeliac trunk"
+          ],
+          "scope": {
+            "letter": "D"
+          },
+          "start": "08:00",
+          "end": "09:30",
+          "place": "Main Hall",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-28",
+          "type": "tut",
+          "number": 7,
+          "subject": "Biochemistry",
+          "topics": [
+            "L4: Phenylalanine & tyrosine AA 1",
+            "L5: Phenylalanine & tyrosine AA 2",
+            "L6: Tryptophan AA"
+          ],
+          "scope": {
+            "letter": "A"
+          },
+          "start": "09:30",
+          "end": "11:00",
+          "place": "Hall 4",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-28",
+          "type": "tut",
+          "number": 7,
+          "subject": "Biochemistry",
+          "topics": [
+            "L4: Phenylalanine & tyrosine AA 1",
+            "L5: Phenylalanine & tyrosine AA 2",
+            "L6: Tryptophan AA"
+          ],
+          "scope": {
+            "letter": "D"
+          },
+          "start": "09:30",
+          "end": "11:00",
+          "place": "Main Hall",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-28",
+          "type": "tut",
+          "number": 8,
+          "subject": "Anatomy",
+          "topics": [
+            "L9: Peritoneum",
+            "L10: Anatomy of esophagus & stomach",
+            "L11: Anatomy of duodenum & coeliac trunk"
+          ],
+          "scope": {
+            "letter": "C"
+          },
+          "start": "09:30",
+          "end": "11:00",
+          "place": "Hall 6",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-28",
+          "type": "tut",
+          "number": 8,
+          "subject": "Anatomy",
+          "topics": [
+            "L9: Peritoneum",
+            "L10: Anatomy of esophagus & stomach",
+            "L11: Anatomy of duodenum & coeliac trunk"
+          ],
+          "scope": {
+            "letter": "B"
+          },
+          "start": "09:30",
+          "end": "11:00",
+          "place": "Hall 5",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-29",
+          "type": "tut",
+          "subject": "Radiology",
+          "topics": [
+            "Radiology"
+          ],
+          "scope": {
+            "letter": "C"
+          },
+          "start": "08:00",
+          "end": "09:30",
+          "place": "Hall 6",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-29",
+          "type": "tut",
+          "subject": "Radiology",
+          "topics": [
+            "Radiology"
+          ],
+          "scope": {
+            "letter": "D"
+          },
+          "start": "08:00",
+          "end": "09:30",
+          "place": "Main Hall",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-29",
+          "type": "tut",
+          "number": 9,
+          "subject": "Histology",
+          "topics": [
+            "L4: Histological structure of the stomach",
+            "L5: Histological structure of the liver and gall bladder",
+            "L6: Histological structure of liver (cont.) & pancreas"
+          ],
+          "scope": {
+            "letter": "A"
+          },
+          "start": "08:00",
+          "end": "09:30",
+          "place": "Hall 4",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-29",
+          "type": "tut",
+          "number": 9,
+          "subject": "Histology",
+          "topics": [
+            "L4: Histological structure of the stomach",
+            "L5: Histological structure of the liver and gall bladder",
+            "L6: Histological structure of liver (cont.) & pancreas"
+          ],
+          "scope": {
+            "letter": "B"
+          },
+          "start": "08:00",
+          "end": "09:30",
+          "place": "Hall 5",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-29",
+          "type": "tut",
+          "subject": "Radiology",
+          "topics": [
+            "Radiology"
+          ],
+          "scope": {
+            "letter": "A"
+          },
+          "start": "09:30",
+          "end": "11:00",
+          "place": "Hall 6",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-29",
+          "type": "tut",
+          "subject": "Radiology",
+          "topics": [
+            "Radiology"
+          ],
+          "scope": {
+            "letter": "B"
+          },
+          "start": "09:30",
+          "end": "11:00",
+          "place": "Main Hall",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-29",
+          "type": "tut",
+          "number": 9,
+          "subject": "Histology",
+          "topics": [
+            "L4: Histological structure of the stomach",
+            "L5: Histological structure of the liver and gall bladder",
+            "L6: Histological structure of liver (cont.) & pancreas"
+          ],
+          "scope": {
+            "letter": "C"
+          },
+          "start": "09:30",
+          "end": "11:00",
+          "place": "Hall 4",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-11-29",
+          "type": "tut",
+          "number": 9,
+          "subject": "Histology",
+          "topics": [
+            "L4: Histological structure of the stomach",
+            "L5: Histological structure of the liver and gall bladder",
+            "L6: Histological structure of liver (cont.) & pancreas"
+          ],
+          "scope": {
+            "letter": "D"
+          },
+          "start": "09:30",
+          "end": "11:00",
+          "place": "Hall 5",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-01",
+          "type": "prac",
+          "number": 10,
+          "subject": "Histology",
+          "topics": [
+            "Histology of esophagus and stomach"
+          ],
+          "scope": {
+            "practicalGroups": [
+              8
+            ]
+          },
+          "start": "08:00",
+          "end": "09:30",
+          "place": "Lab 8",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-01",
+          "type": "prac",
+          "number": 11,
+          "subject": "Anatomy",
+          "topics": [
+            "Anterior and posterior abdominal wall + vessels"
+          ],
+          "scope": {
+            "practicalGroups": [
+              1
+            ]
+          },
+          "start": "08:00",
+          "end": "09:30",
+          "place": "Morgue 1",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-01",
+          "type": "prac",
+          "number": 12,
+          "subject": "Biochemistry",
+          "topics": [
+            "Determination of serum total protein level by colorimeter"
+          ],
+          "scope": {
+            "practicalGroups": [
+              2
+            ]
+          },
+          "start": "08:00",
+          "end": "09:30",
+          "place": "Lab 7",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-01",
+          "type": "prac",
+          "number": 10,
+          "subject": "Histology",
+          "topics": [
+            "Histology of esophagus and stomach"
+          ],
+          "scope": {
+            "practicalGroups": [
+              4
+            ]
+          },
+          "start": "09:30",
+          "end": "11:00",
+          "place": "Lab 8",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-01",
+          "type": "prac",
+          "number": 11,
+          "subject": "Anatomy",
+          "topics": [
+            "Anterior and posterior abdominal wall + vessels"
+          ],
+          "scope": {
+            "practicalGroups": [
+              8
+            ]
+          },
+          "start": "09:30",
+          "end": "11:00",
+          "place": "Morgue 1",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-01",
+          "type": "prac",
+          "number": 12,
+          "subject": "Biochemistry",
+          "topics": [
+            "Determination of serum total protein level by colorimeter"
+          ],
+          "scope": {
+            "practicalGroups": [
+              1
+            ]
+          },
+          "start": "09:30",
+          "end": "11:00",
+          "place": "Lab 7",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-01",
+          "type": "prac",
+          "number": 10,
+          "subject": "Histology",
+          "topics": [
+            "Histology of esophagus and stomach"
+          ],
+          "scope": {
+            "practicalGroups": [
+              2
+            ]
+          },
+          "start": "11:00",
+          "end": "12:30",
+          "place": "Lab 8",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-01",
+          "type": "prac",
+          "number": 11,
+          "subject": "Anatomy",
+          "topics": [
+            "Anterior and posterior abdominal wall + vessels"
+          ],
+          "scope": {
+            "practicalGroups": [
+              4
+            ]
+          },
+          "start": "11:00",
+          "end": "12:30",
+          "place": "Morgue 1",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-01",
+          "type": "prac",
+          "number": 12,
+          "subject": "Biochemistry",
+          "topics": [
+            "Determination of serum total protein level by colorimeter"
+          ],
+          "scope": {
+            "practicalGroups": [
+              8
+            ]
+          },
+          "start": "11:00",
+          "end": "12:30",
+          "place": "Lab 7",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-01",
+          "type": "prac",
+          "number": 10,
+          "subject": "Histology",
+          "topics": [
+            "Histology of esophagus and stomach"
+          ],
+          "scope": {
+            "practicalGroups": [
+              1
+            ]
+          },
+          "start": "12:30",
+          "end": "14:00",
+          "place": "Lab 8",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-01",
+          "type": "prac",
+          "number": 11,
+          "subject": "Anatomy",
+          "topics": [
+            "Anterior and posterior abdominal wall + vessels"
+          ],
+          "scope": {
+            "practicalGroups": [
+              2
+            ]
+          },
+          "start": "12:30",
+          "end": "14:00",
+          "place": "Morgue 1",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-01",
+          "type": "prac",
+          "number": 12,
+          "subject": "Biochemistry",
+          "topics": [
+            "Determination of serum total protein level by colorimeter"
+          ],
+          "scope": {
+            "practicalGroups": [
+              4
+            ]
+          },
+          "start": "12:30",
+          "end": "14:00",
+          "place": "Lab 7",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-02",
+          "type": "prac",
+          "number": 10,
+          "subject": "Histology",
+          "topics": [
+            "Histology of esophagus and stomach"
+          ],
+          "scope": {
+            "practicalGroups": [
+              7
+            ]
+          },
+          "start": "11:00",
+          "end": "12:30",
+          "place": "Lab 8",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-02",
+          "type": "prac",
+          "number": 11,
+          "subject": "Anatomy",
+          "topics": [
+            "Anterior and posterior abdominal wall + vessels"
+          ],
+          "scope": {
+            "practicalGroups": [
+              6
+            ]
+          },
+          "start": "11:00",
+          "end": "12:30",
+          "place": "Morgue 1",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-02",
+          "type": "prac",
+          "number": 12,
+          "subject": "Biochemistry",
+          "topics": [
+            "Determination of serum total protein level by colorimeter"
+          ],
+          "scope": {
+            "practicalGroups": [
+              5
+            ]
+          },
+          "start": "11:00",
+          "end": "12:30",
+          "place": "Lab 7",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-02",
+          "type": "prac",
+          "number": 10,
+          "subject": "Histology",
+          "topics": [
+            "Histology of esophagus and stomach"
+          ],
+          "scope": {
+            "practicalGroups": [
+              3
+            ]
+          },
+          "start": "12:30",
+          "end": "14:00",
+          "place": "Lab 8",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-02",
+          "type": "prac",
+          "number": 11,
+          "subject": "Anatomy",
+          "topics": [
+            "Anterior and posterior abdominal wall + vessels"
+          ],
+          "scope": {
+            "practicalGroups": [
+              7
+            ]
+          },
+          "start": "12:30",
+          "end": "14:00",
+          "place": "Morgue 1",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-02",
+          "type": "prac",
+          "number": 12,
+          "subject": "Biochemistry",
+          "topics": [
+            "Determination of serum total protein level by colorimeter"
+          ],
+          "scope": {
+            "practicalGroups": [
+              6
+            ]
+          },
+          "start": "12:30",
+          "end": "14:00",
+          "place": "Lab 7",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-02",
+          "type": "prac",
+          "number": 10,
+          "subject": "Histology",
+          "topics": [
+            "Histology of esophagus and stomach"
+          ],
+          "scope": {
+            "practicalGroups": [
+              5
+            ]
+          },
+          "start": "14:00",
+          "end": "15:30",
+          "place": "Lab 8",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-02",
+          "type": "prac",
+          "number": 11,
+          "subject": "Anatomy",
+          "topics": [
+            "Anterior and posterior abdominal wall + vessels"
+          ],
+          "scope": {
+            "practicalGroups": [
+              3
+            ]
+          },
+          "start": "14:00",
+          "end": "15:30",
+          "place": "Morgue 1",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-02",
+          "type": "prac",
+          "number": 12,
+          "subject": "Biochemistry",
+          "topics": [
+            "Determination of serum total protein level by colorimeter"
+          ],
+          "scope": {
+            "practicalGroups": [
+              7
+            ]
+          },
+          "start": "14:00",
+          "end": "15:30",
+          "place": "Lab 7",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-02",
+          "type": "prac",
+          "number": 10,
+          "subject": "Histology",
+          "topics": [
+            "Histology of esophagus and stomach"
+          ],
+          "scope": {
+            "practicalGroups": [
+              6
+            ]
+          },
+          "start": "15:30",
+          "end": "17:00",
+          "place": "Lab 8",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-02",
+          "type": "prac",
+          "number": 11,
+          "subject": "Anatomy",
+          "topics": [
+            "Anterior and posterior abdominal wall + vessels"
+          ],
+          "scope": {
+            "practicalGroups": [
+              5
+            ]
+          },
+          "start": "15:30",
+          "end": "17:00",
+          "place": "Morgue 1",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-02",
+          "type": "prac",
+          "number": 12,
+          "subject": "Biochemistry",
+          "topics": [
+            "Determination of serum total protein level by colorimeter"
+          ],
+          "scope": {
+            "practicalGroups": [
+              3
+            ]
+          },
+          "start": "15:30",
+          "end": "17:00",
+          "place": "Lab 7",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-03",
+          "type": "prac",
+          "number": 10,
+          "subject": "Histology",
+          "topics": [
+            "Histology of esophagus and stomach"
+          ],
+          "scope": {
+            "practicalGroups": [
+              11
+            ]
+          },
+          "start": "08:00",
+          "end": "09:30",
+          "place": "Lab 8",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-03",
+          "type": "prac",
+          "number": 11,
+          "subject": "Anatomy",
+          "topics": [
+            "Anterior and posterior abdominal wall + vessels"
+          ],
+          "scope": {
+            "practicalGroups": [
+              9
+            ]
+          },
+          "start": "08:00",
+          "end": "09:30",
+          "place": "Morgue 1",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-03",
+          "type": "prac",
+          "number": 12,
+          "subject": "Biochemistry",
+          "topics": [
+            "Determination of serum total protein level by colorimeter"
+          ],
+          "scope": {
+            "practicalGroups": [
+              10
+            ]
+          },
+          "start": "08:00",
+          "end": "09:30",
+          "place": "Lab 7",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-03",
+          "type": "prac",
+          "number": 10,
+          "subject": "Histology",
+          "topics": [
+            "Histology of esophagus and stomach"
+          ],
+          "scope": {
+            "practicalGroups": [
+              12
+            ]
+          },
+          "start": "09:30",
+          "end": "11:00",
+          "place": "Lab 8",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-03",
+          "type": "prac",
+          "number": 11,
+          "subject": "Anatomy",
+          "topics": [
+            "Anterior and posterior abdominal wall + vessels"
+          ],
+          "scope": {
+            "practicalGroups": [
+              11
+            ]
+          },
+          "start": "09:30",
+          "end": "11:00",
+          "place": "Morgue 1",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-03",
+          "type": "prac",
+          "number": 12,
+          "subject": "Biochemistry",
+          "topics": [
+            "Determination of serum total protein level by colorimeter"
+          ],
+          "scope": {
+            "practicalGroups": [
+              9
+            ]
+          },
+          "start": "09:30",
+          "end": "11:00",
+          "place": "Lab 7",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-03",
+          "type": "prac",
+          "number": 10,
+          "subject": "Histology",
+          "topics": [
+            "Histology of esophagus and stomach"
+          ],
+          "scope": {
+            "practicalGroups": [
+              10
+            ]
+          },
+          "start": "11:00",
+          "end": "12:30",
+          "place": "Lab 8",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-03",
+          "type": "prac",
+          "number": 11,
+          "subject": "Anatomy",
+          "topics": [
+            "Anterior and posterior abdominal wall + vessels"
+          ],
+          "scope": {
+            "practicalGroups": [
+              12
+            ]
+          },
+          "start": "11:00",
+          "end": "12:30",
+          "place": "Morgue 1",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-03",
+          "type": "prac",
+          "number": 12,
+          "subject": "Biochemistry",
+          "topics": [
+            "Determination of serum total protein level by colorimeter"
+          ],
+          "scope": {
+            "practicalGroups": [
+              11
+            ]
+          },
+          "start": "11:00",
+          "end": "12:30",
+          "place": "Lab 7",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-03",
+          "type": "prac",
+          "number": 10,
+          "subject": "Histology",
+          "topics": [
+            "Histology of esophagus and stomach"
+          ],
+          "scope": {
+            "practicalGroups": [
+              9
+            ]
+          },
+          "start": "12:30",
+          "end": "14:00",
+          "place": "Lab 8",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-03",
+          "type": "prac",
+          "number": 11,
+          "subject": "Anatomy",
+          "topics": [
+            "Anterior and posterior abdominal wall + vessels"
+          ],
+          "scope": {
+            "practicalGroups": [
+              10
+            ]
+          },
+          "start": "12:30",
+          "end": "14:00",
+          "place": "Morgue 1",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-03",
+          "type": "prac",
+          "number": 12,
+          "subject": "Biochemistry",
+          "topics": [
+            "Determination of serum total protein level by colorimeter"
+          ],
+          "scope": {
+            "practicalGroups": [
+              12
+            ]
+          },
+          "start": "12:30",
+          "end": "14:00",
+          "place": "Lab 7",
+          "status": "normal",
+          "note": ""
+        }
+      ]
+    },
+    {
+      "n": 5,
+      "sessions": [
+        {
+          "date": "2026-12-05",
+          "type": "tut",
+          "number": 10,
+          "subject": "Histology",
+          "topics": [
+            "L7: Histological structure of small intestine",
+            "L8: Histological structure of the large intestine, appendix and junctional areas"
+          ],
+          "scope": {
+            "letter": "C"
+          },
+          "start": "08:00",
+          "end": "09:30",
+          "place": "Hall 6",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-05",
+          "type": "tut",
+          "number": 10,
+          "subject": "Histology",
+          "topics": [
+            "L7: Histological structure of small intestine",
+            "L8: Histological structure of the large intestine, appendix and junctional areas"
+          ],
+          "scope": {
+            "letter": "B"
+          },
+          "start": "08:00",
+          "end": "09:30",
+          "place": "Hall 5",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-05",
+          "type": "tut",
+          "number": 11,
+          "subject": "Anatomy",
+          "topics": [
+            "L12: Anatomy of small intestine, superior mesenteric and inferior mesenteric arteries",
+            "L13: Anatomy of large intestine, rectum, anal canal",
+            "L14: Anatomy of liver, biliary system"
+          ],
+          "scope": {
+            "letter": "A"
+          },
+          "start": "08:00",
+          "end": "09:30",
+          "place": "Hall 4",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-05",
+          "type": "tut",
+          "number": 11,
+          "subject": "Anatomy",
+          "topics": [
+            "L12: Anatomy of small intestine, superior mesenteric and inferior mesenteric arteries",
+            "L13: Anatomy of large intestine, rectum, anal canal",
+            "L14: Anatomy of liver, biliary system"
+          ],
+          "scope": {
+            "letter": "D"
+          },
+          "start": "08:00",
+          "end": "09:30",
+          "place": "Main Hall",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-05",
+          "type": "tut",
+          "number": 10,
+          "subject": "Histology",
+          "topics": [
+            "L7: Histological structure of small intestine",
+            "L8: Histological structure of the large intestine, appendix and junctional areas"
+          ],
+          "scope": {
+            "letter": "A"
+          },
+          "start": "09:30",
+          "end": "11:00",
+          "place": "Hall 4",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-05",
+          "type": "tut",
+          "number": 10,
+          "subject": "Histology",
+          "topics": [
+            "L7: Histological structure of small intestine",
+            "L8: Histological structure of the large intestine, appendix and junctional areas"
+          ],
+          "scope": {
+            "letter": "D"
+          },
+          "start": "09:30",
+          "end": "11:00",
+          "place": "Main Hall",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-05",
+          "type": "tut",
+          "number": 11,
+          "subject": "Anatomy",
+          "topics": [
+            "L12: Anatomy of small intestine, superior mesenteric and inferior mesenteric arteries",
+            "L13: Anatomy of large intestine, rectum, anal canal",
+            "L14: Anatomy of liver, biliary system"
+          ],
+          "scope": {
+            "letter": "C"
+          },
+          "start": "09:30",
+          "end": "11:00",
+          "place": "Hall 6",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-05",
+          "type": "tut",
+          "number": 11,
+          "subject": "Anatomy",
+          "topics": [
+            "L12: Anatomy of small intestine, superior mesenteric and inferior mesenteric arteries",
+            "L13: Anatomy of large intestine, rectum, anal canal",
+            "L14: Anatomy of liver, biliary system"
+          ],
+          "scope": {
+            "letter": "B"
+          },
+          "start": "09:30",
+          "end": "11:00",
+          "place": "Hall 5",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-06",
+          "type": "tut",
+          "number": 12,
+          "subject": "Physiology",
+          "topics": [
+            "L4: Gastric secretion",
+            "L5: Gastric motility",
+            "L6: Regulation, vomiting"
+          ],
+          "scope": {
+            "letter": "C"
+          },
+          "start": "08:00",
+          "end": "09:30",
+          "place": "Hall 4",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-06",
+          "type": "tut",
+          "number": 12,
+          "subject": "Physiology",
+          "topics": [
+            "L4: Gastric secretion",
+            "L5: Gastric motility",
+            "L6: Regulation, vomiting"
+          ],
+          "scope": {
+            "letter": "D"
+          },
+          "start": "08:00",
+          "end": "09:30",
+          "place": "Hall 5",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-06",
+          "type": "tut",
+          "number": 12,
+          "subject": "Physiology",
+          "topics": [
+            "L4: Gastric secretion",
+            "L5: Gastric motility",
+            "L6: Regulation, vomiting"
+          ],
+          "scope": {
+            "letter": "A"
+          },
+          "start": "09:30",
+          "end": "11:00",
+          "place": "Hall 4",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-06",
+          "type": "tut",
+          "number": 12,
+          "subject": "Physiology",
+          "topics": [
+            "L4: Gastric secretion",
+            "L5: Gastric motility",
+            "L6: Regulation, vomiting"
+          ],
+          "scope": {
+            "letter": "B"
+          },
+          "start": "09:30",
+          "end": "11:00",
+          "place": "Hall 5",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-08",
+          "type": "prac",
+          "number": 13,
+          "subject": "Histology",
+          "topics": [
+            "Histology of liver, gallbladder & pancreas"
+          ],
+          "scope": {
+            "practicalGroups": [
+              1
+            ]
+          },
+          "start": "08:00",
+          "end": "09:30",
+          "place": "Lab 7",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-08",
+          "type": "prac",
+          "number": 14,
+          "subject": "Histology",
+          "topics": [
+            "Histology of the small intestine"
+          ],
+          "scope": {
+            "practicalGroups": [
+              3
+            ]
+          },
+          "start": "08:00",
+          "end": "09:30",
+          "place": "Lab 8",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-08",
+          "type": "prac",
+          "number": 15,
+          "subject": "Anatomy",
+          "topics": [
+            "Anatomy of esophagus, stomach, duodenum, and small intestine"
+          ],
+          "scope": {
+            "practicalGroups": [
+              4
+            ]
+          },
+          "start": "08:00",
+          "end": "09:30",
+          "place": "Morgue 1",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-08",
+          "type": "prac",
+          "number": 13,
+          "subject": "Histology",
+          "topics": [
+            "Histology of liver, gallbladder & pancreas"
+          ],
+          "scope": {
+            "practicalGroups": [
+              2
+            ]
+          },
+          "start": "09:30",
+          "end": "11:00",
+          "place": "Lab 8",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-08",
+          "type": "prac",
+          "number": 14,
+          "subject": "Histology",
+          "topics": [
+            "Histology of the small intestine"
+          ],
+          "scope": {
+            "practicalGroups": [
+              1
+            ]
+          },
+          "start": "09:30",
+          "end": "11:00",
+          "place": "Lab 7",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-08",
+          "type": "prac",
+          "number": 15,
+          "subject": "Anatomy",
+          "topics": [
+            "Anatomy of esophagus, stomach, duodenum, and small intestine"
+          ],
+          "scope": {
+            "practicalGroups": [
+              3
+            ]
+          },
+          "start": "09:30",
+          "end": "11:00",
+          "place": "Morgue 1",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-08",
+          "type": "prac",
+          "number": 13,
+          "subject": "Histology",
+          "topics": [
+            "Histology of liver, gallbladder & pancreas"
+          ],
+          "scope": {
+            "practicalGroups": [
+              4
+            ]
+          },
+          "start": "11:00",
+          "end": "12:30",
+          "place": "Lab 7",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-08",
+          "type": "prac",
+          "number": 14,
+          "subject": "Histology",
+          "topics": [
+            "Histology of the small intestine"
+          ],
+          "scope": {
+            "practicalGroups": [
+              2
+            ]
+          },
+          "start": "11:00",
+          "end": "12:30",
+          "place": "Lab 8",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-08",
+          "type": "prac",
+          "number": 15,
+          "subject": "Anatomy",
+          "topics": [
+            "Anatomy of esophagus, stomach, duodenum, and small intestine"
+          ],
+          "scope": {
+            "practicalGroups": [
+              1
+            ]
+          },
+          "start": "11:00",
+          "end": "12:30",
+          "place": "Morgue 1",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-08",
+          "type": "prac",
+          "number": 13,
+          "subject": "Histology",
+          "topics": [
+            "Histology of liver, gallbladder & pancreas"
+          ],
+          "scope": {
+            "practicalGroups": [
+              3
+            ]
+          },
+          "start": "12:30",
+          "end": "14:00",
+          "place": "Lab 8",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-08",
+          "type": "prac",
+          "number": 14,
+          "subject": "Histology",
+          "topics": [
+            "Histology of the small intestine"
+          ],
+          "scope": {
+            "practicalGroups": [
+              4
+            ]
+          },
+          "start": "12:30",
+          "end": "14:00",
+          "place": "Lab 7",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-08",
+          "type": "prac",
+          "number": 15,
+          "subject": "Anatomy",
+          "topics": [
+            "Anatomy of esophagus, stomach, duodenum, and small intestine"
+          ],
+          "scope": {
+            "practicalGroups": [
+              2
+            ]
+          },
+          "start": "12:30",
+          "end": "14:00",
+          "place": "Morgue 1",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-09",
+          "type": "prac",
+          "number": 13,
+          "subject": "Histology",
+          "topics": [
+            "Histology of liver, gallbladder & pancreas"
+          ],
+          "scope": {
+            "practicalGroups": [
+              5
+            ]
+          },
+          "start": "11:00",
+          "end": "12:30",
+          "place": "Lab 7",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-09",
+          "type": "prac",
+          "number": 14,
+          "subject": "Histology",
+          "topics": [
+            "Histology of the small intestine"
+          ],
+          "scope": {
+            "practicalGroups": [
+              7
+            ]
+          },
+          "start": "11:00",
+          "end": "12:30",
+          "place": "Lab 8",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-09",
+          "type": "prac",
+          "number": 15,
+          "subject": "Anatomy",
+          "topics": [
+            "Anatomy of esophagus, stomach, duodenum, and small intestine"
+          ],
+          "scope": {
+            "practicalGroups": [
+              8
+            ]
+          },
+          "start": "11:00",
+          "end": "12:30",
+          "place": "Morgue 1",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-09",
+          "type": "prac",
+          "number": 13,
+          "subject": "Histology",
+          "topics": [
+            "Histology of liver, gallbladder & pancreas"
+          ],
+          "scope": {
+            "practicalGroups": [
+              6
+            ]
+          },
+          "start": "12:30",
+          "end": "14:00",
+          "place": "Lab 8",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-09",
+          "type": "prac",
+          "number": 14,
+          "subject": "Histology",
+          "topics": [
+            "Histology of the small intestine"
+          ],
+          "scope": {
+            "practicalGroups": [
+              5
+            ]
+          },
+          "start": "12:30",
+          "end": "14:00",
+          "place": "Lab 7",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-09",
+          "type": "prac",
+          "number": 15,
+          "subject": "Anatomy",
+          "topics": [
+            "Anatomy of esophagus, stomach, duodenum, and small intestine"
+          ],
+          "scope": {
+            "practicalGroups": [
+              7
+            ]
+          },
+          "start": "12:30",
+          "end": "14:00",
+          "place": "Morgue 1",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-09",
+          "type": "prac",
+          "number": 13,
+          "subject": "Histology",
+          "topics": [
+            "Histology of liver, gallbladder & pancreas"
+          ],
+          "scope": {
+            "practicalGroups": [
+              8
+            ]
+          },
+          "start": "14:00",
+          "end": "15:30",
+          "place": "Lab 7",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-09",
+          "type": "prac",
+          "number": 14,
+          "subject": "Histology",
+          "topics": [
+            "Histology of the small intestine"
+          ],
+          "scope": {
+            "practicalGroups": [
+              6
+            ]
+          },
+          "start": "14:00",
+          "end": "15:30",
+          "place": "Lab 8",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-09",
+          "type": "prac",
+          "number": 15,
+          "subject": "Anatomy",
+          "topics": [
+            "Anatomy of esophagus, stomach, duodenum, and small intestine"
+          ],
+          "scope": {
+            "practicalGroups": [
+              5
+            ]
+          },
+          "start": "14:00",
+          "end": "15:30",
+          "place": "Morgue 1",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-09",
+          "type": "prac",
+          "number": 13,
+          "subject": "Histology",
+          "topics": [
+            "Histology of liver, gallbladder & pancreas"
+          ],
+          "scope": {
+            "practicalGroups": [
+              7
+            ]
+          },
+          "start": "15:30",
+          "end": "17:00",
+          "place": "Lab 8",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-09",
+          "type": "prac",
+          "number": 14,
+          "subject": "Histology",
+          "topics": [
+            "Histology of the small intestine"
+          ],
+          "scope": {
+            "practicalGroups": [
+              8
+            ]
+          },
+          "start": "15:30",
+          "end": "17:00",
+          "place": "Lab 7",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-09",
+          "type": "prac",
+          "number": 15,
+          "subject": "Anatomy",
+          "topics": [
+            "Anatomy of esophagus, stomach, duodenum, and small intestine"
+          ],
+          "scope": {
+            "practicalGroups": [
+              6
+            ]
+          },
+          "start": "15:30",
+          "end": "17:00",
+          "place": "Morgue 1",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-10",
+          "type": "prac",
+          "number": 13,
+          "subject": "Histology",
+          "topics": [
+            "Histology of liver, gallbladder & pancreas"
+          ],
+          "scope": {
+            "practicalGroups": [
+              9
+            ]
+          },
+          "start": "08:00",
+          "end": "09:30",
+          "place": "Lab 7",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-10",
+          "type": "prac",
+          "number": 14,
+          "subject": "Histology",
+          "topics": [
+            "Histology of the small intestine"
+          ],
+          "scope": {
+            "practicalGroups": [
+              11
+            ]
+          },
+          "start": "08:00",
+          "end": "09:30",
+          "place": "Lab 8",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-10",
+          "type": "prac",
+          "number": 15,
+          "subject": "Anatomy",
+          "topics": [
+            "Anatomy of esophagus, stomach, duodenum, and small intestine"
+          ],
+          "scope": {
+            "practicalGroups": [
+              12
+            ]
+          },
+          "start": "08:00",
+          "end": "09:30",
+          "place": "Morgue 1",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-10",
+          "type": "prac",
+          "number": 13,
+          "subject": "Histology",
+          "topics": [
+            "Histology of liver, gallbladder & pancreas"
+          ],
+          "scope": {
+            "practicalGroups": [
+              10
+            ]
+          },
+          "start": "09:30",
+          "end": "11:00",
+          "place": "Lab 8",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-10",
+          "type": "prac",
+          "number": 14,
+          "subject": "Histology",
+          "topics": [
+            "Histology of the small intestine"
+          ],
+          "scope": {
+            "practicalGroups": [
+              9
+            ]
+          },
+          "start": "09:30",
+          "end": "11:00",
+          "place": "Lab 7",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-10",
+          "type": "prac",
+          "number": 15,
+          "subject": "Anatomy",
+          "topics": [
+            "Anatomy of esophagus, stomach, duodenum, and small intestine"
+          ],
+          "scope": {
+            "practicalGroups": [
+              11
+            ]
+          },
+          "start": "09:30",
+          "end": "11:00",
+          "place": "Morgue 1",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-10",
+          "type": "prac",
+          "number": 13,
+          "subject": "Histology",
+          "topics": [
+            "Histology of liver, gallbladder & pancreas"
+          ],
+          "scope": {
+            "practicalGroups": [
+              12
+            ]
+          },
+          "start": "11:00",
+          "end": "12:30",
+          "place": "Lab 7",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-10",
+          "type": "prac",
+          "number": 14,
+          "subject": "Histology",
+          "topics": [
+            "Histology of the small intestine"
+          ],
+          "scope": {
+            "practicalGroups": [
+              10
+            ]
+          },
+          "start": "11:00",
+          "end": "12:30",
+          "place": "Lab 8",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-10",
+          "type": "prac",
+          "number": 15,
+          "subject": "Anatomy",
+          "topics": [
+            "Anatomy of esophagus, stomach, duodenum, and small intestine"
+          ],
+          "scope": {
+            "practicalGroups": [
+              9
+            ]
+          },
+          "start": "11:00",
+          "end": "12:30",
+          "place": "Morgue 1",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-10",
+          "type": "prac",
+          "number": 13,
+          "subject": "Histology",
+          "topics": [
+            "Histology of liver, gallbladder & pancreas"
+          ],
+          "scope": {
+            "practicalGroups": [
+              11
+            ]
+          },
+          "start": "12:30",
+          "end": "14:00",
+          "place": "Lab 8",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-10",
+          "type": "prac",
+          "number": 14,
+          "subject": "Histology",
+          "topics": [
+            "Histology of the small intestine"
+          ],
+          "scope": {
+            "practicalGroups": [
+              12
+            ]
+          },
+          "start": "12:30",
+          "end": "14:00",
+          "place": "Lab 7",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-10",
+          "type": "prac",
+          "number": 15,
+          "subject": "Anatomy",
+          "topics": [
+            "Anatomy of esophagus, stomach, duodenum, and small intestine"
+          ],
+          "scope": {
+            "practicalGroups": [
+              10
+            ]
+          },
+          "start": "12:30",
+          "end": "14:00",
+          "place": "Morgue 1",
+          "status": "normal",
+          "note": ""
+        }
+      ]
+    },
+    {
+      "n": 6,
+      "sessions": [
+        {
+          "date": "2026-12-12",
+          "type": "tut",
+          "number": 13,
+          "subject": "Physiology",
+          "topics": [
+            "L7: Functions of the liver & bile salts & gall bladder",
+            "L8: Bile pigments and jaundice",
+            "L9: Exocrine pancreatic secretion"
+          ],
+          "scope": {
+            "letter": "C"
+          },
+          "start": "08:00",
+          "end": "09:30",
+          "place": "Hall 6",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-12",
+          "type": "tut",
+          "number": 13,
+          "subject": "Physiology",
+          "topics": [
+            "L7: Functions of the liver & bile salts & gall bladder",
+            "L8: Bile pigments and jaundice",
+            "L9: Exocrine pancreatic secretion"
+          ],
+          "scope": {
+            "letter": "B"
+          },
+          "start": "08:00",
+          "end": "09:30",
+          "place": "Hall 5",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-12",
+          "type": "tut",
+          "number": 14,
+          "subject": "Biochemistry",
+          "topics": [
+            "L7: Purine de novo synthesis",
+            "L8: Purine salvage pathway, catabolism & hyperuricemia",
+            "L9: Pyrimidine metabolism"
+          ],
+          "scope": {
+            "letter": "A"
+          },
+          "start": "08:00",
+          "end": "09:30",
+          "place": "Hall 4",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-12",
+          "type": "tut",
+          "number": 14,
+          "subject": "Biochemistry",
+          "topics": [
+            "L7: Purine de novo synthesis",
+            "L8: Purine salvage pathway, catabolism & hyperuricemia",
+            "L9: Pyrimidine metabolism"
+          ],
+          "scope": {
+            "letter": "D"
+          },
+          "start": "08:00",
+          "end": "09:30",
+          "place": "Main Hall",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-12",
+          "type": "tut",
+          "number": 13,
+          "subject": "Physiology",
+          "topics": [
+            "L7: Functions of the liver & bile salts & gall bladder",
+            "L8: Bile pigments and jaundice",
+            "L9: Exocrine pancreatic secretion"
+          ],
+          "scope": {
+            "letter": "A"
+          },
+          "start": "09:30",
+          "end": "11:00",
+          "place": "Hall 4",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-12",
+          "type": "tut",
+          "number": 13,
+          "subject": "Physiology",
+          "topics": [
+            "L7: Functions of the liver & bile salts & gall bladder",
+            "L8: Bile pigments and jaundice",
+            "L9: Exocrine pancreatic secretion"
+          ],
+          "scope": {
+            "letter": "D"
+          },
+          "start": "09:30",
+          "end": "11:00",
+          "place": "Main Hall",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-12",
+          "type": "tut",
+          "number": 14,
+          "subject": "Biochemistry",
+          "topics": [
+            "L7: Purine de novo synthesis",
+            "L8: Purine salvage pathway, catabolism & hyperuricemia",
+            "L9: Pyrimidine metabolism"
+          ],
+          "scope": {
+            "letter": "C"
+          },
+          "start": "09:30",
+          "end": "11:00",
+          "place": "Hall 6",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-12",
+          "type": "tut",
+          "number": 14,
+          "subject": "Biochemistry",
+          "topics": [
+            "L7: Purine de novo synthesis",
+            "L8: Purine salvage pathway, catabolism & hyperuricemia",
+            "L9: Pyrimidine metabolism"
+          ],
+          "scope": {
+            "letter": "B"
+          },
+          "start": "09:30",
+          "end": "11:00",
+          "place": "Hall 5",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-13",
+          "type": "tut",
+          "number": 15,
+          "subject": "Anatomy",
+          "topics": [
+            "L15: Anatomy of pancreas, portal circulation",
+            "L16: Development of GIT (1)",
+            "L17: Development of GIT (2)"
+          ],
+          "scope": {
+            "letter": "C"
+          },
+          "start": "08:00",
+          "end": "09:30",
+          "place": "Hall 4",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-13",
+          "type": "tut",
+          "number": 15,
+          "subject": "Anatomy",
+          "topics": [
+            "L15: Anatomy of pancreas, portal circulation",
+            "L16: Development of GIT (1)",
+            "L17: Development of GIT (2)"
+          ],
+          "scope": {
+            "letter": "D"
+          },
+          "start": "08:00",
+          "end": "09:30",
+          "place": "Hall 5",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-13",
+          "type": "tut",
+          "number": 15,
+          "subject": "Anatomy",
+          "topics": [
+            "L15: Anatomy of pancreas, portal circulation",
+            "L16: Development of GIT (1)",
+            "L17: Development of GIT (2)"
+          ],
+          "scope": {
+            "letter": "A"
+          },
+          "start": "09:30",
+          "end": "11:00",
+          "place": "Hall 4",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-13",
+          "type": "tut",
+          "number": 15,
+          "subject": "Anatomy",
+          "topics": [
+            "L15: Anatomy of pancreas, portal circulation",
+            "L16: Development of GIT (1)",
+            "L17: Development of GIT (2)"
+          ],
+          "scope": {
+            "letter": "B"
+          },
+          "start": "09:30",
+          "end": "11:00",
+          "place": "Hall 5",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-15",
+          "type": "prac",
+          "number": 16,
+          "subject": "Histology",
+          "topics": [
+            "Histology of the large intestine, appendix & junctional sites"
+          ],
+          "scope": {
+            "practicalGroups": [
+              3
+            ]
+          },
+          "start": "08:00",
+          "end": "09:30",
+          "place": "Lab 8",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-15",
+          "type": "prac",
+          "number": 17,
+          "subject": "Anatomy",
+          "topics": [
+            "Anatomy of large intestine, liver and pancreas"
+          ],
+          "scope": {
+            "practicalGroups": [
+              4
+            ]
+          },
+          "start": "08:00",
+          "end": "09:30",
+          "place": "Morgue 1",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-15",
+          "type": "prac",
+          "number": 18,
+          "subject": "Physiology",
+          "topics": [
+            "Measurement of body fat percentage and metabolic rate"
+          ],
+          "scope": {
+            "practicalGroups": [
+              7
+            ]
+          },
+          "start": "08:00",
+          "end": "09:30",
+          "place": "Lab 4",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-15",
+          "type": "prac",
+          "number": 19,
+          "subject": "Biochemistry",
+          "topics": [
+            "Determination of blood uric acid concentration by colorimeter"
+          ],
+          "scope": {
+            "practicalGroups": [
+              8
+            ]
+          },
+          "start": "08:00",
+          "end": "09:30",
+          "place": "Lab 6",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-15",
+          "type": "prac",
+          "number": 16,
+          "subject": "Histology",
+          "topics": [
+            "Histology of the large intestine, appendix & junctional sites"
+          ],
+          "scope": {
+            "practicalGroups": [
+              4
+            ]
+          },
+          "start": "09:30",
+          "end": "11:00",
+          "place": "Lab 8",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-15",
+          "type": "prac",
+          "number": 17,
+          "subject": "Anatomy",
+          "topics": [
+            "Anatomy of large intestine, liver and pancreas"
+          ],
+          "scope": {
+            "practicalGroups": [
+              3
+            ]
+          },
+          "start": "09:30",
+          "end": "11:00",
+          "place": "Morgue 1",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-15",
+          "type": "prac",
+          "number": 18,
+          "subject": "Physiology",
+          "topics": [
+            "Measurement of body fat percentage and metabolic rate"
+          ],
+          "scope": {
+            "practicalGroups": [
+              8
+            ]
+          },
+          "start": "09:30",
+          "end": "11:00",
+          "place": "Lab 4",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-15",
+          "type": "prac",
+          "number": 19,
+          "subject": "Biochemistry",
+          "topics": [
+            "Determination of blood uric acid concentration by colorimeter"
+          ],
+          "scope": {
+            "practicalGroups": [
+              7
+            ]
+          },
+          "start": "09:30",
+          "end": "11:00",
+          "place": "Lab 6",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-15",
+          "type": "prac",
+          "number": 16,
+          "subject": "Histology",
+          "topics": [
+            "Histology of the large intestine, appendix & junctional sites"
+          ],
+          "scope": {
+            "practicalGroups": [
+              1
+            ]
+          },
+          "start": "11:00",
+          "end": "12:30",
+          "place": "Lab 8",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-15",
+          "type": "prac",
+          "number": 17,
+          "subject": "Anatomy",
+          "topics": [
+            "Anatomy of large intestine, liver and pancreas"
+          ],
+          "scope": {
+            "practicalGroups": [
+              2
+            ]
+          },
+          "start": "11:00",
+          "end": "12:30",
+          "place": "Morgue 1",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-15",
+          "type": "prac",
+          "number": 18,
+          "subject": "Physiology",
+          "topics": [
+            "Measurement of body fat percentage and metabolic rate"
+          ],
+          "scope": {
+            "practicalGroups": [
+              5
+            ]
+          },
+          "start": "11:00",
+          "end": "12:30",
+          "place": "Lab 4",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-15",
+          "type": "prac",
+          "number": 19,
+          "subject": "Biochemistry",
+          "topics": [
+            "Determination of blood uric acid concentration by colorimeter"
+          ],
+          "scope": {
+            "practicalGroups": [
+              6
+            ]
+          },
+          "start": "11:00",
+          "end": "12:30",
+          "place": "Lab 6",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-15",
+          "type": "prac",
+          "number": 16,
+          "subject": "Histology",
+          "topics": [
+            "Histology of the large intestine, appendix & junctional sites"
+          ],
+          "scope": {
+            "practicalGroups": [
+              2
+            ]
+          },
+          "start": "12:30",
+          "end": "14:00",
+          "place": "Lab 8",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-15",
+          "type": "prac",
+          "number": 17,
+          "subject": "Anatomy",
+          "topics": [
+            "Anatomy of large intestine, liver and pancreas"
+          ],
+          "scope": {
+            "practicalGroups": [
+              1
+            ]
+          },
+          "start": "12:30",
+          "end": "14:00",
+          "place": "Morgue 1",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-15",
+          "type": "prac",
+          "number": 18,
+          "subject": "Physiology",
+          "topics": [
+            "Measurement of body fat percentage and metabolic rate"
+          ],
+          "scope": {
+            "practicalGroups": [
+              6
+            ]
+          },
+          "start": "12:30",
+          "end": "14:00",
+          "place": "Lab 4",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-15",
+          "type": "prac",
+          "number": 19,
+          "subject": "Biochemistry",
+          "topics": [
+            "Determination of blood uric acid concentration by colorimeter"
+          ],
+          "scope": {
+            "practicalGroups": [
+              5
+            ]
+          },
+          "start": "12:30",
+          "end": "14:00",
+          "place": "Lab 6",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-16",
+          "type": "prac",
+          "number": 16,
+          "subject": "Histology",
+          "topics": [
+            "Histology of the large intestine, appendix & junctional sites"
+          ],
+          "scope": {
+            "practicalGroups": [
+              7
+            ]
+          },
+          "start": "11:00",
+          "end": "12:30",
+          "place": "Lab 8",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-16",
+          "type": "prac",
+          "number": 17,
+          "subject": "Anatomy",
+          "topics": [
+            "Anatomy of large intestine, liver and pancreas"
+          ],
+          "scope": {
+            "practicalGroups": [
+              8
+            ]
+          },
+          "start": "11:00",
+          "end": "12:30",
+          "place": "Morgue 1",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-16",
+          "type": "prac",
+          "number": 18,
+          "subject": "Physiology",
+          "topics": [
+            "Measurement of body fat percentage and metabolic rate"
+          ],
+          "scope": {
+            "practicalGroups": [
+              11
+            ]
+          },
+          "start": "11:00",
+          "end": "12:30",
+          "place": "Lab 4",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-16",
+          "type": "prac",
+          "number": 19,
+          "subject": "Biochemistry",
+          "topics": [
+            "Determination of blood uric acid concentration by colorimeter"
+          ],
+          "scope": {
+            "practicalGroups": [
+              12
+            ]
+          },
+          "start": "11:00",
+          "end": "12:30",
+          "place": "Lab 6",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-16",
+          "type": "prac",
+          "number": 16,
+          "subject": "Histology",
+          "topics": [
+            "Histology of the large intestine, appendix & junctional sites"
+          ],
+          "scope": {
+            "practicalGroups": [
+              8
+            ]
+          },
+          "start": "12:30",
+          "end": "14:00",
+          "place": "Lab 8",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-16",
+          "type": "prac",
+          "number": 17,
+          "subject": "Anatomy",
+          "topics": [
+            "Anatomy of large intestine, liver and pancreas"
+          ],
+          "scope": {
+            "practicalGroups": [
+              7
+            ]
+          },
+          "start": "12:30",
+          "end": "14:00",
+          "place": "Morgue 1",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-16",
+          "type": "prac",
+          "number": 18,
+          "subject": "Physiology",
+          "topics": [
+            "Measurement of body fat percentage and metabolic rate"
+          ],
+          "scope": {
+            "practicalGroups": [
+              12
+            ]
+          },
+          "start": "12:30",
+          "end": "14:00",
+          "place": "Lab 4",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-16",
+          "type": "prac",
+          "number": 19,
+          "subject": "Biochemistry",
+          "topics": [
+            "Determination of blood uric acid concentration by colorimeter"
+          ],
+          "scope": {
+            "practicalGroups": [
+              11
+            ]
+          },
+          "start": "12:30",
+          "end": "14:00",
+          "place": "Lab 6",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-16",
+          "type": "prac",
+          "number": 16,
+          "subject": "Histology",
+          "topics": [
+            "Histology of the large intestine, appendix & junctional sites"
+          ],
+          "scope": {
+            "practicalGroups": [
+              5
+            ]
+          },
+          "start": "14:00",
+          "end": "15:30",
+          "place": "Lab 8",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-16",
+          "type": "prac",
+          "number": 17,
+          "subject": "Anatomy",
+          "topics": [
+            "Anatomy of large intestine, liver and pancreas"
+          ],
+          "scope": {
+            "practicalGroups": [
+              6
+            ]
+          },
+          "start": "14:00",
+          "end": "15:30",
+          "place": "Morgue 1",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-16",
+          "type": "prac",
+          "number": 18,
+          "subject": "Physiology",
+          "topics": [
+            "Measurement of body fat percentage and metabolic rate"
+          ],
+          "scope": {
+            "practicalGroups": [
+              9
+            ]
+          },
+          "start": "14:00",
+          "end": "15:30",
+          "place": "Lab 4",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-16",
+          "type": "prac",
+          "number": 19,
+          "subject": "Biochemistry",
+          "topics": [
+            "Determination of blood uric acid concentration by colorimeter"
+          ],
+          "scope": {
+            "practicalGroups": [
+              10
+            ]
+          },
+          "start": "14:00",
+          "end": "15:30",
+          "place": "Lab 6",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-16",
+          "type": "prac",
+          "number": 16,
+          "subject": "Histology",
+          "topics": [
+            "Histology of the large intestine, appendix & junctional sites"
+          ],
+          "scope": {
+            "practicalGroups": [
+              6
+            ]
+          },
+          "start": "15:30",
+          "end": "17:00",
+          "place": "Lab 8",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-16",
+          "type": "prac",
+          "number": 17,
+          "subject": "Anatomy",
+          "topics": [
+            "Anatomy of large intestine, liver and pancreas"
+          ],
+          "scope": {
+            "practicalGroups": [
+              5
+            ]
+          },
+          "start": "15:30",
+          "end": "17:00",
+          "place": "Morgue 1",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-16",
+          "type": "prac",
+          "number": 18,
+          "subject": "Physiology",
+          "topics": [
+            "Measurement of body fat percentage and metabolic rate"
+          ],
+          "scope": {
+            "practicalGroups": [
+              10
+            ]
+          },
+          "start": "15:30",
+          "end": "17:00",
+          "place": "Lab 4",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-16",
+          "type": "prac",
+          "number": 19,
+          "subject": "Biochemistry",
+          "topics": [
+            "Determination of blood uric acid concentration by colorimeter"
+          ],
+          "scope": {
+            "practicalGroups": [
+              9
+            ]
+          },
+          "start": "15:30",
+          "end": "17:00",
+          "place": "Lab 6",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-17",
+          "type": "prac",
+          "number": 16,
+          "subject": "Histology",
+          "topics": [
+            "Histology of the large intestine, appendix & junctional sites"
+          ],
+          "scope": {
+            "practicalGroups": [
+              11
+            ]
+          },
+          "start": "08:00",
+          "end": "09:30",
+          "place": "Lab 8",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-17",
+          "type": "prac",
+          "number": 17,
+          "subject": "Anatomy",
+          "topics": [
+            "Anatomy of large intestine, liver and pancreas"
+          ],
+          "scope": {
+            "practicalGroups": [
+              12
+            ]
+          },
+          "start": "08:00",
+          "end": "09:30",
+          "place": "Morgue 1",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-17",
+          "type": "prac",
+          "number": 18,
+          "subject": "Physiology",
+          "topics": [
+            "Measurement of body fat percentage and metabolic rate"
+          ],
+          "scope": {
+            "practicalGroups": [
+              3
+            ]
+          },
+          "start": "08:00",
+          "end": "09:30",
+          "place": "Lab 4",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-17",
+          "type": "prac",
+          "number": 19,
+          "subject": "Biochemistry",
+          "topics": [
+            "Determination of blood uric acid concentration by colorimeter"
+          ],
+          "scope": {
+            "practicalGroups": [
+              4
+            ]
+          },
+          "start": "08:00",
+          "end": "09:30",
+          "place": "Lab 6",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-17",
+          "type": "prac",
+          "number": 16,
+          "subject": "Histology",
+          "topics": [
+            "Histology of the large intestine, appendix & junctional sites"
+          ],
+          "scope": {
+            "practicalGroups": [
+              12
+            ]
+          },
+          "start": "09:30",
+          "end": "11:00",
+          "place": "Lab 8",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-17",
+          "type": "prac",
+          "number": 17,
+          "subject": "Anatomy",
+          "topics": [
+            "Anatomy of large intestine, liver and pancreas"
+          ],
+          "scope": {
+            "practicalGroups": [
+              11
+            ]
+          },
+          "start": "09:30",
+          "end": "11:00",
+          "place": "Morgue 1",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-17",
+          "type": "prac",
+          "number": 18,
+          "subject": "Physiology",
+          "topics": [
+            "Measurement of body fat percentage and metabolic rate"
+          ],
+          "scope": {
+            "practicalGroups": [
+              4
+            ]
+          },
+          "start": "09:30",
+          "end": "11:00",
+          "place": "Lab 4",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-17",
+          "type": "prac",
+          "number": 19,
+          "subject": "Biochemistry",
+          "topics": [
+            "Determination of blood uric acid concentration by colorimeter"
+          ],
+          "scope": {
+            "practicalGroups": [
+              3
+            ]
+          },
+          "start": "09:30",
+          "end": "11:00",
+          "place": "Lab 6",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-17",
+          "type": "prac",
+          "number": 16,
+          "subject": "Histology",
+          "topics": [
+            "Histology of the large intestine, appendix & junctional sites"
+          ],
+          "scope": {
+            "practicalGroups": [
+              9
+            ]
+          },
+          "start": "11:00",
+          "end": "12:30",
+          "place": "Lab 8",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-17",
+          "type": "prac",
+          "number": 17,
+          "subject": "Anatomy",
+          "topics": [
+            "Anatomy of large intestine, liver and pancreas"
+          ],
+          "scope": {
+            "practicalGroups": [
+              10
+            ]
+          },
+          "start": "11:00",
+          "end": "12:30",
+          "place": "Morgue 1",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-17",
+          "type": "prac",
+          "number": 18,
+          "subject": "Physiology",
+          "topics": [
+            "Measurement of body fat percentage and metabolic rate"
+          ],
+          "scope": {
+            "practicalGroups": [
+              1
+            ]
+          },
+          "start": "11:00",
+          "end": "12:30",
+          "place": "Lab 4",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-17",
+          "type": "prac",
+          "number": 19,
+          "subject": "Biochemistry",
+          "topics": [
+            "Determination of blood uric acid concentration by colorimeter"
+          ],
+          "scope": {
+            "practicalGroups": [
+              2
+            ]
+          },
+          "start": "11:00",
+          "end": "12:30",
+          "place": "Lab 6",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-17",
+          "type": "prac",
+          "number": 16,
+          "subject": "Histology",
+          "topics": [
+            "Histology of the large intestine, appendix & junctional sites"
+          ],
+          "scope": {
+            "practicalGroups": [
+              10
+            ]
+          },
+          "start": "12:30",
+          "end": "14:00",
+          "place": "Lab 8",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-17",
+          "type": "prac",
+          "number": 17,
+          "subject": "Anatomy",
+          "topics": [
+            "Anatomy of large intestine, liver and pancreas"
+          ],
+          "scope": {
+            "practicalGroups": [
+              9
+            ]
+          },
+          "start": "12:30",
+          "end": "14:00",
+          "place": "Morgue 1",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-17",
+          "type": "prac",
+          "number": 18,
+          "subject": "Physiology",
+          "topics": [
+            "Measurement of body fat percentage and metabolic rate"
+          ],
+          "scope": {
+            "practicalGroups": [
+              2
+            ]
+          },
+          "start": "12:30",
+          "end": "14:00",
+          "place": "Lab 4",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-17",
+          "type": "prac",
+          "number": 19,
+          "subject": "Biochemistry",
+          "topics": [
+            "Determination of blood uric acid concentration by colorimeter"
+          ],
+          "scope": {
+            "practicalGroups": [
+              1
+            ]
+          },
+          "start": "12:30",
+          "end": "14:00",
+          "place": "Lab 6",
+          "status": "normal",
+          "note": ""
+        }
+      ]
+    },
+    {
+      "n": 7,
+      "sessions": [
+        {
+          "date": "2026-12-19",
+          "type": "tut",
+          "number": 16,
+          "subject": "Physiology",
+          "topics": [
+            "L10: Intestinal secretion",
+            "L11: Small intestinal motility, absorption",
+            "L12: Large intestine & defecation"
+          ],
+          "scope": {
+            "letter": "A"
+          },
+          "start": "08:00",
+          "end": "09:30",
+          "place": "Hall 4",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-19",
+          "type": "tut",
+          "number": 16,
+          "subject": "Physiology",
+          "topics": [
+            "L10: Intestinal secretion",
+            "L11: Small intestinal motility, absorption",
+            "L12: Large intestine & defecation"
+          ],
+          "scope": {
+            "letter": "B"
+          },
+          "start": "08:00",
+          "end": "09:30",
+          "place": "Hall 5",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-19",
+          "type": "tut",
+          "number": 17,
+          "subject": "Biochemistry",
+          "topics": [
+            "L10: Vitamins A & E",
+            "L11: Water soluble vitamins I",
+            "L12: Water soluble vitamins II"
+          ],
+          "scope": {
+            "letter": "C"
+          },
+          "start": "08:00",
+          "end": "09:30",
+          "place": "Hall 6",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-19",
+          "type": "tut",
+          "number": 17,
+          "subject": "Biochemistry",
+          "topics": [
+            "L10: Vitamins A & E",
+            "L11: Water soluble vitamins I",
+            "L12: Water soluble vitamins II"
+          ],
+          "scope": {
+            "letter": "D"
+          },
+          "start": "08:00",
+          "end": "09:30",
+          "place": "Main Hall",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-19",
+          "type": "tut",
+          "number": 16,
+          "subject": "Physiology",
+          "topics": [
+            "L10: Intestinal secretion",
+            "L11: Small intestinal motility, absorption",
+            "L12: Large intestine & defecation"
+          ],
+          "scope": {
+            "letter": "C"
+          },
+          "start": "09:30",
+          "end": "11:00",
+          "place": "Hall 6",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-19",
+          "type": "tut",
+          "number": 16,
+          "subject": "Physiology",
+          "topics": [
+            "L10: Intestinal secretion",
+            "L11: Small intestinal motility, absorption",
+            "L12: Large intestine & defecation"
+          ],
+          "scope": {
+            "letter": "D"
+          },
+          "start": "09:30",
+          "end": "11:00",
+          "place": "Main Hall",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-19",
+          "type": "tut",
+          "number": 17,
+          "subject": "Biochemistry",
+          "topics": [
+            "L10: Vitamins A & E",
+            "L11: Water soluble vitamins I",
+            "L12: Water soluble vitamins II"
+          ],
+          "scope": {
+            "letter": "A"
+          },
+          "start": "09:30",
+          "end": "11:00",
+          "place": "Hall 4",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-19",
+          "type": "tut",
+          "number": 17,
+          "subject": "Biochemistry",
+          "topics": [
+            "L10: Vitamins A & E",
+            "L11: Water soluble vitamins I",
+            "L12: Water soluble vitamins II"
+          ],
+          "scope": {
+            "letter": "B"
+          },
+          "start": "09:30",
+          "end": "11:00",
+          "place": "Hall 5",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-20",
+          "type": "tut",
+          "number": 18,
+          "subject": "Physiology",
+          "topics": [
+            "L13: The energy balance",
+            "L14: Factors affecting the metabolic rate",
+            "L15: Regulation of food intake and starvation"
+          ],
+          "scope": {
+            "letter": "C"
+          },
+          "start": "08:00",
+          "end": "09:30",
+          "place": "Hall 6",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-20",
+          "type": "tut",
+          "number": 18,
+          "subject": "Physiology",
+          "topics": [
+            "L13: The energy balance",
+            "L14: Factors affecting the metabolic rate",
+            "L15: Regulation of food intake and starvation"
+          ],
+          "scope": {
+            "letter": "B"
+          },
+          "start": "08:00",
+          "end": "09:30",
+          "place": "Hall 5",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-20",
+          "type": "tut",
+          "number": 19,
+          "subject": "Biochemistry",
+          "topics": [
+            "L13: Sodium & potassium trace elements",
+            "L14: Calcium & phosphorous"
+          ],
+          "scope": {
+            "letter": "A"
+          },
+          "start": "08:00",
+          "end": "09:30",
+          "place": "Hall 4",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-20",
+          "type": "tut",
+          "number": 19,
+          "subject": "Biochemistry",
+          "topics": [
+            "L13: Sodium & potassium trace elements",
+            "L14: Calcium & phosphorous"
+          ],
+          "scope": {
+            "letter": "D"
+          },
+          "start": "08:00",
+          "end": "09:30",
+          "place": "Main Hall",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-20",
+          "type": "tut",
+          "number": 18,
+          "subject": "Physiology",
+          "topics": [
+            "L13: The energy balance",
+            "L14: Factors affecting the metabolic rate",
+            "L15: Regulation of food intake and starvation"
+          ],
+          "scope": {
+            "letter": "A"
+          },
+          "start": "09:30",
+          "end": "11:00",
+          "place": "Hall 4",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-20",
+          "type": "tut",
+          "number": 18,
+          "subject": "Physiology",
+          "topics": [
+            "L13: The energy balance",
+            "L14: Factors affecting the metabolic rate",
+            "L15: Regulation of food intake and starvation"
+          ],
+          "scope": {
+            "letter": "D"
+          },
+          "start": "09:30",
+          "end": "11:00",
+          "place": "Main Hall",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-20",
+          "type": "tut",
+          "number": 19,
+          "subject": "Biochemistry",
+          "topics": [
+            "L13: Sodium & potassium trace elements",
+            "L14: Calcium & phosphorous"
+          ],
+          "scope": {
+            "letter": "C"
+          },
+          "start": "09:30",
+          "end": "11:00",
+          "place": "Hall 6",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-20",
+          "type": "tut",
+          "number": 19,
+          "subject": "Biochemistry",
+          "topics": [
+            "L13: Sodium & potassium trace elements",
+            "L14: Calcium & phosphorous"
+          ],
+          "scope": {
+            "letter": "B"
+          },
+          "start": "09:30",
+          "end": "11:00",
+          "place": "Hall 5",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-22",
+          "type": "prac",
+          "number": 20,
+          "subject": "Anatomy",
+          "topics": [
+            "Anatomy Revision"
+          ],
+          "scope": {
+            "practicalGroups": [
+              1
+            ]
+          },
+          "start": "08:00",
+          "end": "09:30",
+          "place": "Morgue 1",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-22",
+          "type": "prac",
+          "number": 20,
+          "subject": "Anatomy",
+          "topics": [
+            "Anatomy Revision"
+          ],
+          "scope": {
+            "practicalGroups": [
+              5
+            ]
+          },
+          "start": "08:00",
+          "end": "09:30",
+          "place": "Morgue 2",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-22",
+          "type": "prac",
+          "number": 21,
+          "subject": "Histology",
+          "topics": [
+            "Histology Revision"
+          ],
+          "scope": {
+            "practicalGroups": [
+              2
+            ]
+          },
+          "start": "08:00",
+          "end": "09:30",
+          "place": "Lab 7",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-22",
+          "type": "prac",
+          "number": 21,
+          "subject": "Histology",
+          "topics": [
+            "Histology Revision"
+          ],
+          "scope": {
+            "practicalGroups": [
+              6
+            ]
+          },
+          "start": "08:00",
+          "end": "09:30",
+          "place": "Lab 8",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-22",
+          "type": "prac",
+          "number": 20,
+          "subject": "Anatomy",
+          "topics": [
+            "Anatomy Revision"
+          ],
+          "scope": {
+            "practicalGroups": [
+              2
+            ]
+          },
+          "start": "09:30",
+          "end": "11:00",
+          "place": "Morgue 1",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-22",
+          "type": "prac",
+          "number": 20,
+          "subject": "Anatomy",
+          "topics": [
+            "Anatomy Revision"
+          ],
+          "scope": {
+            "practicalGroups": [
+              6
+            ]
+          },
+          "start": "09:30",
+          "end": "11:00",
+          "place": "Morgue 2",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-22",
+          "type": "prac",
+          "number": 21,
+          "subject": "Histology",
+          "topics": [
+            "Histology Revision"
+          ],
+          "scope": {
+            "practicalGroups": [
+              1
+            ]
+          },
+          "start": "09:30",
+          "end": "11:00",
+          "place": "Lab 7",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-22",
+          "type": "prac",
+          "number": 21,
+          "subject": "Histology",
+          "topics": [
+            "Histology Revision"
+          ],
+          "scope": {
+            "practicalGroups": [
+              5
+            ]
+          },
+          "start": "09:30",
+          "end": "11:00",
+          "place": "Lab 8",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-22",
+          "type": "prac",
+          "number": 20,
+          "subject": "Anatomy",
+          "topics": [
+            "Anatomy Revision"
+          ],
+          "scope": {
+            "practicalGroups": [
+              3
+            ]
+          },
+          "start": "11:00",
+          "end": "12:30",
+          "place": "Morgue 1",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-22",
+          "type": "prac",
+          "number": 20,
+          "subject": "Anatomy",
+          "topics": [
+            "Anatomy Revision"
+          ],
+          "scope": {
+            "practicalGroups": [
+              7
+            ]
+          },
+          "start": "11:00",
+          "end": "12:30",
+          "place": "Morgue 2",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-22",
+          "type": "prac",
+          "number": 21,
+          "subject": "Histology",
+          "topics": [
+            "Histology Revision"
+          ],
+          "scope": {
+            "practicalGroups": [
+              4
+            ]
+          },
+          "start": "11:00",
+          "end": "12:30",
+          "place": "Lab 7",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-22",
+          "type": "prac",
+          "number": 21,
+          "subject": "Histology",
+          "topics": [
+            "Histology Revision"
+          ],
+          "scope": {
+            "practicalGroups": [
+              8
+            ]
+          },
+          "start": "11:00",
+          "end": "12:30",
+          "place": "Lab 8",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-22",
+          "type": "prac",
+          "number": 20,
+          "subject": "Anatomy",
+          "topics": [
+            "Anatomy Revision"
+          ],
+          "scope": {
+            "practicalGroups": [
+              4
+            ]
+          },
+          "start": "12:30",
+          "end": "14:00",
+          "place": "Morgue 1",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-22",
+          "type": "prac",
+          "number": 20,
+          "subject": "Anatomy",
+          "topics": [
+            "Anatomy Revision"
+          ],
+          "scope": {
+            "practicalGroups": [
+              8
+            ]
+          },
+          "start": "12:30",
+          "end": "14:00",
+          "place": "Morgue 2",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-22",
+          "type": "prac",
+          "number": 21,
+          "subject": "Histology",
+          "topics": [
+            "Histology Revision"
+          ],
+          "scope": {
+            "practicalGroups": [
+              3
+            ]
+          },
+          "start": "12:30",
+          "end": "14:00",
+          "place": "Lab 7",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-22",
+          "type": "prac",
+          "number": 21,
+          "subject": "Histology",
+          "topics": [
+            "Histology Revision"
+          ],
+          "scope": {
+            "practicalGroups": [
+              7
+            ]
+          },
+          "start": "12:30",
+          "end": "14:00",
+          "place": "Lab 8",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-23",
+          "type": "prac",
+          "number": 20,
+          "subject": "Anatomy",
+          "topics": [
+            "Anatomy Revision"
+          ],
+          "scope": {
+            "practicalGroups": [
+              9
+            ]
+          },
+          "start": "11:00",
+          "end": "12:30",
+          "place": "Morgue 1",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-23",
+          "type": "prac",
+          "number": 21,
+          "subject": "Histology",
+          "topics": [
+            "Histology Revision"
+          ],
+          "scope": {
+            "practicalGroups": [
+              10
+            ]
+          },
+          "start": "11:00",
+          "end": "12:30",
+          "place": "Lab 8",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-23",
+          "type": "prac",
+          "number": 20,
+          "subject": "Anatomy",
+          "topics": [
+            "Anatomy Revision"
+          ],
+          "scope": {
+            "practicalGroups": [
+              10
+            ]
+          },
+          "start": "12:30",
+          "end": "14:00",
+          "place": "Morgue 1",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-23",
+          "type": "prac",
+          "number": 21,
+          "subject": "Histology",
+          "topics": [
+            "Histology Revision"
+          ],
+          "scope": {
+            "practicalGroups": [
+              9
+            ]
+          },
+          "start": "12:30",
+          "end": "14:00",
+          "place": "Lab 8",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-23",
+          "type": "prac",
+          "number": 20,
+          "subject": "Anatomy",
+          "topics": [
+            "Anatomy Revision"
+          ],
+          "scope": {
+            "practicalGroups": [
+              11
+            ]
+          },
+          "start": "14:00",
+          "end": "15:30",
+          "place": "Morgue 1",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-23",
+          "type": "prac",
+          "number": 21,
+          "subject": "Histology",
+          "topics": [
+            "Histology Revision"
+          ],
+          "scope": {
+            "practicalGroups": [
+              12
+            ]
+          },
+          "start": "14:00",
+          "end": "15:30",
+          "place": "Lab 8",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-23",
+          "type": "prac",
+          "number": 20,
+          "subject": "Anatomy",
+          "topics": [
+            "Anatomy Revision"
+          ],
+          "scope": {
+            "practicalGroups": [
+              12
+            ]
+          },
+          "start": "15:30",
+          "end": "17:00",
+          "place": "Morgue 1",
+          "status": "normal",
+          "note": ""
+        },
+        {
+          "date": "2026-12-23",
+          "type": "prac",
+          "number": 21,
+          "subject": "Histology",
+          "topics": [
+            "Histology Revision"
+          ],
+          "scope": {
+            "practicalGroups": [
+              11
+            ]
+          },
+          "start": "15:30",
+          "end": "17:00",
+          "place": "Lab 8",
+          "status": "normal",
+          "note": ""
+        }
+      ]
+    }
+  ]
+}
