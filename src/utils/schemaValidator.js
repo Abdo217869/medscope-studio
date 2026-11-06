@@ -44,8 +44,12 @@ export function validateScheduleJson(data) {
         errors.push({ path: p, message: 'Section must be an object' });
         return;
       }
+      // Numeric section IDs: convert to strings on import
+      if (typeof sec.id === 'number') {
+        sec.id = String(sec.id);
+      }
       if (typeof sec.id !== 'string') {
-        errors.push({ path: `${p}.id`, message: 'Section "id" must be a string (e.g. "A1")' });
+        errors.push({ path: `${p}.id`, message: 'Section "id" must be a string (e.g. "1")' });
       }
     });
   }

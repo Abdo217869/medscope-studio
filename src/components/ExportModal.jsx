@@ -44,6 +44,10 @@ function formatPlainIssueSentence(issue, schedule) {
   if (dateText) prefixParts.push(dateText);
   const locationPrefix = prefixParts.length > 0 ? prefixParts.join(', ') + ': ' : '';
 
+  if (issue.rule === 'ERR_INVALID_DATE' || issue.message?.toLowerCase().includes('date not valid')) {
+    return `${locationPrefix}date not valid.`;
+  }
+
   if (issue.rule === 'ERR_TIME_OVERLAP') {
     const match = issue.message?.match(/"([^"]+)"\s*\([^)]*\)\s*overlaps\s*with\s*"([^"]+)"/i);
     if (match) {
@@ -83,6 +87,7 @@ export function ExportModal({
   const [namingTemplate, setNamingTemplate] = useState('{module}_Group_{group}_Section_{section}_Week_{week}');
   const [quality, setQuality] = useState(0.98);
   const [includeValidationReport, setIncludeValidationReport] = useState(true);
+  const [exportError, setExportError] = useState('');
 
   // Close modal on Escape key
   useEffect(() => {
@@ -181,18 +186,24 @@ export function ExportModal({
   }, [namingTemplate, schedule, selectedSection, selectedWeek, theme, format]);
 
   // Execute export (export is NEVER blocked)
-  const handleStartExport = () => {
-    onExecuteExport({
-      scope,
-      format,
-      multiPdfMode,
-      pixelRatio: resolution,
-      pageSize,
-      namingTemplate,
-      quality,
-      includeValidationReport,
-      validationReportText: buildValidationReportText()
-    });
+  const handleStartExport = async () => {
+    setExportError('');
+    try {
+      await onExecuteExport({
+        scope,
+        format,
+        multiPdfMode,
+        pixelRatio: resolution,
+        pageSize,
+        namingTemplate,
+        quality,
+        includeValidationReport,
+        validationReportText: buildValidationReportText()
+      });
+    } catch (err) {
+      console.error('Export execution error:', err);
+      setExportError(err?.message || 'Export failed. Please check the timetable and try again.');
+    }
   };
 
   const buildValidationReportText = () => {
@@ -493,6 +504,17 @@ export function ExportModal({
                   </div>
                 ))}
               </div>
+            </div>
+          )}
+
+          {/* Error Banner */}
+          {exportError && (
+            <div
+              data-testid="export-error-banner"
+              className="p-3 bg-rose-500/15 border border-rose-500/40 rounded-xl text-xs text-rose-300 flex items-center gap-2"
+            >
+              <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
+              <span>{exportError}</span>
             </div>
           )}
 

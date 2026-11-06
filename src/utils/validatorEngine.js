@@ -1,15 +1,25 @@
-import { isSessionForSection } from './dataUtils.js';
+import { isSessionForSection, isValidDate } from './dataUtils.js';
+
+/**
+ * Validates whether a time string strictly matches HH:MM format with valid hours and minutes
+ */
+export function isValidTimeFormat(timeStr) {
+  if (!timeStr || typeof timeStr !== 'string') return false;
+  const match = timeStr.trim().match(/^(\d{1,2}):(\d{2})$/);
+  if (!match) return false;
+  const h = parseInt(match[1], 10);
+  const m = parseInt(match[2], 10);
+  return h >= 0 && h <= 23 && m >= 0 && m <= 59;
+}
 
 /**
  * Normalizes time string "HH:MM" into minutes from midnight for interval math
  */
 export function timeToMinutes(timeStr) {
-  if (!timeStr || typeof timeStr !== 'string') return NaN;
+  if (!isValidTimeFormat(timeStr)) return NaN;
   const parts = timeStr.trim().split(':');
-  if (parts.length < 2) return NaN;
   const h = parseInt(parts[0], 10);
   const m = parseInt(parts[1], 10);
-  if (isNaN(h) || isNaN(m)) return NaN;
   return h * 60 + m;
 }
 
@@ -82,7 +92,22 @@ export function validate(project, options = {}) {
     const weekDates = [];
 
     (week.sessions || []).forEach((session, sIdx) => {
-      if (!session.date) return;
+      if (!session.date || !isValidDate(session.date)) {
+        issues.push({
+          id: `ERR_INVALID_DATE_w${wNum}_s${sIdx}`,
+          severity: 'error',
+          rule: 'ERR_INVALID_DATE',
+          message: 'date not valid',
+          location: {
+            week: wNum,
+            sessionIndex: sIdx,
+            field: 'date',
+            sectionId: session.scope?.sections?.[0] || undefined
+          }
+        });
+        return;
+      }
+
       weekDates.push(session.date);
 
       // Check if weekday matches module.weekdays
@@ -189,11 +214,32 @@ export function validate(project, options = {}) {
         }
       }
 
-      // Time validity: end > start
-      if (session.start && session.end) {
+      // Time validity: start & end format and end > start
+      if (session.start || session.end) {
         const startMin = timeToMinutes(session.start);
         const endMin = timeToMinutes(session.end);
-        if (isNaN(startMin) || isNaN(endMin) || endMin <= startMin) {
+
+        if (session.start && isNaN(startMin)) {
+          issues.push({
+            id: `ERR_INVALID_START_TIME_w${wNum}_s${sIdx}`,
+            severity: 'error',
+            rule: 'ERR_MISSING_REQUIRED_OR_INVALID_TIME',
+            message: `Start time (${session.start}) is invalid (must be HH:MM in 00:00 to 23:59).`,
+            location: { week: wNum, sessionIndex: sIdx, field: 'start' }
+          });
+        }
+
+        if (session.end && isNaN(endMin)) {
+          issues.push({
+            id: `ERR_INVALID_END_TIME_w${wNum}_s${sIdx}`,
+            severity: 'error',
+            rule: 'ERR_MISSING_REQUIRED_OR_INVALID_TIME',
+            message: `End time (${session.end}) is invalid (must be HH:MM in 00:00 to 23:59).`,
+            location: { week: wNum, sessionIndex: sIdx, field: 'end' }
+          });
+        }
+
+        if (!isNaN(startMin) && !isNaN(endMin) && endMin <= startMin) {
           issues.push({
             id: `ERR_TIME_ORDER_w${wNum}_s${sIdx}`,
             severity: 'error',

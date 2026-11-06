@@ -17,19 +17,24 @@ export function buildFilename(template, context = {}, extension = 'pdf') {
   } = context;
 
   const raw = (template || '{module}_Group_{group}_Section_{section}_Week_{week}')
-    .replace(/{module}/gi, module)
-    .replace(/{term}/gi, term)
-    .replace(/{group}/gi, group)
-    .replace(/{section}/gi, section)
-    .replace(/{week}/gi, week)
-    .replace(/{date}/gi, date);
+    .replace(/{module}/gi, module || 'Module')
+    .replace(/{term}/gi, term || 'Term')
+    .replace(/{group}/gi, group || 'Group')
+    .replace(/{section}/gi, section || '1')
+    .replace(/{week}/gi, week || '1')
+    .replace(/{date}/gi, date || 'date');
 
   // Clean filename: replace spaces with underscores, strip illegal characters
-  const safeName = raw
-    .replace(/[/\:*?"<>|]/g, '')
+  let safeName = raw
+    .replace(/[\\/:*?"<>|]/g, '')
     .trim()
     .replace(/\s+/g, '_')
-    .replace(/_+/g, '_');
+    .replace(/_+/g, '_')
+    .replace(/^_+|_+$/g, '');
+
+  if (!safeName || safeName === '.') {
+    safeName = 'timetable_export';
+  }
 
   return extension ? `${safeName}.${extension.replace(/^\./, '')}` : safeName;
 }
@@ -97,6 +102,15 @@ export async function renderElementToPng(element, options = {}) {
  * Create a jsPDF document from an array of image Data URLs
  */
 export function createPdfFromImages(images = [], options = {}) {
+  if (!Array.isArray(images) || images.length === 0) {
+    throw new Error('No images provided for PDF generation');
+  }
+
+  const validImages = images.filter(img => typeof img === 'string' && img.startsWith('data:image/'));
+  if (validImages.length === 0) {
+    throw new Error('No valid image data provided for PDF generation');
+  }
+
   const {
     pageSize = 'a4', // 'a4' | 'a3' | 'canvas'
     canvasWidth = 1414,

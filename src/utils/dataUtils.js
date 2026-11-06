@@ -101,6 +101,21 @@ export function getWeekdayFromDate(dateStr) {
 }
 
 /**
+ * Strictly validates a calendar date string in YYYY-MM-DD format
+ */
+export function isValidDate(dateStr) {
+  if (!dateStr || typeof dateStr !== 'string') return false;
+  const match = dateStr.trim().match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!match) return false;
+  const y = parseInt(match[1], 10);
+  const m = parseInt(match[2], 10);
+  const d = parseInt(match[3], 10);
+  if (m < 1 || m > 12 || d < 1 || d > 31) return false;
+  const dt = new Date(Date.UTC(y, m - 1, d));
+  return dt.getUTCFullYear() === y && dt.getUTCMonth() === m - 1 && dt.getUTCDate() === d;
+}
+
+/**
  * Group and process all sessions for a specific section and week.
  * The weekday of each row comes from its real date.
  */
@@ -111,14 +126,17 @@ export function buildWeekSchedule(moduleInfo, section, weekData) {
   // Filter sessions that match this section
   const sectionSessions = allSessions.filter(s => isSessionForSection(s, section));
 
-  // Determine unique dates present in this week across all sessions
-  const weekDates = [...new Set(allSessions.map(s => s.date).filter(Boolean))].sort();
+  // Determine valid unique dates present in this week across all sessions
+  const validWeekDates = [...new Set(allSessions.map(s => s.date).filter(isValidDate))].sort();
+
+  // Sessions belonging to this section with invalid or missing date
+  const invalidDateSessions = sectionSessions.filter(s => !isValidDate(s.date));
 
   let daysToBuild = [];
 
-  if (weekDates.length > 0) {
+  if (validWeekDates.length > 0) {
     // Week has explicit dates: build a row for each real date in the week
-    daysToBuild = weekDates.map(dateStr => {
+    daysToBuild = validWeekDates.map(dateStr => {
       const shortWd = getWeekdayFromDate(dateStr);
       const fullDayName = getFullDayName(shortWd);
       return {
@@ -140,16 +158,31 @@ export function buildWeekSchedule(moduleInfo, section, weekData) {
     });
   }
 
+  // Never drop a session silently: keep invalid date sessions in a fallback row
+  if (invalidDateSessions.length > 0) {
+    daysToBuild.push({
+      dateStr: '__invalid_date__',
+      shortWd: 'Fix',
+      fullDayName: 'Date Error',
+      isInvalidDateRow: true
+    });
+  }
+
   // Build final day rows
   const dayRows = daysToBuild.map((dayItem) => {
-    const { shortWd, fullDayName, dateStr } = dayItem;
+    const { shortWd, fullDayName, dateStr, isInvalidDateRow } = dayItem;
 
-    const daySessions = sectionSessions.filter(s => {
-      if (dateStr && s.date) {
-        return s.date === dateStr;
-      }
-      return getShortDayName(getWeekdayFromDate(s.date)) === shortWd;
-    });
+    let daySessions;
+    if (isInvalidDateRow) {
+      daySessions = [...invalidDateSessions];
+    } else {
+      daySessions = sectionSessions.filter(s => {
+        if (dateStr && s.date) {
+          return s.date === dateStr;
+        }
+        return getShortDayName(getWeekdayFromDate(s.date)) === shortWd;
+      });
+    }
 
     // Sort sessions within the day
     daySessions.sort(compareSessions);

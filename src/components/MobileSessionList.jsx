@@ -1,5 +1,6 @@
 import { useState } from 'preact/hooks';
-import { Plus, Trash2, Copy, ChevronDown, ChevronUp, Clock, MapPin, Tag } from 'lucide-preact';
+import { Plus, Trash2, Copy, ChevronDown, ChevronUp, Clock, MapPin, Tag, AlertCircle } from 'lucide-preact';
+import { isValidDate } from '../utils/dataUtils.js';
 
 export function MobileSessionList({
   schedule,
@@ -128,11 +129,14 @@ export function MobileSessionList({
             const isRecorded = s.status === 'recorded';
             const isLeave = s.status === 'leave';
 
+            const isInvalidDate = !isValidDate(s.date);
+
             return (
               <div
                 key={idx}
+                data-testid={isInvalidDate ? 'needs-fixing-row' : undefined}
                 className={`medscope-card border transition-all ${
-                  isExpanded ? 'border-[var(--gold)] shadow-lg' : 'border-[var(--border)] hover:border-[var(--border)]/80'
+                  isExpanded ? 'border-[var(--gold)] shadow-lg' : isInvalidDate ? 'border-rose-500/60 bg-rose-950/20' : 'border-[var(--border)] hover:border-[var(--border)]/80'
                 }`}
               >
                 {/* Collapsed Card Summary (Tap to expand) */}

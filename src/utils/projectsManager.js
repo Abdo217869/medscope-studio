@@ -1,9 +1,10 @@
-import { DEFAULT_SCHEDULE, GIT_SCHEDULE, DEFAULT_THEME } from '../constants';
-import { mergeThemeWithDefaults } from './themeUtils';
-import { needsSectionMigration, migrateSectionModel } from './sectionUtils';
+import { DEFAULT_SCHEDULE, GIT_SCHEDULE, DEFAULT_THEME } from '../constants.js';
+import { mergeThemeWithDefaults } from './themeUtils.js';
+import { needsSectionMigration, migrateSectionModel } from './sectionUtils.js';
 
 export const STORAGE_KEY_PROJECTS = 'medscope_projects_library';
 export const STORAGE_KEY_ACTIVE_ID = 'medscope_active_project_id';
+export const STORAGE_KEY_CORRUPTED_BACKUP = 'medscope_corrupted_backup';
 
 /**
  * Generates a unique project ID
@@ -14,54 +15,98 @@ export function generateProjectId() {
 
 /**
  * Loads all projects from localStorage.
- * If empty, automatically migrates legacy 'medscope_schedule_data' or initializes default project.
+ * If empty or corrupted, automatically handles recovery, creates backup, or migrates legacy data.
  */
 export function getProjects() {
+  const createFallbackProject = () => ({
+    id: generateProjectId(),
+    name: 'GIT (all 12 sections)',
+    createdAt: Date.now(),
+    updatedAt: Date.now(),
+    schedule: DEFAULT_SCHEDULE,
+    theme: DEFAULT_THEME
+  });
+
   if (typeof window === 'undefined' || !window.localStorage) {
-    return [{
-      id: 'proj_default',
-      name: 'GIT (all 12 sections)',
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
-      schedule: DEFAULT_SCHEDULE,
-      theme: DEFAULT_THEME
-    }];
+    return [createFallbackProject()];
   }
+
+  const recoverFromCorrupted = (raw, reason) => {
+    console.warn('Corrupted localStorage detected in projects library:', reason);
+    try {
+      if (raw) {
+        localStorage.setItem(STORAGE_KEY_CORRUPTED_BACKUP, String(raw));
+      }
+    } catch (e) {
+      console.warn('Failed to save corrupted backup:', e);
+    }
+    const fallbackList = [createFallbackProject()];
+    try {
+      localStorage.setItem(STORAGE_KEY_PROJECTS, JSON.stringify(fallbackList));
+      localStorage.setItem(STORAGE_KEY_ACTIVE_ID, fallbackList[0].id);
+      if (typeof window !== 'undefined' && window.location) {
+        window.location.hash = '#/';
+      }
+    } catch (e) {}
+    return fallbackList;
+  };
 
   try {
     const raw = localStorage.getItem(STORAGE_KEY_PROJECTS);
     if (raw) {
-      const list = JSON.parse(raw);
-      if (Array.isArray(list) && list.length > 0) {
-        // Automatically migrate sections to global continuous 1..N if needed
-        let migratedAny = false;
-        list.forEach(p => {
-          if (p.schedule && needsSectionMigration(p.schedule)) {
-            p.schedule = migrateSectionModel(p.schedule);
+      let list;
+      try {
+        list = JSON.parse(raw);
+      } catch (parseErr) {
+        return recoverFromCorrupted(raw, 'Invalid JSON syntax');
+      }
+
+      if (!Array.isArray(list) || list.length === 0) {
+        return recoverFromCorrupted(raw, 'Not an array or empty list');
+      }
+
+      // Filter and heal projects: each must have a valid schedule with module
+      const validProjects = list.filter(p => p && typeof p === 'object' && p.schedule && p.schedule.module);
+      if (validProjects.length === 0) {
+        return recoverFromCorrupted(raw, 'No projects with valid schedule.module');
+      }
+
+      // Automatically migrate sections to global continuous 1..N if needed
+      let migratedAny = false;
+      validProjects.forEach(p => {
+        if (!p.id) {
+          p.id = generateProjectId();
+          migratedAny = true;
+        }
+        if (!p.theme) {
+          p.theme = DEFAULT_THEME;
+          migratedAny = true;
+        }
+        if (p.schedule && needsSectionMigration(p.schedule)) {
+          p.schedule = migrateSectionModel(p.schedule);
+          migratedAny = true;
+        }
+      });
+
+      // Sync if legacy medscope_schedule_data was externally modified (e.g. by test scripts)
+      try {
+        const directSchedRaw = localStorage.getItem('medscope_schedule_data');
+        if (directSchedRaw) {
+          const activeId = localStorage.getItem(STORAGE_KEY_ACTIVE_ID) || validProjects[0].id;
+          const activeProj = validProjects.find(p => p.id === activeId) || validProjects[0];
+          const directSched = JSON.parse(directSchedRaw);
+          const finalSched = needsSectionMigration(directSched) ? migrateSectionModel(directSched) : directSched;
+          if (JSON.stringify(activeProj.schedule) !== JSON.stringify(finalSched)) {
+            activeProj.schedule = finalSched;
             migratedAny = true;
           }
-        });
-
-        // Sync if legacy medscope_schedule_data was externally modified (e.g. by test scripts)
-        try {
-          const directSchedRaw = localStorage.getItem('medscope_schedule_data');
-          if (directSchedRaw) {
-            const activeId = localStorage.getItem(STORAGE_KEY_ACTIVE_ID) || list[0].id;
-            const activeProj = list.find(p => p.id === activeId) || list[0];
-            const directSched = JSON.parse(directSchedRaw);
-            const finalSched = needsSectionMigration(directSched) ? migrateSectionModel(directSched) : directSched;
-            if (JSON.stringify(activeProj.schedule) !== JSON.stringify(finalSched)) {
-              activeProj.schedule = finalSched;
-              migratedAny = true;
-            }
-          }
-        } catch (e) {}
-
-        if (migratedAny) {
-          localStorage.setItem(STORAGE_KEY_PROJECTS, JSON.stringify(list));
         }
-        return list;
+      } catch (e) {}
+
+      if (migratedAny || validProjects.length !== list.length) {
+        localStorage.setItem(STORAGE_KEY_PROJECTS, JSON.stringify(validProjects));
       }
+      return validProjects;
     }
 
     // Auto-migration of existing standalone schedule data
@@ -94,15 +139,7 @@ export function getProjects() {
     localStorage.setItem(STORAGE_KEY_ACTIVE_ID, initialProject.id);
     return initialList;
   } catch (err) {
-    console.warn('Error reading projects library:', err);
-    return [{
-      id: 'proj_default',
-      name: 'GIT (all 12 sections)',
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
-      schedule: DEFAULT_SCHEDULE,
-      theme: DEFAULT_THEME
-    }];
+    return recoverFromCorrupted(null, err?.message || 'Unknown error');
   }
 }
 
@@ -155,7 +192,18 @@ export function setActiveProjectId(id) {
 export function getActiveProject() {
   const projects = getProjects();
   const activeId = getActiveProjectId();
-  return projects.find(p => p.id === activeId) || projects[0];
+  const found = projects.find(p => p.id === activeId) || projects[0];
+  if (found && found.schedule && found.schedule.module) {
+    return found;
+  }
+  return {
+    id: 'proj_default',
+    name: 'GIT (all 12 sections)',
+    createdAt: Date.now(),
+    updatedAt: Date.now(),
+    schedule: DEFAULT_SCHEDULE,
+    theme: DEFAULT_THEME
+  };
 }
 
 /**

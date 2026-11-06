@@ -83,11 +83,38 @@ export function cleanSubjectName(name) {
 }
 
 /**
+ * Coerces numeric section IDs to strings across sections and session scopes
+ */
+export function coerceNumericSectionIds(project) {
+  if (!project || typeof project !== 'object') return project;
+  if (Array.isArray(project.sections)) {
+    project.sections.forEach(sec => {
+      if (sec && typeof sec.id === 'number') {
+        sec.id = String(sec.id);
+      }
+    });
+  }
+  if (Array.isArray(project.weeks)) {
+    project.weeks.forEach(w => {
+      if (Array.isArray(w.sessions)) {
+        w.sessions.forEach(s => {
+          if (s?.scope?.sections && Array.isArray(s.scope.sections)) {
+            s.scope.sections = s.scope.sections.map(id => typeof id === 'number' ? String(id) : id);
+          }
+        });
+      }
+    });
+  }
+  return project;
+}
+
+/**
  * Normalizes all subjects in an incoming project:
+ * - Converts numeric section IDs to strings
  * - Strips trailing counter from subjects in sessions and subjects array ("Anatomy 1" -> "Anatomy")
  * - Safety net for subjects:
- *   - If not a known subject and ends with known discipline in brackets:
- *     "Mandible and normal lateralis (Anatomy)" -> subject = "Anatomy", topics = ["Mandible and normal lateralis"]
+ *   - Multi-bracket support: checks all bracket pairs for known disciplines
+ *   - "Mandible (part 1) and normal lateralis (Anatomy)" -> subject = "Anatomy", topics = ["Mandible (part 1) and normal lateralis"]
  *   - If unknown and starts with a known discipline:
  *     "Anatomy Revision" -> subject = "Anatomy", topics = [original text] (when topics are empty)
  * - Matches subject colours ignoring capital letters against known standard colors
@@ -98,7 +125,7 @@ export function normalizeIncomingSubjects(project, existingProject = null) {
   if (!project || typeof project !== 'object') {
     return { normalizedProject: project, cleanedCount: 0, fixedCount: 0 };
   }
-  const cloned = JSON.parse(JSON.stringify(project));
+  const cloned = coerceNumericSectionIds(JSON.parse(JSON.stringify(project)));
   let cleanedCount = 0;
   let fixedCount = 0;
 
@@ -124,28 +151,46 @@ export function normalizeIncomingSubjects(project, existingProject = null) {
       let isKnown = disciplinesMap.has(current.toLowerCase());
 
       if (!isKnown) {
-        // Case A: Ends with a known discipline in brackets, e.g. "Mandible and normal lateralis (Anatomy)"
-        const bracketMatch = current.match(/^(.*?)\s*[\(\[]\s*([^()\[\]]+?)\s*[\)\]]$/);
+        // Multi-bracket matching: inspect all bracket pairs (...) or [...]
+        const bracketRegex = /[\(\[]+([^\(\)\[\]]+?)[\)\]]+/g;
+        let bMatch;
+        const foundDisciplines = [];
+        while ((bMatch = bracketRegex.exec(current)) !== null) {
+          const rawInside = bMatch[1].trim();
+          const cleanInside = cleanSubjectName(rawInside).toLowerCase();
+          if (disciplinesMap.has(cleanInside)) {
+            foundDisciplines.push({
+              fullMatch: bMatch[0],
+              index: bMatch.index,
+              canonical: disciplinesMap.get(cleanInside),
+              rawInside
+            });
+          }
+        }
+
         let handled = false;
 
-        if (bracketMatch) {
-          const topicPart = bracketMatch[1].trim();
-          let disciplinePart = bracketMatch[2].trim();
-          const cleanDisc = cleanSubjectName(disciplinePart);
-          if (cleanDisc !== disciplinePart) {
-            cleanedCount++;
-            disciplinePart = cleanDisc;
+        if (foundDisciplines.length > 0) {
+          const chosen = foundDisciplines[foundDisciplines.length - 1];
+          let remaining = (current.slice(0, chosen.index) + ' ' + current.slice(chosen.index + chosen.fullMatch.length))
+            .trim()
+            .replace(/^[–—\-_:,\.\s]+|[–—\-_:,\.\s]+$/g, '')
+            .replace(/\s+/g, ' ');
+
+          if (remaining.startsWith('(') && remaining.endsWith(')') && !remaining.slice(1, -1).includes('(')) {
+            remaining = remaining.slice(1, -1).trim();
           }
 
-          if (disciplinesMap.has(disciplinePart.toLowerCase())) {
-            const canonical = disciplinesMap.get(disciplinePart.toLowerCase());
-            current = canonical;
-            const existingTopics = Array.isArray(s.topics) ? s.topics : [];
-            s.topics = topicPart ? [topicPart, ...existingTopics] : existingTopics;
-            fixedCount++;
-            handled = true;
-            isKnown = true;
+          current = chosen.canonical;
+          const existingTopics = Array.isArray(s.topics) ? s.topics : [];
+          if (remaining) {
+            s.topics = existingTopics.includes(remaining) ? existingTopics : [remaining, ...existingTopics];
+          } else {
+            s.topics = existingTopics;
           }
+          fixedCount++;
+          handled = true;
+          isKnown = true;
         }
 
         // Case B: Starts with a known discipline, e.g. "Anatomy Revision"

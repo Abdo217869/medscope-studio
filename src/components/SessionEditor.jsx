@@ -10,7 +10,7 @@ import {
   FileSpreadsheet,
   AlertCircle
 } from 'lucide-preact';
-import { isSessionForSection, getShortDayName, getWeekdayFromDate } from '../utils/dataUtils';
+import { isSessionForSection, getShortDayName, getWeekdayFromDate, isValidDate } from '../utils/dataUtils';
 import { MobileSessionList } from './MobileSessionList';
 import { HelpTooltip } from './HelpTooltip';
 
@@ -327,6 +327,22 @@ export function SessionEditor({
         </button>
       </div>
 
+      {/* Needs fixing alert banner for invalid dates in current week */}
+      {sessions.some(s => !isValidDate(s.date)) && (
+        <div
+          data-testid="needs-fixing-alert"
+          className="mx-3 my-2 p-2.5 bg-rose-500/15 border border-rose-500/40 rounded-xl text-xs text-rose-300 flex items-center justify-between gap-2"
+        >
+          <div className="flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
+            <span>
+              <strong>Needs fixing:</strong> {sessions.filter(s => !isValidDate(s.date)).length} session(s) have an invalid date (must be YYYY-MM-DD).
+            </span>
+          </div>
+          <span className="text-[10px] text-rose-300/80">Never dropped silently</span>
+        </div>
+      )}
+
       {/* Spreadsheet Table View */}
       <div className="flex-1 overflow-auto custom-scrollbar">
         <table className="w-full border-collapse text-left text-xs min-w-[760px]">
@@ -378,14 +394,18 @@ export function SessionEditor({
                 const subjColor = subjectObj ? subjectObj.color : '#dfc274';
 
                 const isHighlighted = highlightedSessionIndex === idx;
+                const isDateInvalid = !isValidDate(s.date);
 
                 return (
                   <tr
                     key={idx}
                     id={`session-row-${idx}`}
+                    data-testid={isDateInvalid ? "needs-fixing-row" : undefined}
                     className={`transition-all duration-300 ${
                       isHighlighted
                         ? 'bg-[var(--gold)]/20 ring-2 ring-[var(--gold)] ring-amber-400 shadow-md'
+                        : isDateInvalid
+                        ? 'bg-rose-950/20 hover:bg-rose-950/30 border-l-4 border-rose-500'
                         : 'hover:bg-[var(--surface-2)]/40'
                     }`}
                   >
@@ -396,12 +416,22 @@ export function SessionEditor({
                           type="text"
                           value={s.date || ''}
                           onInput={(e) => updateSessionField(idx, 'date', e.target.value)}
-                          className="input-field w-full px-1.5 py-0.5 text-[11px] font-mono"
+                          className={`input-field w-full px-1.5 py-0.5 text-[11px] font-mono ${
+                            isDateInvalid ? 'border-rose-500 bg-rose-950/40 text-rose-200' : ''
+                          }`}
                           placeholder="YYYY-MM-DD"
                         />
                         <span className="text-[10px] text-[var(--gold)] font-bold px-1">
-                          {dayName || 'Unknown Day'}
+                          {dayName || (isDateInvalid ? 'Invalid Date' : 'Unknown Day')}
                         </span>
+                        {isDateInvalid && (
+                          <span
+                            data-testid="needs-fixing-badge"
+                            className="inline-block mt-0.5 px-1.5 py-0.5 rounded text-[10px] font-bold bg-rose-500/25 text-rose-300 border border-rose-500/40"
+                          >
+                            Needs fixing: date not valid
+                          </span>
+                        )}
                       </div>
                     </td>
 
