@@ -12,6 +12,131 @@ import {
   registerCustomFont
 } from '../utils/themeUtils';
 
+/**
+ * SessionTitle Component:
+ * - Allows title (session type > subject) to wrap to two lines, centered, no ellipsis
+ * - Uses the same font (Fredoka 600) and same inherited font size
+ * - If it still does not fit on 2 lines or horizontally, shrinks font in small steps down to 70%
+ */
+function SessionTitle({
+  prefixGlyph,
+  prefixColor,
+  typeLabel,
+  separatorGlyph,
+  separatorColor,
+  subject,
+  subjectColor,
+  ts
+}) {
+  const containerRef = useRef(null);
+  const baseSize = ts.sessionType?.size || 41;
+  const [scale, setScale] = useState(() => {
+    // Initial estimate based on character length to minimize reflow
+    const totalChars = (prefixGlyph?.length || 1) + (typeLabel?.length || 6) + (separatorGlyph?.length || 1) + (subject?.length || 0) + 4;
+    if (totalChars > 75) return 0.70;
+    if (totalChars > 68) return 0.75;
+    if (totalChars > 62) return 0.80;
+    if (totalChars > 56) return 0.85;
+    if (totalChars > 50) return 0.90;
+    if (totalChars > 45) return 0.95;
+    return 1.0;
+  });
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    // Small steps down to 70%: 1.0, 0.95, 0.90, 0.85, 0.80, 0.75, 0.70
+    const steps = [1.0, 0.95, 0.90, 0.85, 0.80, 0.75, 0.70];
+
+    for (const step of steps) {
+      const candidateSize = Math.round(baseSize * step);
+      el.style.fontSize = `${candidateSize}px`;
+
+      // Allow wrap to 2 lines without clipping:
+      const maxTwoLineHeight = Math.ceil(candidateSize * 1.15 * 2.35);
+      const renderedHeight = el.getBoundingClientRect().height || el.scrollHeight;
+      const isOverflowingHeight = renderedHeight > maxTwoLineHeight;
+      const isOverflowingWidth = el.scrollWidth > el.clientWidth + 2;
+
+      if (!isOverflowingHeight && !isOverflowingWidth) {
+        setScale(step);
+        return;
+      }
+    }
+
+    setScale(0.70);
+    el.style.fontSize = `${Math.round(baseSize * 0.70)}px`;
+  }, [prefixGlyph, typeLabel, separatorGlyph, subject, baseSize]);
+
+  const activeFontSize = Math.round(baseSize * scale);
+  const fontFamily = ts.sessionType?.fontFamily || 'Fredoka';
+  const fontWeight = ts.sessionType?.weight || 600;
+
+  return (
+    <div
+      ref={containerRef}
+      data-role="sessionTitle"
+      className="text-center w-full max-w-full"
+      style={{
+        fontFamily,
+        fontSize: `${activeFontSize}px`,
+        fontWeight,
+        lineHeight: 1.15,
+        textAlign: 'center',
+        wordBreak: 'break-word',
+        overflowWrap: 'break-word',
+        whiteSpace: 'normal',
+        overflow: 'visible'
+      }}
+    >
+      <span
+        style={{
+          color: prefixColor,
+          marginRight: '6px',
+          textShadow: buildTextShadow(ts.dayText?.shadow)
+        }}
+      >
+        {prefixGlyph}
+      </span>
+      <span
+        data-role="sessionType"
+        style={{
+          fontFamily,
+          fontSize: 'inherit',
+          fontWeight,
+          color: ts.sessionType?.color || '#d6c070',
+          textDecoration: ts.sessionType?.underline !== false ? 'underline' : 'none',
+          textDecorationColor: ts.sessionType?.color || '#d6c070',
+          textShadow: buildTextShadow(ts.sessionType?.shadow)
+        }}
+      >
+        {typeLabel}
+      </span>
+      <span
+        style={{
+          color: separatorColor,
+          margin: '0 6px'
+        }}
+      >
+        {separatorGlyph}
+      </span>
+      <span
+        data-role="sessionSubject"
+        style={{
+          fontFamily: ts.sessionSubject?.fontFamily || fontFamily,
+          fontSize: 'inherit',
+          fontWeight: ts.sessionSubject?.weight || fontWeight,
+          color: subjectColor,
+          textShadow: buildTextShadow(ts.sessionSubject?.shadow)
+        }}
+      >
+        {subject}
+      </span>
+    </div>
+  );
+}
+
 export function SchedulePage({
   moduleInfo,
   section,
@@ -110,9 +235,15 @@ export function SchedulePage({
   });
 
   const getSubjectColor = (subjectName) => {
-    if (!subjectName) return t.textStyles.sessionSubject.color || '#000000';
+    if (!subjectName) return '#d9d9d9';
     const clean = subjectName.trim().toLowerCase();
-    return subjectColorMap[clean] || t.textStyles.sessionSubject.color || '#000000';
+    const foundColor = subjectColorMap[clean];
+    if (!foundColor) return '#d9d9d9';
+    const lower = foundColor.trim().toLowerCase();
+    if (lower === '#ffffff' || lower === '#fff' || lower === 'white' || lower.startsWith('rgb(255,255,255)') || lower.startsWith('rgb(255, 255, 255)')) {
+      return '#d9d9d9';
+    }
+    return foundColor;
   };
 
   // Session type mapping
@@ -286,35 +417,47 @@ export function SchedulePage({
       )}
 
       {/* TOP CENTER: Module Title */}
-      {hl.moduleTitle?.visible !== false && (
-        <div
-          className="absolute flex items-center justify-center text-center"
-          style={{
-            left: `${hl.moduleTitle?.x ?? 320}px`,
-            top: `${hl.moduleTitle?.y ?? 16}px`,
-            width: `${hl.moduleTitle?.width ?? 730}px`,
-            height: `${hl.moduleTitle?.height ?? 110}px`
-          }}
-        >
-          <h1
-            data-role="moduleTitle"
+      {hl.moduleTitle?.visible !== false && (() => {
+        const baseModuleSize = ts.moduleTitle?.size || 108;
+        const moduleTitleText = moduleInfo?.title || t.moduleTitle || 'Foundation';
+        const moduleTitleFontSize = moduleTitleText.length > 20
+          ? Math.min(baseModuleSize, 56)
+          : moduleTitleText.length > 14
+          ? Math.min(baseModuleSize, 72)
+          : moduleTitleText.length > 10
+          ? Math.min(baseModuleSize, 88)
+          : baseModuleSize;
+
+        return (
+          <div
+            className="absolute flex items-center justify-center text-center"
             style={{
-              fontFamily: ts.moduleTitle?.fontFamily || 'Poppins',
-              fontSize: `${ts.moduleTitle?.size || 108}px`,
-              fontWeight: ts.moduleTitle?.weight || 800,
-              lineHeight: 1,
-              color: ts.moduleTitle?.color || '#001238',
-              textShadow: buildTextShadow(ts.moduleTitle?.shadow),
-              letterSpacing: ts.moduleTitle?.letterSpacing || '0.01em',
-              textDecoration: ts.moduleTitle?.underline ? 'underline' : 'none',
-              maxWidth: '100%',
-              whiteSpace: 'nowrap'
+              left: `${hl.moduleTitle?.x ?? 320}px`,
+              top: `${hl.moduleTitle?.y ?? 16}px`,
+              width: `${hl.moduleTitle?.width ?? 730}px`,
+              height: `${hl.moduleTitle?.height ?? 110}px`
             }}
           >
-            {moduleInfo?.title || t.moduleTitle || 'Foundation'}
-          </h1>
-        </div>
-      )}
+            <h1
+              data-role="moduleTitle"
+              style={{
+                fontFamily: ts.moduleTitle?.fontFamily || 'Poppins',
+                fontSize: `${moduleTitleFontSize}px`,
+                fontWeight: ts.moduleTitle?.weight || 800,
+                lineHeight: 1,
+                color: ts.moduleTitle?.color || '#001238',
+                textShadow: buildTextShadow(ts.moduleTitle?.shadow),
+                letterSpacing: ts.moduleTitle?.letterSpacing || '0.01em',
+                textDecoration: ts.moduleTitle?.underline ? 'underline' : 'none',
+                maxWidth: '100%',
+                whiteSpace: 'nowrap'
+              }}
+            >
+              {moduleTitleText}
+            </h1>
+          </div>
+        );
+      })()}
 
       {/* TOP CENTER: Section Label */}
       {hl.sectionLabel?.visible !== false && (
@@ -636,63 +779,17 @@ export function SchedulePage({
                               overflow: 'hidden'
                             }}
                           >
-                            {/* Line 1: = <Type> > <Subject> */}
-                            <div
-                              className="flex items-center justify-center"
-                              style={{
-                                fontFamily: ts.sessionType?.fontFamily || 'Fredoka',
-                                fontSize: `${ts.sessionType?.size || 41}px`,
-                                fontWeight: ts.sessionType?.weight || 600,
-                                lineHeight: 1.15,
-                                maxWidth: '100%',
-                                whiteSpace: 'nowrap'
-                              }}
-                            >
-                              <span
-                                style={{
-                                  color: prefixColor,
-                                  marginRight: '8px',
-                                  textShadow: buildTextShadow(ts.dayText?.shadow)
-                                }}
-                              >
-                                {prefixGlyph}
-                              </span>
-                              <span
-                                data-role="sessionType"
-                                style={{
-                                  fontFamily: ts.sessionType?.fontFamily || 'Fredoka',
-                                  fontSize: `${ts.sessionType?.size || 41}px`,
-                                  fontWeight: ts.sessionType?.weight || 600,
-                                  color: ts.sessionType?.color || '#d6c070',
-                                  textDecoration: ts.sessionType?.underline !== false ? 'underline' : 'none',
-                                  textDecorationColor: ts.sessionType?.color || '#d6c070',
-                                  marginRight: '8px',
-                                  textShadow: buildTextShadow(ts.sessionType?.shadow)
-                                }}
-                              >
-                                {typeLabel}
-                              </span>
-                              <span
-                                style={{
-                                  color: separatorColor,
-                                  marginRight: '8px'
-                                }}
-                              >
-                                {separatorGlyph}
-                              </span>
-                              <span
-                                data-role="sessionSubject"
-                                style={{
-                                  fontFamily: ts.sessionSubject?.fontFamily || 'Fredoka',
-                                  fontSize: `${ts.sessionSubject?.size || 41}px`,
-                                  fontWeight: ts.sessionSubject?.weight || 600,
-                                  color: subjectColor,
-                                  textShadow: buildTextShadow(ts.sessionSubject?.shadow)
-                                }}
-                              >
-                                {session.subject}
-                              </span>
-                            </div>
+                            {/* Line 1: = <Type> > <Subject> (Wraps up to 2 lines, centered, shrinks to fit down to 70%) */}
+                            <SessionTitle
+                              prefixGlyph={prefixGlyph}
+                              prefixColor={prefixColor}
+                              typeLabel={typeLabel}
+                              separatorGlyph={separatorGlyph}
+                              separatorColor={separatorColor}
+                              subject={session.subject}
+                              subjectColor={subjectColor}
+                              ts={ts}
+                            />
 
                             {/* Line 2+: (Topics in parentheses, underlined, centered) */}
                             {Array.isArray(session.topics) && session.topics.length > 0 && (

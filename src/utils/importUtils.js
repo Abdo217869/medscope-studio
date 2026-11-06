@@ -27,6 +27,52 @@ export const KNOWN_SUBJECT_COLORS = {
 
 export const NEUTRAL_SUBJECT_COLOR = '#d9d9d9';
 
+export const STANDARD_DISCIPLINES = [
+  'Anatomy',
+  'Histology',
+  'Physiology',
+  'Biochemistry',
+  'Radiology',
+  'Communication'
+];
+
+/**
+ * Builds a lookup map of lowerCase -> canonical name for known disciplines:
+ * Standard disciplines plus any subjects already defined in the existing project
+ * or declared in the incoming project.
+ */
+export function buildKnownDisciplinesMap(existingProject, incomingProject) {
+  const map = new Map();
+  // 1. Standard disciplines
+  STANDARD_DISCIPLINES.forEach(d => map.set(d.toLowerCase(), d));
+
+  // 2. Subjects already in the project
+  if (existingProject?.subjects && Array.isArray(existingProject.subjects)) {
+    existingProject.subjects.forEach(s => {
+      if (s?.name && typeof s.name === 'string') {
+        const clean = cleanSubjectName(s.name.trim());
+        if (clean && !map.has(clean.toLowerCase())) {
+          map.set(clean.toLowerCase(), clean);
+        }
+      }
+    });
+  }
+
+  // 3. Subjects declared in incoming project
+  if (incomingProject?.subjects && Array.isArray(incomingProject.subjects)) {
+    incomingProject.subjects.forEach(s => {
+      if (s?.name && typeof s.name === 'string') {
+        const clean = cleanSubjectName(s.name.trim());
+        if (clean && !map.has(clean.toLowerCase())) {
+          map.set(clean.toLowerCase(), clean);
+        }
+      }
+    });
+  }
+
+  return map;
+}
+
 /**
  * Strips a trailing counter number from a subject name:
  * "Anatomy 1" -> "Anatomy", "Histology 9" -> "Histology"
@@ -38,32 +84,92 @@ export function cleanSubjectName(name) {
 
 /**
  * Normalizes all subjects in an incoming project:
- * - Strips trailing counter from subjects in sessions and subjects array
+ * - Strips trailing counter from subjects in sessions and subjects array ("Anatomy 1" -> "Anatomy")
+ * - Safety net for subjects:
+ *   - If not a known subject and ends with known discipline in brackets:
+ *     "Mandible and normal lateralis (Anatomy)" -> subject = "Anatomy", topics = ["Mandible and normal lateralis"]
+ *   - If unknown and starts with a known discipline:
+ *     "Anatomy Revision" -> subject = "Anatomy", topics = [original text] (when topics are empty)
  * - Matches subject colours ignoring capital letters against known standard colors
- * - Assigns neutral color (#d9d9d9) to unknown subjects
- * - Counts how many subject names were cleaned
+ * - Assigns neutral color (#d9d9d9) to unknown subjects (never white)
+ * - Returns cleanedCount and fixedCount
  */
-export function normalizeIncomingSubjects(project) {
+export function normalizeIncomingSubjects(project, existingProject = null) {
   if (!project || typeof project !== 'object') {
-    return { normalizedProject: project, cleanedCount: 0 };
+    return { normalizedProject: project, cleanedCount: 0, fixedCount: 0 };
   }
   const cloned = JSON.parse(JSON.stringify(project));
   let cleanedCount = 0;
+  let fixedCount = 0;
 
-  const allCleanedSubjects = new Set();
+  const disciplinesMap = buildKnownDisciplinesMap(existingProject, cloned);
+  const allFinalSubjects = new Set();
 
-  // 1. Clean session subjects across all weeks
+  // 1. Clean & fix session subjects across all weeks
   (cloned.weeks || []).forEach(w => {
     (w.sessions || []).forEach(s => {
-      if (s && s.subject && typeof s.subject === 'string') {
-        const orig = s.subject.trim();
-        const cleaned = cleanSubjectName(orig);
-        if (cleaned !== orig) {
-          cleanedCount++;
-          s.subject = cleaned;
-        }
-        allCleanedSubjects.add(s.subject);
+      if (!s || !s.subject || typeof s.subject !== 'string') return;
+
+      const orig = s.subject.trim();
+      let current = orig;
+
+      // Strip trailing counter first (e.g. "Anatomy 1" -> "Anatomy")
+      const stripped = cleanSubjectName(current);
+      if (stripped !== current) {
+        cleanedCount++;
+        current = stripped;
       }
+
+      // Check if current subject is already a known discipline
+      let isKnown = disciplinesMap.has(current.toLowerCase());
+
+      if (!isKnown) {
+        // Case A: Ends with a known discipline in brackets, e.g. "Mandible and normal lateralis (Anatomy)"
+        const bracketMatch = current.match(/^(.*?)\s*[\(\[]\s*([^()\[\]]+?)\s*[\)\]]$/);
+        let handled = false;
+
+        if (bracketMatch) {
+          const topicPart = bracketMatch[1].trim();
+          let disciplinePart = bracketMatch[2].trim();
+          const cleanDisc = cleanSubjectName(disciplinePart);
+          if (cleanDisc !== disciplinePart) {
+            cleanedCount++;
+            disciplinePart = cleanDisc;
+          }
+
+          if (disciplinesMap.has(disciplinePart.toLowerCase())) {
+            const canonical = disciplinesMap.get(disciplinePart.toLowerCase());
+            current = canonical;
+            const existingTopics = Array.isArray(s.topics) ? s.topics : [];
+            s.topics = topicPart ? [topicPart, ...existingTopics] : existingTopics;
+            fixedCount++;
+            handled = true;
+            isKnown = true;
+          }
+        }
+
+        // Case B: Starts with a known discipline, e.g. "Anatomy Revision"
+        if (!handled) {
+          const sortedKeys = Array.from(disciplinesMap.keys()).sort((a, b) => b.length - a.length);
+          for (const key of sortedKeys) {
+            const lowerCur = current.toLowerCase();
+            if (lowerCur.startsWith(key) && (lowerCur.length === key.length || /[\s\-_:]/.test(lowerCur.charAt(key.length)))) {
+              const canonical = disciplinesMap.get(key);
+              current = canonical;
+              if (!Array.isArray(s.topics) || s.topics.length === 0) {
+                s.topics = [orig];
+              }
+              fixedCount++;
+              handled = true;
+              isKnown = true;
+              break;
+            }
+          }
+        }
+      }
+
+      s.subject = current;
+      allFinalSubjects.add(s.subject);
     });
   });
 
@@ -74,10 +180,19 @@ export function normalizeIncomingSubjects(project) {
   existingSubjects.forEach(s => {
     if (s && s.name && typeof s.name === 'string') {
       const origName = s.name.trim();
-      const cleanedName = cleanSubjectName(origName);
+      let cleanedName = cleanSubjectName(origName);
       if (cleanedName !== origName) {
         cleanedCount++;
       }
+
+      // Check bracket match on declared subject names
+      if (!disciplinesMap.has(cleanedName.toLowerCase())) {
+        const bm = cleanedName.match(/^(.*?)\s*[\(\[]\s*([^()\[\]]+?)\s*[\)\]]$/);
+        if (bm && disciplinesMap.has(bm[2].trim().toLowerCase())) {
+          cleanedName = disciplinesMap.get(bm[2].trim().toLowerCase());
+        }
+      }
+
       const lower = cleanedName.toLowerCase();
       const color = KNOWN_SUBJECT_COLORS[lower] || NEUTRAL_SUBJECT_COLOR;
       if (!subjectMap.has(lower)) {
@@ -87,7 +202,7 @@ export function normalizeIncomingSubjects(project) {
   });
 
   // 3. Ensure any subjects referenced in sessions are also in project.subjects
-  allCleanedSubjects.forEach(subName => {
+  allFinalSubjects.forEach(subName => {
     const lower = subName.toLowerCase();
     if (!subjectMap.has(lower)) {
       const color = KNOWN_SUBJECT_COLORS[lower] || NEUTRAL_SUBJECT_COLOR;
@@ -96,7 +211,7 @@ export function normalizeIncomingSubjects(project) {
   });
 
   cloned.subjects = Array.from(subjectMap.values());
-  return { normalizedProject: cloned, cleanedCount };
+  return { normalizedProject: cloned, cleanedCount, fixedCount };
 }
 
 /**
@@ -138,8 +253,8 @@ export function getSessionMatchKey(session) {
 export function calculateMergeSessionsSummary(current, incoming) {
   if (!current || !incoming) return null;
 
-  // Normalize incoming subjects (strip trailing counter & match colors)
-  const { normalizedProject: normIncoming, cleanedCount } = normalizeIncomingSubjects(incoming);
+  // Normalize incoming subjects (strip trailing counter & safety net & match colors)
+  const { normalizedProject: normIncoming, cleanedCount, fixedCount } = normalizeIncomingSubjects(incoming, current);
 
   const currentWeeks = Array.isArray(current.weeks) ? current.weeks : [];
   const incomingWeeks = Array.isArray(normIncoming.weeks) ? normIncoming.weeks : [];
@@ -204,6 +319,7 @@ export function calculateMergeSessionsSummary(current, incoming) {
     sessionsReplaced,
     sessionsUnchanged,
     cleanedSubjectsCount: cleanedCount,
+    fixedSubjectsCount: fixedCount,
     weeksAdded: weeksAdded.sort((a, b) => a - b),
     sectionsAdded,
     sectionsExistingCount: (current.sections || []).length,
@@ -222,10 +338,11 @@ export function calculateMergeSessionsSummary(current, incoming) {
  * Weeks, sections, subjects, sessionTypes, and weekdays are united.
  */
 export function mergeSessionsProject(current, incoming) {
-  const { normalizedProject: normIncoming, cleanedCount } = normalizeIncomingSubjects(incoming);
+  const { normalizedProject: normIncoming, cleanedCount, fixedCount } = normalizeIncomingSubjects(incoming, current);
   const summary = calculateMergeSessionsSummary(current, normIncoming);
   if (summary) {
     summary.cleanedSubjectsCount = cleanedCount;
+    summary.fixedSubjectsCount = fixedCount;
   }
   const currentWeeks = Array.isArray(current.weeks) ? current.weeks : [];
   const incomingWeeks = Array.isArray(normIncoming.weeks) ? normIncoming.weeks : [];
@@ -335,8 +452,8 @@ export function mergeSessionsProject(current, incoming) {
 export function calculateMergeSummary(current, incoming) {
   if (!current || !incoming) return null;
 
-  // Normalize incoming subjects (strip trailing counter & match colors)
-  const { normalizedProject: normIncoming, cleanedCount } = normalizeIncomingSubjects(incoming);
+  // Normalize incoming subjects (strip trailing counter & safety net & match colors)
+  const { normalizedProject: normIncoming, cleanedCount, fixedCount } = normalizeIncomingSubjects(incoming, current);
 
   const currentWeeks = Array.isArray(current.weeks) ? current.weeks : [];
   const incomingWeeks = Array.isArray(normIncoming.weeks) ? normIncoming.weeks : [];
@@ -368,6 +485,7 @@ export function calculateMergeSummary(current, incoming) {
     weeksAdded: weeksAdded.sort((a, b) => a - b),
     weeksUntouchedCount: currentUntouchedWeekCount,
     cleanedSubjectsCount: cleanedCount,
+    fixedSubjectsCount: fixedCount,
     sectionsAdded,
     sectionsExistingCount: (current.sections || []).length,
     subjectsAdded,
@@ -381,10 +499,11 @@ export function calculateMergeSummary(current, incoming) {
  * Merges incoming project into current project (Replace Weeks mode).
  */
 export function mergeProjects(current, incoming) {
-  const { normalizedProject: normIncoming, cleanedCount } = normalizeIncomingSubjects(incoming);
+  const { normalizedProject: normIncoming, cleanedCount, fixedCount } = normalizeIncomingSubjects(incoming, current);
   const summary = calculateMergeSummary(current, normIncoming);
   if (summary) {
     summary.cleanedSubjectsCount = cleanedCount;
+    summary.fixedSubjectsCount = fixedCount;
   }
   const currentWeeks = Array.isArray(current.weeks) ? current.weeks : [];
   const incomingWeeks = Array.isArray(normIncoming.weeks) ? normIncoming.weeks : [];

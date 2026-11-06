@@ -40,6 +40,33 @@ export function SectionPicker({
     }
   };
 
+  // When project has no sections
+  if (!sections || sections.length === 0) {
+    return null;
+  }
+
+  // When project has a single section: show it as a normal chip "Section 1" with a neutral/amber outline, not a filled red circle
+  if (sections.length === 1) {
+    const singleSec = sections[0];
+    const secId = singleSec.id ?? singleSec.number ?? '1';
+    const chipText = `Section ${secId}`;
+    return (
+      <div
+        data-testid="section-picker-single-level"
+        className={`flex items-center ${className}`}
+      >
+        <button
+          type="button"
+          data-testid={`section-chip-${secId}`}
+          onClick={() => onSelectSection && onSelectSection(singleSec.id)}
+          className="px-3 py-1 text-xs font-medium rounded-full border border-[#ffb347]/40 bg-white/[0.04] text-[#ffb347] shadow-[0_0_8px_rgba(255,179,71,0.15)] shrink-0 transition hover:bg-white/[0.08]"
+        >
+          {chipText}
+        </button>
+      </div>
+    );
+  }
+
   // If only 1 letter group exists, show a single clean row of section chips
   if (letters.length <= 1) {
     return (

@@ -22,6 +22,19 @@ tutorials exist. Write each session's type exactly as the table names it ("Lectu
 "Tutorial", "Practical", or anything else). Keep the session's own number if it has one; if it
 has none, write no number.
 
+## Subject and topic (very important)
+- The 👉 line is ALWAYS the subject, meaning the discipline: Anatomy, Histology, Physiology,
+  Biochemistry, Radiology, and so on. The topic goes on its own line in parentheses. Never put
+  a topic on the 👉 line.
+- Some tables write the topic first and the subject in brackets at the end, for example
+  "Mandible and normal lateralis (Anatomy)". Then 👉 is "Anatomy" and the topic line is
+  "Mandible and normal lateralis" (without the brackets).
+- Some tables write the subject first and the topic after it, for example
+  "Tutorial (1): Anatomy 1" followed by L1 and L2 lines, or "Lec 21: Histology 9 (Cell cycle)".
+  Then 👉 is "Anatomy 1" or "Histology 9" and the lines after it are the topics.
+- If the table gives one phrase that starts with a subject (for example "Anatomy Revision"),
+  👉 is that subject ("Anatomy") and the full phrase is the topic line.
+
 ## Who each session is for
 Sessions may be listed per group letter (A, B, C, D), per practical group number, per section
 number, or for everyone. Take: rows of MY group letter, rows for MY section numbers (section N
@@ -62,6 +75,11 @@ This lets the human check the hard part quickly. Build the section blocks only f
 ( L2: second topic line )
 ( 9:30 - 11 )  Hall 4
 
+🔹 Practical 1
+👉 Anatomy
+( Mandible and normal lateralis )
+( 8 - 9:30 )  Morgue 1
+
 🔷 Sunday 15/11
 👉 off
 
@@ -71,7 +89,7 @@ This lets the human check the hard part quickly. Build the section blocks only f
 ( Recorded )
 
 Format rules:
-- 🔹 = type and number exactly as the table writes them, 👉 = the subject line exactly as written.
+- 🔹 = type and number exactly as the table writes them.
 - One line per topic, each in its own parentheses.
 - Time line: ( start - end ) then two spaces then the place. Keep the table's 12-hour style.
 - List every day the table shows for that week, in order. A day with nothing for this section
@@ -80,7 +98,8 @@ Format rules:
 
 ## Check silently before answering
 Each practical number appears exactly once per section; no two sessions of a section overlap;
-every date matches its day name; every session of my letter or for everyone appears.
+every date matches its day name; every session of my letter or for everyone appears; no 👉 line
+contains a topic.
 
 ## Delivery
 Send the MAP first, then ONE section per message, then stop and write "Type next for

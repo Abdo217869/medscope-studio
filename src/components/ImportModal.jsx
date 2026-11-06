@@ -59,9 +59,9 @@ export function ImportModal({
 
     try {
       const raw = JSON.parse(text);
-      const { normalizedProject, cleanedCount } = normalizeIncomingSubjects(raw);
+      const { normalizedProject, cleanedCount, fixedCount } = normalizeIncomingSubjects(raw, currentSchedule);
       const res = validateScheduleJson(normalizedProject);
-      setValidationResult({ ...res, parsed: normalizedProject, rawParsed: raw, cleanedCount });
+      setValidationResult({ ...res, parsed: normalizedProject, rawParsed: raw, cleanedCount, fixedCount });
       setJsonText(text);
     } catch (err) {
       setParseError(`JSON Syntax Error: ${err.message}`);
@@ -162,7 +162,7 @@ export function ImportModal({
       let parsed = JSON.parse(text);
 
       // Auto-clean subject names & normalize colors
-      const { normalizedProject } = normalizeIncomingSubjects(parsed);
+      const { normalizedProject } = normalizeIncomingSubjects(parsed, currentSchedule);
       parsed = normalizedProject;
 
       // Auto-migrate sections from legacy A1, B2 to continuous 1..N
@@ -402,6 +402,12 @@ export function ImportModal({
                       <span>{validationResult.cleanedCount} subject names cleaned</span>
                     </div>
                   )}
+                  {validationResult.fixedCount > 0 && (
+                    <div data-testid="fixed-subjects-line" className="w-full text-[#90f0e0] font-semibold pt-1 border-t border-[#90f0e0]/20 flex items-center gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5 text-[#90f0e0]" />
+                      <span>{validationResult.fixedCount} subject{validationResult.fixedCount === 1 ? '' : 's'} fixed</span>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className="p-3 bg-[#ff6b8a]/10 border border-[#ff6b8a]/40 rounded-xl text-[#ff6b8a] space-y-2">
@@ -475,6 +481,12 @@ export function ImportModal({
                         <span>{mergeSessionsSummary.cleanedSubjectsCount} subject names cleaned</span>
                       </div>
                     )}
+                    {mergeSessionsSummary.fixedSubjectsCount > 0 && (
+                      <div data-testid="fixed-subjects-merge-sessions" className="text-[#90f0e0] font-semibold flex items-center gap-1.5 pt-1 border-t border-[#90f0e0]/20">
+                        <Sparkles className="w-3.5 h-3.5 text-[#90f0e0]" />
+                        <span>{mergeSessionsSummary.fixedSubjectsCount} subject{mergeSessionsSummary.fixedSubjectsCount === 1 ? '' : 's'} fixed</span>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
@@ -527,6 +539,12 @@ export function ImportModal({
                         <span>{mergeSummary.cleanedSubjectsCount} subject names cleaned</span>
                       </div>
                     )}
+                    {mergeSummary.fixedSubjectsCount > 0 && (
+                      <div data-testid="fixed-subjects-merge" className="text-[#90f0e0] font-semibold flex items-center gap-1.5 pt-1 border-t border-[#7fb2ff]/20">
+                        <Sparkles className="w-3.5 h-3.5 text-[#90f0e0]" />
+                        <span>{mergeSummary.fixedSubjectsCount} subject{mergeSummary.fixedSubjectsCount === 1 ? '' : 's'} fixed</span>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
@@ -541,6 +559,12 @@ export function ImportModal({
                     <div data-testid="cleaned-subjects-replace" className="text-[#ffb347] font-semibold flex items-center gap-1.5 pt-1 border-t border-[var(--gold)]/20">
                       <Sparkles className="w-3.5 h-3.5 text-[#ffb347]" />
                       <span>{validationResult.cleanedCount} subject names cleaned</span>
+                    </div>
+                  )}
+                  {validationResult.fixedCount > 0 && (
+                    <div data-testid="fixed-subjects-replace" className="text-[#90f0e0] font-semibold flex items-center gap-1.5 pt-1 border-t border-[var(--gold)]/20">
+                      <Sparkles className="w-3.5 h-3.5 text-[#90f0e0]" />
+                      <span>{validationResult.fixedCount} subject{validationResult.fixedCount === 1 ? '' : 's'} fixed</span>
                     </div>
                   )}
                 </div>
