@@ -127,7 +127,7 @@ async function runPhase5Tests() {
   const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
 
   try {
-    await page.goto('http://localhost:4173/', { waitUntil: 'networkidle' });
+    await page.goto('http://localhost:4173/#/app', { waitUntil: 'networkidle' });
     await page.evaluate(() => document.fonts.ready);
     await page.waitForTimeout(600);
 
@@ -245,7 +245,7 @@ async function runPhase5Tests() {
       storageState
     });
     const phonePage = await phoneContext.newPage();
-    await phonePage.goto('http://localhost:4173/', { waitUntil: 'networkidle' });
+    await phonePage.goto('http://localhost:4173/#/app', { waitUntil: 'networkidle' });
     await phonePage.waitForTimeout(500);
 
     const phoneTwoLevel = phonePage.locator('[data-testid="section-picker-two-level"]:visible');

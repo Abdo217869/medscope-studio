@@ -13,7 +13,13 @@ import {
   FileDown
 } from 'lucide-preact';
 import { validateScheduleJson, getTemplateScheduleJson } from '../utils/schemaValidator';
-import { calculateMergeSummary, mergeProjects, calculateMergeSessionsSummary, mergeSessionsProject } from '../utils/importUtils';
+import {
+  calculateMergeSummary,
+  mergeProjects,
+  calculateMergeSessionsSummary,
+  mergeSessionsProject,
+  normalizeIncomingSubjects
+} from '../utils/importUtils';
 import { DEFAULT_SCHEDULE, GIT_SCHEDULE } from '../constants';
 import { downloadBlob } from '../utils/exportPdf';
 import { needsSectionMigration, migrateSectionModel } from '../utils/sectionUtils';
@@ -52,9 +58,10 @@ export function ImportModal({
     }
 
     try {
-      const parsed = JSON.parse(text);
-      const res = validateScheduleJson(parsed);
-      setValidationResult({ ...res, parsed });
+      const raw = JSON.parse(text);
+      const { normalizedProject, cleanedCount } = normalizeIncomingSubjects(raw);
+      const res = validateScheduleJson(normalizedProject);
+      setValidationResult({ ...res, parsed: normalizedProject, rawParsed: raw, cleanedCount });
       setJsonText(text);
     } catch (err) {
       setParseError(`JSON Syntax Error: ${err.message}`);
@@ -153,6 +160,10 @@ export function ImportModal({
     try {
       const text = textareaRef.current?.value || jsonText;
       let parsed = JSON.parse(text);
+
+      // Auto-clean subject names & normalize colors
+      const { normalizedProject } = normalizeIncomingSubjects(parsed);
+      parsed = normalizedProject;
 
       // Auto-migrate sections from legacy A1, B2 to continuous 1..N
       if (needsSectionMigration(parsed)) {
@@ -385,6 +396,12 @@ export function ImportModal({
                     <span><strong>Subjects:</strong> {validationResult.parsed?.subjects?.length}</span>
                     <span><strong>Weeks:</strong> {validationResult.parsed?.weeks?.length}</span>
                   </div>
+                  {validationResult.cleanedCount > 0 && (
+                    <div data-testid="cleaned-subjects-line" className="w-full text-[#ffb347] font-semibold pt-1 border-t border-[#90f0e0]/20 flex items-center gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5 text-[#ffb347]" />
+                      <span>{validationResult.cleanedCount} subject names cleaned</span>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className="p-3 bg-[#ff6b8a]/10 border border-[#ff6b8a]/40 rounded-xl text-[#ff6b8a] space-y-2">
@@ -452,6 +469,12 @@ export function ImportModal({
                         <span>All existing subjects kept.</span>
                       )}
                     </div>
+                    {mergeSessionsSummary.cleanedSubjectsCount > 0 && (
+                      <div data-testid="cleaned-subjects-merge-sessions" className="text-[#ffb347] font-semibold flex items-center gap-1.5 pt-1 border-t border-[#90f0e0]/20">
+                        <Sparkles className="w-3.5 h-3.5 text-[#ffb347]" />
+                        <span>{mergeSessionsSummary.cleanedSubjectsCount} subject names cleaned</span>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
@@ -498,6 +521,12 @@ export function ImportModal({
                         <span>All {mergeSummary.subjectsExistingCount} subjects already exist.</span>
                       )}
                     </div>
+                    {mergeSummary.cleanedSubjectsCount > 0 && (
+                      <div data-testid="cleaned-subjects-merge" className="text-[#ffb347] font-semibold flex items-center gap-1.5 pt-1 border-t border-[#7fb2ff]/20">
+                        <Sparkles className="w-3.5 h-3.5 text-[#ffb347]" />
+                        <span>{mergeSummary.cleanedSubjectsCount} subject names cleaned</span>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
@@ -508,6 +537,12 @@ export function ImportModal({
                   <p className="text-[11px]">
                     Will completely replace the current timetable with <strong>{validationResult.parsed?.module?.title}</strong> ({validationResult.parsed?.module?.term}), loading {validationResult.parsed?.sections?.length} sections, {validationResult.parsed?.subjects?.length} subjects, and {validationResult.parsed?.weeks?.length} weeks.
                   </p>
+                  {validationResult.cleanedCount > 0 && (
+                    <div data-testid="cleaned-subjects-replace" className="text-[#ffb347] font-semibold flex items-center gap-1.5 pt-1 border-t border-[var(--gold)]/20">
+                      <Sparkles className="w-3.5 h-3.5 text-[#ffb347]" />
+                      <span>{validationResult.cleanedCount} subject names cleaned</span>
+                    </div>
+                  )}
                 </div>
               )}
             </div>

@@ -1,44 +1,66 @@
-# FILL IN THIS BOX ONLY (change the values, keep the labels)
+# FILL IN THIS BOX ONLY (replace the example values, keep the labels)
 Module name: Gastrointestinal Tract
 Term: 1st Term
 Year: 2026
-Group letter: B
-Section numbers: 4, 5, 6
-Notes (optional, for anything special in this module):
+Group letter: A
+Section numbers: 1, 2, 3
+Notes (optional, anything special about this module):
 # END OF BOX
 
-You are formatting an official college timetable into clean text, one block per section.
-The attached file (PDF, image or text) is the ONLY source of truth. Never guess, never
-invent. If something is unreadable, say so in the check list instead of filling it in.
+You are copying an official college timetable into clean text, one block per section.
+The attached file (PDF, image or text) is the ONLY source of truth.
 
-## What to take from the source
-- Tutorials and lectures are listed by group letter: take only the rows of MY group letter.
-- Practicals are listed by practical group number: section number N uses practical group N
-  (unless my Notes say otherwise). Take only that group's slot, day and place.
-- Each day block in the table has its OWN time header row. Use the header of THAT block for
-  a group's time, never move a group to another day block, and a row that continues on the
-  next page belongs to the block above it.
-- A group that is not in a day block has no session that day.
-- "Recorded" sessions have no time or place.
-- Fix obvious spelling typos in names, but never change numbers, dates, times or places.
+## Golden rule: write what the table says, change nothing
+Copy every name, topic, number, place and spelling exactly as the table shows it, including
+capital letters and spelling mistakes. Never correct, translate, shorten or reword anything.
+If something looks like a typo, keep it as is and mention it in the check list. Never invent
+anything. If something is unreadable, say so in the check list instead of filling it in.
 
-## Output format (exactly this, plain text in ONE code block per section)
+## Session types
+The table can contain any mix of Lectures, Tutorials, Practicals or other types. Do not assume
+tutorials exist. Write each session's type exactly as the table names it ("Lecture", "Lec.",
+"Tutorial", "Practical", or anything else). Keep the session's own number if it has one; if it
+has none, write no number.
+
+## Who each session is for
+Sessions may be listed per group letter (A, B, C, D), per practical group number, per section
+number, or for everyone. Take: rows of MY group letter, rows for MY section numbers (section N
+uses practical group N unless my Notes say otherwise), and rows for everyone. Ignore the rest.
+
+## How to read the table
+1. Every day block has its own date label (on the left) and its own time header row. A
+   session's DATE is the label of the block that contains its cell. Never move a session to
+   the previous or next day. A day block with nothing for me is "off".
+2. Practical groups are usually split across different day blocks (for example groups 1-4 on
+   Tuesday, 5-8 on Wednesday, 9-12 on Thursday, but this can change from one practical to the
+   next). The same practical number appears in several blocks. Use only the block where MY
+   group's cell is.
+3. A group's time is the header over the column where its cell is, inside its own block.
+4. A row that continues on the next page belongs to the block above it.
+5. "Recorded" sessions have no time and no place.
+
+## Step 1: print the MAP first (one code block)
+One line per practical per section, in this format:
+Practical 2 | Section 1 | Tue 10/11 | 9:30 - 11 | Lab 9
+This lets the human check the hard part quickly. Build the section blocks only from the MAP.
+
+## Step 2: output format (plain text, ONE code block per section)
 📌 {Module} | {Term} | {Year}
 📌 Group ({letter}) - Section {N} (practical group {N})
 
 🦅 Week 1
 
 🔷 Saturday 14/11
+🔹 Lecture 21
+👉 Histology 9
+( Cell cycle )
+( 8 - 9 )  Hall 4
+
 🔹 Tutorial 1
-👉 Anatomy
+👉 Anatomy 1
 ( L1: first topic line )
 ( L2: second topic line )
 ( 9:30 - 11 )  Hall 4
-
-🔹 Practical 4
-👉 Anatomy
-( Anatomy of oral cavity, pharynx & salivary glands )
-( 8 - 9:30 )  Morgue 1
 
 🔷 Sunday 15/11
 👉 off
@@ -48,19 +70,19 @@ invent. If something is unreadable, say so in the check list instead of filling 
 ( Communication )
 ( Recorded )
 
-Rules for the format:
-- One line per topic, each in its own parentheses. Keep source numbering (L1, L2...).
-- Time line: ( start - end ) then two spaces then the place. Keep the source's 12-hour style
-  without am/pm (8-9:30, 12:30-2, 2-3:30).
-- If the source gives a session no number, write only "Tutorial" or "Practical", never invent one.
-- List every day the source shows for that week, in order. A day with nothing for this
-  section is "👉 off". Within a day, order by time; Recorded last.
-- Dates are day/month. Day names must match the source.
+Format rules:
+- 🔹 = type and number exactly as the table writes them, 👉 = the subject line exactly as written.
+- One line per topic, each in its own parentheses.
+- Time line: ( start - end ) then two spaces then the place. Keep the table's 12-hour style.
+- List every day the table shows for that week, in order. A day with nothing for this section
+  is "👉 off". Inside a day, order by time; Recorded last.
+- Dates are day/month, day names as in the table.
 
-## Before you answer (do silently)
-For every section check: each practical number appears exactly once; no two sessions overlap
-in time; every date matches its day name in the source; every tutorial of my letter appears.
+## Check silently before answering
+Each practical number appears exactly once per section; no two sessions of a section overlap;
+every date matches its day name; every session of my letter or for everyone appears.
 
 ## Delivery
-Send ONE section per message, then stop and write "Type next for Section X". After the last
-section, send "⚠️ Check list": every place you were unsure, with the page and day.
+Send the MAP first, then ONE section per message, then stop and write "Type next for
+Section X". After the last section send "⚠️ Check list": every place you were unsure about,
+every suspected typo (unchanged), with the page and day.

@@ -21,8 +21,8 @@ async function runPhase7bTests() {
   const page = await context.newPage();
 
   try {
-    console.log('1. Navigating to Medscope Studio...');
-    await page.goto('http://localhost:4173/', { waitUntil: 'networkidle' });
+    console.log('1. Navigating to Medscope Studio Editor (#/app)...');
+    await page.goto('http://localhost:4173/#/app', { waitUntil: 'networkidle' });
 
     // Ensure we start with a clean state on the official GIT schedule
     await page.evaluate(() => {
@@ -31,7 +31,7 @@ async function runPhase7bTests() {
       localStorage.removeItem('medscope_projects');
       localStorage.removeItem('medscope_active_project_id');
     });
-    await page.reload({ waitUntil: 'networkidle' });
+    await page.goto('http://localhost:4173/#/app', { waitUntil: 'networkidle' });
     await page.waitForTimeout(1000);
 
     // Wait for fonts to be ready

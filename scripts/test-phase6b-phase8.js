@@ -92,10 +92,10 @@ async function runAcceptanceTests() {
   const page = await context.newPage();
 
   try {
-    // Clear localStorage
-    await page.goto(BASE_URL);
+    // Clear localStorage and navigate to editor (#/app)
+    await page.goto(`${BASE_URL}/#/app`);
     await page.evaluate(() => localStorage.clear());
-    await page.reload();
+    await page.goto(`${BASE_URL}/#/app`);
     await page.waitForTimeout(1000);
 
     // Test Wordmark and branding

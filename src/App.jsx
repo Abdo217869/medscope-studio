@@ -131,8 +131,24 @@ export function App() {
   const [activeStep, setActiveStep] = useState(null); // 'data' | 'style' | 'export' | null
   // Mobile bottom tab: 'preview' | 'data' | 'style' | 'export'
   const [mobileTab, setMobileTab] = useState('preview');
-  // Home / Overview landing page toggle
-  const [isHomeView, setIsHomeView] = useState(false);
+  // Home / Overview landing page toggle (Phase 9: URL hash #/ for Home, #/app for Editor)
+  const [isHomeView, setIsHomeView] = useState(() => {
+    if (typeof window === 'undefined') return true;
+    return window.location.hash !== '#/app';
+  });
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      if (!window.location.hash || window.location.hash === '#') {
+        window.location.hash = '#/';
+      }
+      const handleHashChange = () => {
+        setIsHomeView(window.location.hash !== '#/app');
+      };
+      window.addEventListener('hashchange', handleHashChange);
+      return () => window.removeEventListener('hashchange', handleHashChange);
+    }
+  }, []);
 
   // Modals & Panels state
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
@@ -774,6 +790,8 @@ export function App() {
     const modeDesc = mode === 'merge' ? 'Merged into' : 'Imported';
     const numWeeks = finalSched.weeks?.length || 0;
     const numSessions = (finalSched.weeks || []).reduce((acc, w) => acc + (w.sessions?.length || 0), 0);
+    window.location.hash = '#/app';
+    setIsHomeView(false);
     addToast({
       type: 'success',
       title: `${modeDesc} Project`,
@@ -860,9 +878,32 @@ export function App() {
     });
   };
 
+  // Navigation between Home (#/) and Editor (#/app)
+  const handleGoHome = () => {
+    window.location.hash = '#/';
+    setIsHomeView(true);
+  };
+
+  const handleOpenEditor = () => {
+    window.location.hash = '#/app';
+    setIsHomeView(false);
+  };
+
+  const handleOpenProjectFromHome = (targetId) => {
+    if (targetId) {
+      handleSwitchProject(targetId);
+    }
+    handleOpenEditor();
+  };
+
+  const handleLoadSampleFromHome = () => {
+    handleSelectPreset('GIT');
+    handleOpenEditor();
+  };
+
   // Step selection handler from LeftRail
   const handleSelectStep = (stepId) => {
-    setIsHomeView(false);
+    handleOpenEditor();
     if (stepId === 'export') {
       setIsExportModalOpen(true);
       return;
@@ -872,7 +913,7 @@ export function App() {
 
   // Mobile navigation tab handler
   const handleSelectMobileTab = (tabId) => {
-    setIsHomeView(false);
+    handleOpenEditor();
     setMobileTab(tabId);
     if (tabId === 'export') {
       setIsExportModalOpen(true);
@@ -910,7 +951,7 @@ export function App() {
         isPageVerified={isCurrentPageVerified}
         onToggleVerification={handleToggleVerification}
         onOpenCommandBar={() => setIsCommandBarOpen(true)}
-        onGoHome={() => setIsHomeView(prev => !prev)}
+        onGoHome={handleGoHome}
       />
 
       {/* 2. Main Middle Workspace Area */}
@@ -960,15 +1001,14 @@ export function App() {
           <div className="flex-1 flex h-full overflow-hidden relative">
             {isEmpty || isHomeView ? (
               <EmptyState
+                projects={projects}
+                activeProjectId={activeProjectId}
+                onOpenProject={handleOpenProjectFromHome}
                 onOpenImport={() => {
                   setIsImportOpen(true);
-                  setIsHomeView(false);
                 }}
-                onLoadSample={() => {
-                  handleSelectPreset('GIT');
-                  setIsHomeView(false);
-                }}
-                onOpenCanvas={() => setIsHomeView(false)}
+                onLoadSample={handleLoadSampleFromHome}
+                onOpenCanvas={handleOpenEditor}
                 onCopyPrompt1={() => {
                   addToast({
                     type: 'success',
@@ -1162,7 +1202,7 @@ export function App() {
         isPageVerified={isCurrentPageVerified}
         onSelectPreset={handleSelectPreset}
         onPrintMode={handlePrintMode}
-        onGoHome={() => setIsHomeView(prev => !prev)}
+        onGoHome={handleGoHome}
       />
 
       {/* 5. Offscreen DOM Element for High-Resolution Batch Captures */}

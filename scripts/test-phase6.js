@@ -64,8 +64,8 @@ import { mergeThemeWithDefaults } from '../src/utils/themeUtils.js';
     if (msg.type() === 'error') console.log('BROWSER ERROR:', msg.text());
   });
 
-  console.log('Navigating to http://localhost:4173/ ...');
-  await page.goto('http://localhost:4173/', { waitUntil: 'networkidle' });
+  console.log('Navigating to http://localhost:4173/#/app ...');
+  await page.goto('http://localhost:4173/#/app', { waitUntil: 'networkidle' });
   await page.evaluate(() => document.fonts.ready);
   await page.waitForTimeout(1000);
 
@@ -73,7 +73,7 @@ import { mergeThemeWithDefaults } from '../src/utils/themeUtils.js';
   await page.evaluate(() => {
     localStorage.clear();
   });
-  await page.reload({ waitUntil: 'networkidle' });
+  await page.goto('http://localhost:4173/#/app', { waitUntil: 'networkidle' });
   await page.evaluate(() => document.fonts.ready);
   await page.waitForTimeout(800);
 
@@ -211,7 +211,7 @@ import { mergeThemeWithDefaults } from '../src/utils/themeUtils.js';
   console.log('\n[3G] Checking Mobile Phone Viewport Navigation...');
   const phoneContext = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
   const phonePage = await phoneContext.newPage();
-  await phonePage.goto('http://localhost:4173/', { waitUntil: 'networkidle' });
+  await phonePage.goto('http://localhost:4173/#/app', { waitUntil: 'networkidle' });
   await phonePage.waitForTimeout(500);
 
   const mobileTabs = await phonePage.evaluate(() => {

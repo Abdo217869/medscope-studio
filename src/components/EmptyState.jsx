@@ -1,9 +1,24 @@
 import { useState } from 'preact/hooks';
-import { Upload, Sparkles, Download, Check, Copy, ArrowRight, FileText, Globe } from 'lucide-preact';
+import { Upload, Sparkles, Download, Check, Copy, ArrowRight, FileText, Globe, Folder } from 'lucide-preact';
 import prompt1Text from '../content/prompt-1-format.txt?raw';
 import prompt2Text from '../content/prompt-2-json.txt?raw';
 
+function formatLastEdited(timestamp) {
+  if (!timestamp) return 'Recently';
+  const d = new Date(timestamp);
+  if (isNaN(d.getTime())) return 'Recently';
+  return d.toLocaleDateString(undefined, {
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+}
+
 export function EmptyState({
+  projects = [],
+  activeProjectId,
+  onOpenProject,
   onOpenImport,
   onLoadSample,
   onOpenCanvas,
@@ -33,7 +48,7 @@ export function EmptyState({
   return (
     <div
       data-testid="empty-state-hero"
-      className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6 w-full max-w-4xl mx-auto my-auto select-none text-center relative z-10 animate-in fade-in duration-300"
+      className="flex-1 flex flex-col items-center p-4 sm:p-6 w-full max-w-4xl mx-auto select-none text-center relative z-10 animate-in fade-in duration-300 overflow-y-auto custom-scrollbar my-auto"
     >
       {/* 1. Eyebrow Chip */}
       <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.08] text-xs font-mono text-[#ffb347] shadow-[0_0_16px_rgba(255,179,71,0.15)] mb-6 backdrop-blur-md">
@@ -222,7 +237,91 @@ export function EmptyState({
         </div>
       </div>
 
-      {/* 6. Footer & Copyright */}
+      {/* 6. Your Projects List (Phase 9) */}
+      <div className="w-full max-w-3xl rounded-2xl bg-[#0d0f14]/90 backdrop-blur-xl border border-white/[0.08] shadow-[0_20px_50px_rgba(0,0,0,0.5)] p-5 text-left mb-6">
+        <div className="flex items-center justify-between border-b border-white/[0.08] pb-3 mb-4">
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 rounded-md bg-[#ffb347]/20 border border-[#ffb347]/30 flex items-center justify-center text-[#ffb347]">
+              <Folder className="w-3.5 h-3.5" />
+            </div>
+            <div>
+              <h2 className="text-xs font-semibold text-white">
+                {isAr ? 'مشاريعك المحفوظة' : 'Your Projects'}
+              </h2>
+              <p className="text-[10px] text-[#9c9c9d]">
+                {isAr ? 'المشاريع المحفوظة محلياً — افتح أي مشروع لتعديله' : 'Locally stored timetable projects'}
+              </p>
+            </div>
+          </div>
+          <span className="text-[11px] font-mono text-[#ffb347] bg-white/[0.04] px-2.5 py-0.5 rounded-full border border-white/[0.08]">
+            {projects.length} {projects.length === 1 ? 'project' : 'projects'}
+          </span>
+        </div>
+
+        {projects && projects.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3" data-testid="your-projects-list">
+            {projects.map((proj) => {
+              const isActive = proj.id === activeProjectId;
+              const moduleName = proj.schedule?.module?.title || proj.name || 'Untitled';
+              const term = proj.schedule?.module?.term || '1st Term';
+              const lastEdited = formatLastEdited(proj.updatedAt || proj.createdAt);
+
+              return (
+                <div
+                  key={proj.id}
+                  data-testid={`project-card-${proj.id}`}
+                  className={`p-3.5 rounded-xl border transition flex flex-col justify-between gap-3 ${
+                    isActive
+                      ? 'bg-white/[0.05] border-[#ffb347]/50 shadow-[0_0_15px_rgba(255,179,71,0.08)]'
+                      : 'bg-white/[0.02] border-white/[0.06] hover:border-white/[0.15] hover:bg-white/[0.04]'
+                  }`}
+                >
+                  <div className="space-y-1">
+                    <div className="flex items-start justify-between gap-2">
+                      <h3 className="text-xs font-semibold text-white truncate max-w-[180px]">
+                        {proj.name}
+                      </h3>
+                      {isActive && (
+                        <span className="text-[9px] uppercase tracking-wider font-mono font-bold px-1.5 py-0.5 rounded bg-[#ffb347]/20 text-[#ffb347] border border-[#ffb347]/30 shrink-0">
+                          Active
+                        </span>
+                      )}
+                    </div>
+                    <div className="text-[11px] text-[#9c9c9d] flex items-center gap-1.5">
+                      <span className="truncate">{moduleName}</span>
+                      <span>•</span>
+                      <span className="text-[#ffb347]/80 shrink-0">{term}</span>
+                    </div>
+                    <div className="text-[10px] text-[#9c9c9d]/75 font-mono">
+                      {isAr ? 'آخر تعديل: ' : 'Last edited: '}{lastEdited}
+                    </div>
+                  </div>
+
+                  <div className="pt-2 border-t border-white/[0.06] flex items-center justify-end">
+                    <button
+                      type="button"
+                      data-testid={`open-project-${proj.id}`}
+                      onClick={() => onOpenProject && onOpenProject(proj.id)}
+                      className="btn-keycap text-xs px-3.5 py-1.5 font-medium flex items-center gap-1.5 shadow-sm"
+                    >
+                      <span>{isAr ? 'فتح' : 'Open'}</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="text-center py-6 text-xs text-[#9c9c9d] bg-white/[0.01] rounded-xl border border-dashed border-white/[0.08]">
+            {isAr
+              ? 'لا توجد مشاريع محفوظة حالياً. استورد ملف JSON أو حمل عينة GIT للبدء.'
+              : 'No saved projects yet. Load the GIT sample or import JSON to begin.'}
+          </div>
+        )}
+      </div>
+
+      {/* 7. Footer & Copyright */}
       <footer className="text-xs text-[#9c9c9d]/75 space-y-1">
         <p className="font-mono text-[11px]">
           Medscope Studio • © Medscope Team • made by Fishez

@@ -99,15 +99,20 @@ export function SchedulePage({
     biochemistry: '#c0f080',
     histology: '#f0b0d0',
     physiology: '#90f0e0',
-    anatomy: '#a01040'
+    anatomy: '#a01040',
+    communication: '#f0e0a0',
+    radiology: '#d0c0f0'
   };
   subjects.forEach(s => {
-    subjectColorMap[s.name.toLowerCase()] = s.color;
+    if (s && s.name) {
+      subjectColorMap[s.name.trim().toLowerCase()] = s.color;
+    }
   });
 
   const getSubjectColor = (subjectName) => {
     if (!subjectName) return t.textStyles.sessionSubject.color || '#000000';
-    return subjectColorMap[subjectName.toLowerCase()] || t.textStyles.sessionSubject.color || '#000000';
+    const clean = subjectName.trim().toLowerCase();
+    return subjectColorMap[clean] || t.textStyles.sessionSubject.color || '#000000';
   };
 
   // Session type mapping
@@ -167,6 +172,7 @@ export function SchedulePage({
   return (
     <div
       ref={handleRef}
+      data-testid="schedule-page-canvas"
       className="schedule-page relative select-none"
       style={{
         width: `${geo.canvasWidth}px`,

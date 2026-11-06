@@ -32,7 +32,7 @@ if (!fs.existsSync(SCREENSHOT_DIR)) {
     await d.accept();
   });
 
-  await page.goto('http://localhost:4173/', { waitUntil: 'networkidle' });
+  await page.goto('http://localhost:4173/#/app', { waitUntil: 'networkidle' });
   await page.evaluate(() => document.fonts.ready);
   await page.waitForTimeout(800);
 
@@ -156,7 +156,7 @@ if (!fs.existsSync(SCREENSHOT_DIR)) {
     viewport: { width: 768, height: 1024 }
   });
   const tabletPage = await tabletContext.newPage();
-  await tabletPage.goto('http://localhost:4173/', { waitUntil: 'networkidle' });
+  await tabletPage.goto('http://localhost:4173/#/app', { waitUntil: 'networkidle' });
   await tabletPage.evaluate(() => document.fonts.ready);
   await tabletPage.waitForTimeout(800);
 
@@ -216,7 +216,7 @@ if (!fs.existsSync(SCREENSHOT_DIR)) {
     isMobile: true
   });
   const phonePage = await phoneContext.newPage();
-  await phonePage.goto('http://localhost:4173/', { waitUntil: 'networkidle' });
+  await phonePage.goto('http://localhost:4173/#/app', { waitUntil: 'networkidle' });
   await phonePage.evaluate(() => document.fonts.ready);
   await phonePage.waitForTimeout(800);
 
