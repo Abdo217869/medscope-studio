@@ -9,6 +9,8 @@
  * Top-level keys: module, sections, subjects, sessionTypes, weeks.
  */
 
+import { isValidDate } from './dataUtils.js';
+
 export function validateScheduleJson(data) {
   const errors = [];
 
@@ -31,6 +33,9 @@ export function validateScheduleJson(data) {
     }
     if (!Array.isArray(data.module.weekdays)) {
       errors.push({ path: 'module.weekdays', message: 'Module "weekdays" must be an array (e.g. ["Sat","Sun","Mon","Tue","Wed","Thu"])' });
+    }
+    if (data.module.startDate !== undefined && data.module.startDate !== '' && !isValidDate(data.module.startDate)) {
+      errors.push({ path: 'module.startDate', message: 'Module "startDate" must be a valid YYYY-MM-DD date' });
     }
   }
 
@@ -98,6 +103,20 @@ export function validateScheduleJson(data) {
       }
       if (w.n === undefined || typeof w.n !== 'number') {
         errors.push({ path: `${wp}.n`, message: 'Week number "n" must be a number (e.g. 1)' });
+      }
+      if (w.days !== undefined) {
+        if (!Array.isArray(w.days)) {
+          errors.push({ path: `${wp}.days`, message: 'Week "days" must be an array of valid YYYY-MM-DD dates' });
+        } else {
+          w.days.forEach((d, dIdx) => {
+            if (!isValidDate(d)) {
+              errors.push({
+                path: `${wp}.days[${dIdx}]`,
+                message: `Invalid date "${d}" in week "days" (must be a valid YYYY-MM-DD date)`
+              });
+            }
+          });
+        }
       }
       if (!Array.isArray(w.sessions)) {
         errors.push({ path: `${wp}.sessions`, message: 'Week "sessions" must be an array' });

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'preact/hooks';
+import { useState, useEffect, useRef } from 'preact/hooks';
 import {
   Plus,
   Copy,
@@ -10,7 +10,14 @@ import {
   FileSpreadsheet,
   AlertCircle
 } from 'lucide-preact';
-import { isSessionForSection, getShortDayName, getWeekdayFromDate, isValidDate } from '../utils/dataUtils';
+import {
+  isSessionForSection,
+  getShortDayName,
+  getWeekdayFromDate,
+  isValidDate,
+  buildWeekSchedule,
+  generateDateRange
+} from '../utils/dataUtils';
 import { MobileSessionList } from './MobileSessionList';
 import { HelpTooltip } from './HelpTooltip';
 
@@ -50,6 +57,121 @@ export function SessionEditor({
   const activeWeek = schedule?.weeks?.find(w => w.n === selectedWeekNum) || schedule?.weeks?.[0];
   const activeWeekIdx = schedule?.weeks?.findIndex(w => w.n === selectedWeekNum) ?? 0;
   const currentSection = schedule?.sections?.find(s => s.id === selectedSectionId) || schedule?.sections?.[0];
+
+  const explicitDays = Array.isArray(activeWeek?.days) && activeWeek.days.length > 0 ? activeWeek.days : null;
+  const fallbackValidDates = !explicitDays
+    ? buildWeekSchedule(schedule?.module, currentSection, activeWeek)
+        .map(r => r.dateStr)
+        .filter(isValidDate)
+    : [];
+  const computedFirstDate = explicitDays ? explicitDays[0] : (fallbackValidDates[0] || '');
+  const computedLastDate = explicitDays ? explicitDays[explicitDays.length - 1] : (fallbackValidDates[fallbackValidDates.length - 1] || '');
+
+  const firstInputRef = useRef(null);
+  const lastInputRef = useRef(null);
+  const pendingResetSyncRef = useRef(false);
+  const lastSyncedComputedRef = useRef({
+    weekNum: selectedWeekNum,
+    first: computedFirstDate,
+    last: computedLastDate
+  });
+
+  const [daysDraft, setDaysDraft] = useState({
+    first: computedFirstDate,
+    last: computedLastDate
+  });
+  const daysDraftRef = useRef({
+    first: computedFirstDate,
+    last: computedLastDate
+  });
+
+  useEffect(() => {
+    const prev = lastSyncedComputedRef.current;
+    const weekChanged = prev.weekNum !== selectedWeekNum;
+    const datesChanged = prev.first !== computedFirstDate || prev.last !== computedLastDate;
+
+    if (weekChanged || datesChanged || pendingResetSyncRef.current) {
+      lastSyncedComputedRef.current = {
+        weekNum: selectedWeekNum,
+        first: computedFirstDate,
+        last: computedLastDate
+      };
+
+      const activeEl = typeof document !== 'undefined' ? document.activeElement : null;
+      const isEditingInputs = activeEl === firstInputRef.current || activeEl === lastInputRef.current;
+
+      if (weekChanged || pendingResetSyncRef.current || !isEditingInputs) {
+        pendingResetSyncRef.current = false;
+        const synced = {
+          first: computedFirstDate,
+          last: computedLastDate
+        };
+        daysDraftRef.current = synced;
+        setDaysDraft(synced);
+      }
+    }
+  }, [selectedWeekNum, computedFirstDate, computedLastDate]);
+
+  const updateDaysField = (field, rawVal) => {
+    const val = rawVal || '';
+    const domFirst = firstInputRef.current?.value;
+    const domLast = lastInputRef.current?.value;
+    const nextFirst = field === 'first' ? val : (domFirst !== undefined ? domFirst : daysDraftRef.current.first);
+    const nextLast = field === 'last' ? val : (domLast !== undefined ? domLast : daysDraftRef.current.last);
+    const nextDraft = {
+      first: nextFirst,
+      last: nextLast
+    };
+    daysDraftRef.current = nextDraft;
+    setDaysDraft(nextDraft);
+
+    if (isValidDate(nextDraft.first) && isValidDate(nextDraft.last)) {
+      const range = generateDateRange(nextDraft.first, nextDraft.last);
+      if (range.length > 0) {
+        const targetWeekNum = activeWeek?.n ?? selectedWeekNum;
+        onUpdateSchedule(prev => {
+          const nextWeeks = [...(prev?.weeks || [])];
+          const wIdx = nextWeeks.findIndex(w => w.n === targetWeekNum);
+          if (wIdx >= 0 && nextWeeks[wIdx]) {
+            const existingDays = nextWeeks[wIdx].days;
+            if (
+              Array.isArray(existingDays) &&
+              existingDays.length === range.length &&
+              existingDays.every((d, i) => d === range[i])
+            ) {
+              return prev;
+            }
+            nextWeeks[wIdx] = {
+              ...nextWeeks[wIdx],
+              days: range
+            };
+            return {
+              ...prev,
+              weeks: nextWeeks
+            };
+          }
+          return prev;
+        });
+      }
+    }
+  };
+
+  const resetExplicitDays = () => {
+    pendingResetSyncRef.current = true;
+    onUpdateSchedule(prev => {
+      const nextWeeks = [...(prev?.weeks || [])];
+      const wIdx = nextWeeks.findIndex(w => w.n === (activeWeek?.n ?? selectedWeekNum));
+      if (wIdx >= 0 && nextWeeks[wIdx]) {
+        const { days, ...restWeek } = nextWeeks[wIdx];
+        nextWeeks[wIdx] = restWeek;
+        return {
+          ...prev,
+          weeks: nextWeeks
+        };
+      }
+      return prev;
+    });
+  };
 
   const sessions = activeWeek ? (activeWeek.sessions || []) : [];
 
@@ -325,6 +447,67 @@ export function SessionEditor({
           <Plus className="w-3.5 h-3.5" />
           <span>Add Session</span>
         </button>
+      </div>
+
+      {/* Days shown control per week (first date to last date, all calendar days between included) */}
+      <div
+        data-testid="days-shown-control"
+        className="px-3 py-1.5 bg-white/[0.02] border-b border-white/[0.08] flex flex-wrap items-center justify-between gap-2 text-xs"
+      >
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="flex items-center gap-1 text-[11px] font-semibold text-[#ffb347]">
+            <Calendar className="w-3.5 h-3.5" />
+            <span>Days shown</span>
+          </span>
+          <label className="flex items-center gap-1 text-[11px] text-[#9c9c9d]">
+            <span>From</span>
+            <input
+              ref={firstInputRef}
+              type="date"
+              data-testid="days-shown-first"
+              value={daysDraft.first}
+              onInput={(e) => updateDaysField('first', e.target.value)}
+              onChange={(e) => updateDaysField('first', e.target.value)}
+              className="input-field px-1.5 py-0.5 text-[11px] font-mono [color-scheme:dark]"
+              aria-label="Days shown first date"
+            />
+          </label>
+          <label className="flex items-center gap-1 text-[11px] text-[#9c9c9d]">
+            <span>To</span>
+            <input
+              ref={lastInputRef}
+              type="date"
+              data-testid="days-shown-last"
+              value={daysDraft.last}
+              onInput={(e) => updateDaysField('last', e.target.value)}
+              onChange={(e) => updateDaysField('last', e.target.value)}
+              className="input-field px-1.5 py-0.5 text-[11px] font-mono [color-scheme:dark]"
+              aria-label="Days shown last date"
+            />
+          </label>
+          {daysDraft.first && daysDraft.last && isValidDate(daysDraft.first) && isValidDate(daysDraft.last) && daysDraft.first > daysDraft.last && (
+            <span className="text-[10px] text-rose-400">First date must be on or before last date</span>
+          )}
+        </div>
+
+        <div className="flex items-center gap-2 text-[11px]">
+          <span className="font-mono text-[#9c9c9d]" data-testid="days-shown-count">
+            {explicitDays
+              ? `${explicitDays.length} day${explicitDays.length === 1 ? '' : 's'} (explicit)`
+              : `${fallbackValidDates.length} day${fallbackValidDates.length === 1 ? '' : 's'} (auto)`}
+          </span>
+          {explicitDays && (
+            <button
+              type="button"
+              data-testid="days-shown-reset-btn"
+              onClick={resetExplicitDays}
+              className="px-2 py-0.5 rounded border border-white/[0.08] text-[10px] text-[#9c9c9d] hover:text-white hover:bg-white/[0.06] transition"
+              title="Clear custom days list (never deletes sessions)"
+            >
+              Auto
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Needs fixing alert banner for invalid dates in current week */}

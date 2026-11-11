@@ -90,6 +90,10 @@ export function validate(project, options = {}) {
   weeks.forEach((week) => {
     const wNum = week.n;
     const weekDates = [];
+    const hasExplicitDays = Array.isArray(week.days);
+    const explicitDaysSet = hasExplicitDays
+      ? new Set(week.days.map(d => (typeof d === 'string' ? d.trim() : '')).filter(isValidDate))
+      : null;
 
     (week.sessions || []).forEach((session, sIdx) => {
       if (!session.date || !isValidDate(session.date)) {
@@ -108,16 +112,35 @@ export function validate(project, options = {}) {
         return;
       }
 
-      weekDates.push(session.date);
+      const cleanDate = session.date.trim();
+      weekDates.push(cleanDate);
+
+      if (hasExplicitDays && !explicitDaysSet.has(cleanDate)) {
+        const scopedSec = Array.isArray(session.scope?.sections) && session.scope.sections.length === 1
+          ? String(session.scope.sections[0])
+          : undefined;
+        issues.push({
+          id: `ERR_DATE_NOT_IN_DAYS_SHOWN_w${wNum}_s${sIdx}`,
+          severity: 'warning',
+          rule: 'ERR_DATE_NOT_IN_DAYS_SHOWN',
+          message: `Week ${wNum}: date ${cleanDate} is not in the days shown`,
+          location: {
+            week: wNum,
+            sessionIndex: sIdx,
+            field: 'date',
+            sectionId: scopedSec
+          }
+        });
+      }
 
       // Check if weekday matches module.weekdays
-      const shortWd = getWeekdayShort(session.date);
+      const shortWd = getWeekdayShort(cleanDate);
       if (allowedWeekdays.length > 0 && !allowedWeekdays.includes(shortWd)) {
         issues.push({
-          id: `ERR_DATE_WEEKDAY_w${wNum}_s${sIdx}_${session.date}`,
+          id: `ERR_DATE_WEEKDAY_w${wNum}_s${sIdx}_${cleanDate}`,
           severity: 'error',
           rule: 'ERR_DATE_WEEKDAY_OR_CALENDAR',
-          message: `Date "${session.date}" is a ${shortWd}, which is not in module weekdays: [${allowedWeekdays.join(', ')}]`,
+          message: `Date "${cleanDate}" is a ${shortWd}, which is not in module weekdays: [${allowedWeekdays.join(', ')}]`,
           location: { week: wNum, sessionIndex: sIdx, field: 'date' }
         });
       }

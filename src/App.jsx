@@ -955,7 +955,7 @@ export function App() {
       />
 
       {/* 2. Main Middle Workspace Area */}
-      <div className="flex-1 flex overflow-hidden relative work-area">
+      <div className="flex-1 min-h-0 flex overflow-hidden relative work-area">
         {/* Left Workflow Rail (Desktop / Tablet) */}
         <LeftRail
           activeStep={activeStep}
@@ -998,7 +998,7 @@ export function App() {
           </div>
         ) : (
           /* Default Canvas Preview Area */
-          <div className="flex-1 flex h-full overflow-hidden relative">
+          <div className="flex-1 min-w-0 min-h-0 flex h-full overflow-hidden relative">
             {isEmpty || isHomeView ? (
               <EmptyState
                 projects={projects}

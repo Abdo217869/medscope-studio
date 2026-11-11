@@ -48,8 +48,9 @@ export function EmptyState({
   return (
     <div
       data-testid="empty-state-hero"
-      className="flex-1 flex flex-col items-center p-4 sm:p-6 w-full max-w-4xl mx-auto select-none text-center relative z-10 animate-in fade-in duration-300 overflow-y-auto custom-scrollbar my-auto"
+      className="flex-1 h-full min-h-0 w-full overflow-y-auto overflow-x-hidden custom-scrollbar relative z-10 animate-in fade-in duration-300 select-none"
     >
+      <div className="w-full max-w-4xl mx-auto flex flex-col items-center text-center px-4 pt-6 pb-24 sm:px-6 sm:pt-8 md:pb-12">
       {/* 1. Eyebrow Chip */}
       <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.08] text-xs font-mono text-[#ffb347] shadow-[0_0_16px_rgba(255,179,71,0.15)] mb-6 backdrop-blur-md">
         <span className="text-[#ff6b4a]">✦</span>
@@ -327,6 +328,7 @@ export function EmptyState({
           Medscope Studio • © Medscope Team • made by Fishez
         </p>
       </footer>
+      </div>
     </div>
   );
 }

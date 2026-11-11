@@ -265,6 +265,20 @@ export function SetupModal({
               </div>
 
               <div>
+                <label className="block text-[11px] text-[var(--muted)] font-medium mb-1">
+                  Week 1 Start Date (optional, used if week has no "days" list)
+                </label>
+                <input
+                  type="date"
+                  data-testid="module-start-date-input"
+                  value={draft.module.startDate || ''}
+                  onInput={(e) => updateModuleField('startDate', e.target.value || undefined)}
+                  onChange={(e) => updateModuleField('startDate', e.target.value || undefined)}
+                  className="input-field w-full sm:w-56 min-h-[44px] font-mono [color-scheme:dark]"
+                />
+              </div>
+
+              <div>
                 <label className="block text-[11px] text-[var(--muted)] font-medium mb-1.5">
                   Academic Weekdays (order matches column sequence)
                 </label>

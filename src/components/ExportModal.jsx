@@ -48,6 +48,12 @@ function formatPlainIssueSentence(issue, schedule) {
     return `${locationPrefix}date not valid.`;
   }
 
+  if (issue.rule === 'ERR_DATE_NOT_IN_DAYS_SHOWN') {
+    const fallbackMsg = `Week ${weekNum || '?'}: date ${session?.date || ''} is not in the days shown`;
+    const msg = issue.message || fallbackMsg;
+    return secId ? `Section ${secId} — ${msg}` : msg;
+  }
+
   if (issue.rule === 'ERR_TIME_OVERLAP') {
     const match = issue.message?.match(/"([^"]+)"\s*\([^)]*\)\s*overlaps\s*with\s*"([^"]+)"/i);
     if (match) {

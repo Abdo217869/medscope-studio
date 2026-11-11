@@ -116,27 +116,94 @@ export function isValidDate(dateStr) {
 }
 
 /**
+ * Add (or subtract) calendar days in UTC to a YYYY-MM-DD date string.
+ */
+export function addDaysUTC(dateStr, deltaDays) {
+  if (!isValidDate(dateStr)) return '';
+  const [y, m, d] = dateStr.trim().split('-').map(Number);
+  const dt = new Date(Date.UTC(y, m - 1, d + deltaDays));
+  const yy = dt.getUTCFullYear();
+  const mm = String(dt.getUTCMonth() + 1).padStart(2, '0');
+  const dd = String(dt.getUTCDate()).padStart(2, '0');
+  return `${yy}-${mm}-${dd}`;
+}
+
+/**
+ * Generate an inclusive array of consecutive YYYY-MM-DD dates from startDateStr to endDateStr.
+ */
+export function generateDateRange(startDateStr, endDateStr, maxDays = 62) {
+  if (!isValidDate(startDateStr) || !isValidDate(endDateStr)) return [];
+  const startTrim = startDateStr.trim();
+  const endTrim = endDateStr.trim();
+  const [y1, m1, d1] = startTrim.split('-').map(Number);
+  const [y2, m2, d2] = endTrim.split('-').map(Number);
+  const t1 = Date.UTC(y1, m1 - 1, d1);
+  const t2 = Date.UTC(y2, m2 - 1, d2);
+  if (t2 < t1) return [];
+  const diff = Math.round((t2 - t1) / 86400000);
+  const count = Math.min(diff, maxDays);
+  const result = [];
+  for (let i = 0; i <= count; i++) {
+    result.push(addDaysUTC(startTrim, i));
+  }
+  return result;
+}
+
+/**
+ * Find the date of the first module weekday (e.g. "Sat") on or before dateStr
+ * within the same 7-day calendar week.
+ */
+export function getCalendarWeekStartDate(dateStr, firstWeekdayShort = 'Sat') {
+  if (!isValidDate(dateStr)) return '';
+  const targetShort = getShortDayName(firstWeekdayShort || 'Sat');
+  for (let offset = 0; offset < 7; offset++) {
+    const candidate = addDaysUTC(dateStr, -offset);
+    if (getWeekdayFromDate(candidate) === targetShort) {
+      return candidate;
+    }
+  }
+  return dateStr.trim();
+}
+
+/**
  * Group and process all sessions for a specific section and week.
  * The weekday of each row comes from its real date.
  */
 export function buildWeekSchedule(moduleInfo, section, weekData) {
   const allowedWeekdays = (moduleInfo && moduleInfo.weekdays) || ["Sat", "Sun", "Mon", "Tue", "Wed", "Thu"];
+  const allowedSet = new Set(allowedWeekdays.map(getShortDayName).filter(Boolean));
   const allSessions = (weekData && weekData.sessions) || [];
 
   // Filter sessions that match this section
   const sectionSessions = allSessions.filter(s => isSessionForSection(s, section));
-
-  // Determine valid unique dates present in this week across all sessions
-  const validWeekDates = [...new Set(allSessions.map(s => s.date).filter(isValidDate))].sort();
 
   // Sessions belonging to this section with invalid or missing date
   const invalidDateSessions = sectionSessions.filter(s => !isValidDate(s.date));
 
   let daysToBuild = [];
 
-  if (validWeekDates.length > 0) {
-    // Week has explicit dates: build a row for each real date in the week
-    daysToBuild = validWeekDates.map(dateStr => {
+  if (Array.isArray(weekData?.days) && weekData.days.length > 0) {
+    // Explicit "days" list on the week: render those days in exact order
+    const seen = new Set();
+    const orderedDates = [];
+    weekData.days.forEach(rawDate => {
+      const cleanDate = typeof rawDate === 'string' ? rawDate.trim() : '';
+      if (isValidDate(cleanDate) && !seen.has(cleanDate)) {
+        seen.add(cleanDate);
+        orderedDates.push(cleanDate);
+      }
+    });
+
+    // Never drop any session whose valid date is outside week.days
+    const extraSectionDates = [
+      ...new Set(
+        sectionSessions
+          .map(s => (typeof s.date === 'string' ? s.date.trim() : ''))
+          .filter(d => isValidDate(d) && !seen.has(d))
+      )
+    ].sort();
+
+    daysToBuild = [...orderedDates, ...extraSectionDates].map(dateStr => {
       const shortWd = getWeekdayFromDate(dateStr);
       const fullDayName = getFullDayName(shortWd);
       return {
@@ -146,16 +213,49 @@ export function buildWeekSchedule(moduleInfo, section, weekData) {
       };
     });
   } else {
-    // Fallback for schedules without dates: use module.weekdays
-    daysToBuild = allowedWeekdays.map(wd => {
-      const shortWd = getShortDayName(wd);
-      const fullDayName = getFullDayName(wd);
-      return {
-        dateStr: '',
-        shortWd,
-        fullDayName
-      };
-    });
+    // Fallback when "days" is missing: derive from sessions, fixing Week 1 startDate & other weeks Sat start
+    const validWeekDates = [...new Set(allSessions.map(s => (typeof s.date === 'string' ? s.date.trim() : '')).filter(isValidDate))].sort();
+
+    if (validWeekDates.length > 0) {
+      const earliestSessionDate = validWeekDates[0];
+      const firstModuleWd = getShortDayName(allowedWeekdays[0] || 'Sat') || 'Sat';
+      const startDate = weekData?.n === 1
+        ? (isValidDate(moduleInfo?.startDate) ? moduleInfo.startDate.trim() : earliestSessionDate)
+        : getCalendarWeekStartDate(earliestSessionDate, firstModuleWd);
+
+      const finalDateSet = new Set(validWeekDates);
+      if (startDate && startDate < earliestSessionDate) {
+        const leadingRange = generateDateRange(startDate, addDaysUTC(earliestSessionDate, -1), 13);
+        leadingRange.forEach(d => {
+          const wd = getWeekdayFromDate(d);
+          if (allowedSet.size === 0 || allowedSet.has(wd)) {
+            finalDateSet.add(d);
+          }
+        });
+      }
+
+      const combinedDates = Array.from(finalDateSet).sort();
+      daysToBuild = combinedDates.map(dateStr => {
+        const shortWd = getWeekdayFromDate(dateStr);
+        const fullDayName = getFullDayName(shortWd);
+        return {
+          dateStr,
+          shortWd,
+          fullDayName
+        };
+      });
+    } else {
+      // Fallback for schedules without any valid session dates: use module.weekdays
+      daysToBuild = allowedWeekdays.map(wd => {
+        const shortWd = getShortDayName(wd);
+        const fullDayName = getFullDayName(wd);
+        return {
+          dateStr: '',
+          shortWd,
+          fullDayName
+        };
+      });
+    }
   }
 
   // Never drop a session silently: keep invalid date sessions in a fallback row

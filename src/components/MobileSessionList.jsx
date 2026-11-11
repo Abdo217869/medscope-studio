@@ -1,6 +1,6 @@
-import { useState } from 'preact/hooks';
-import { Plus, Trash2, Copy, ChevronDown, ChevronUp, Clock, MapPin, Tag, AlertCircle } from 'lucide-preact';
-import { isValidDate } from '../utils/dataUtils.js';
+import { useState, useEffect, useRef } from 'preact/hooks';
+import { Plus, Trash2, Copy, ChevronDown, ChevronUp, Clock, MapPin, Tag, AlertCircle, Calendar } from 'lucide-preact';
+import { isValidDate, buildWeekSchedule, generateDateRange } from '../utils/dataUtils.js';
 
 export function MobileSessionList({
   schedule,
@@ -9,10 +9,86 @@ export function MobileSessionList({
   onUpdateSchedule
 }) {
   const currentWeek = schedule?.weeks?.find(w => w.n === selectedWeekNum) || schedule?.weeks?.[0];
+  const currentSection = schedule?.sections?.find(s => s.id === selectedSectionId) || schedule?.sections?.[0];
   const sessions = currentWeek?.sessions || [];
   const subjects = schedule?.subjects || [];
   const sessionTypes = schedule?.sessionTypes || [];
   const [expandedIndex, setExpandedIndex] = useState(null);
+
+  const explicitDays = Array.isArray(currentWeek?.days) && currentWeek.days.length > 0 ? currentWeek.days : null;
+  const fallbackValidDates = !explicitDays
+    ? buildWeekSchedule(schedule?.module, currentSection, currentWeek).map(r => r.dateStr).filter(isValidDate)
+    : [];
+  const computedFirstDate = explicitDays ? explicitDays[0] : (fallbackValidDates[0] || '');
+  const computedLastDate = explicitDays ? explicitDays[explicitDays.length - 1] : (fallbackValidDates[fallbackValidDates.length - 1] || '');
+
+  const firstInputRef = useRef(null);
+  const lastInputRef = useRef(null);
+  const lastSyncedComputedRef = useRef({
+    weekNum: selectedWeekNum,
+    first: computedFirstDate,
+    last: computedLastDate
+  });
+
+  const [daysDraft, setDaysDraft] = useState({ first: computedFirstDate, last: computedLastDate });
+  const daysDraftRef = useRef({ first: computedFirstDate, last: computedLastDate });
+
+  useEffect(() => {
+    const prev = lastSyncedComputedRef.current;
+    const weekChanged = prev.weekNum !== selectedWeekNum;
+    const datesChanged = prev.first !== computedFirstDate || prev.last !== computedLastDate;
+
+    if (weekChanged || datesChanged) {
+      lastSyncedComputedRef.current = {
+        weekNum: selectedWeekNum,
+        first: computedFirstDate,
+        last: computedLastDate
+      };
+
+      const activeEl = typeof document !== 'undefined' ? document.activeElement : null;
+      const isEditingInputs = activeEl === firstInputRef.current || activeEl === lastInputRef.current;
+
+      if (weekChanged || !isEditingInputs) {
+        const synced = { first: computedFirstDate, last: computedLastDate };
+        daysDraftRef.current = synced;
+        setDaysDraft(synced);
+      }
+    }
+  }, [selectedWeekNum, computedFirstDate, computedLastDate]);
+
+  const updateDaysField = (field, rawVal) => {
+    const val = rawVal || '';
+    const domFirst = firstInputRef.current?.value;
+    const domLast = lastInputRef.current?.value;
+    const nextFirst = field === 'first' ? val : (domFirst !== undefined ? domFirst : daysDraftRef.current.first);
+    const nextLast = field === 'last' ? val : (domLast !== undefined ? domLast : daysDraftRef.current.last);
+    const nextDraft = { first: nextFirst, last: nextLast };
+    daysDraftRef.current = nextDraft;
+    setDaysDraft(nextDraft);
+
+    if (isValidDate(nextDraft.first) && isValidDate(nextDraft.last)) {
+      const range = generateDateRange(nextDraft.first, nextDraft.last);
+      if (range.length > 0) {
+        onUpdateSchedule(prev => {
+          const next = JSON.parse(JSON.stringify(prev));
+          const targetWeek = next.weeks.find(w => w.n === selectedWeekNum);
+          if (targetWeek) {
+            const existingDays = targetWeek.days;
+            if (
+              Array.isArray(existingDays) &&
+              existingDays.length === range.length &&
+              existingDays.every((d, i) => d === range[i])
+            ) {
+              return prev;
+            }
+            targetWeek.days = range;
+            return next;
+          }
+          return prev;
+        });
+      }
+    }
+  };
 
   const getSubjectColor = (name) => {
     const s = subjects.find(sub => sub.name?.toLowerCase() === name?.toLowerCase());
@@ -106,6 +182,38 @@ export function MobileSessionList({
           <Plus className="w-4 h-4" />
           <span>Add Session</span>
         </button>
+      </div>
+
+      {/* Days shown control per week */}
+      <div
+        data-testid="days-shown-control"
+        className="px-3 py-2 border-b border-[var(--border)] bg-[var(--surface-2)]/30 flex flex-wrap items-center gap-2 text-xs"
+      >
+        <span className="flex items-center gap-1 text-[11px] font-semibold text-[#ffb347]">
+          <Calendar className="w-3.5 h-3.5" />
+          <span>Days shown:</span>
+        </span>
+        <input
+          ref={firstInputRef}
+          type="date"
+          data-testid="days-shown-first"
+          value={daysDraft.first}
+          onInput={(e) => updateDaysField('first', e.target.value)}
+          onChange={(e) => updateDaysField('first', e.target.value)}
+          className="input-field px-2 py-1 text-[11px] font-mono [color-scheme:dark]"
+          aria-label="Days shown first date"
+        />
+        <span className="text-[11px] text-[var(--muted)]">to</span>
+        <input
+          ref={lastInputRef}
+          type="date"
+          data-testid="days-shown-last"
+          value={daysDraft.last}
+          onInput={(e) => updateDaysField('last', e.target.value)}
+          onChange={(e) => updateDaysField('last', e.target.value)}
+          className="input-field px-2 py-1 text-[11px] font-mono [color-scheme:dark]"
+          aria-label="Days shown last date"
+        />
       </div>
 
       {/* Card List */}

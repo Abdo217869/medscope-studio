@@ -260,6 +260,29 @@ export function normalizeIncomingSubjects(project, existingProject = null) {
 }
 
 /**
+ * Unions two optional week "days" arrays in chronological order.
+ * Returns undefined when neither week specifies "days" (preserving old project files).
+ */
+export function mergeWeekDays(daysA, daysB) {
+  const hasA = Array.isArray(daysA);
+  const hasB = Array.isArray(daysB);
+  if (!hasA && !hasB) return undefined;
+
+  const set = new Set();
+  if (hasA) {
+    daysA.forEach(d => {
+      if (typeof d === 'string' && d.trim()) set.add(d.trim());
+    });
+  }
+  if (hasB) {
+    daysB.forEach(d => {
+      if (typeof d === 'string' && d.trim()) set.add(d.trim());
+    });
+  }
+  return Array.from(set).sort();
+}
+
+/**
  * Normalizes scope object into a comparable canonical string signature
  */
 export function getScopeSignature(scope) {
@@ -425,6 +448,10 @@ export function mergeSessionsProject(current, incoming) {
       });
 
       existingWeek.sessions = existingSessions;
+      const mergedDays = mergeWeekDays(existingWeek.days, inW.days);
+      if (mergedDays !== undefined) {
+        existingWeek.days = mergedDays;
+      }
     }
   });
 
@@ -473,10 +500,12 @@ export function mergeSessionsProject(current, incoming) {
     }
   });
 
+  const mergedStartDate = current.module?.startDate || normIncoming.module?.startDate;
   const mergedProject = {
     ...current,
     module: {
       ...current.module,
+      ...(mergedStartDate ? { startDate: mergedStartDate } : {}),
       weekdays: mergedWeekdays
     },
     sections: mergedSections,
@@ -559,7 +588,15 @@ export function mergeProjects(current, incoming) {
   });
 
   incomingWeeks.forEach(w => {
-    mergedWeeksMap.set(w.n, JSON.parse(JSON.stringify(w)));
+    const clonedW = JSON.parse(JSON.stringify(w));
+    if (mergedWeeksMap.has(w.n)) {
+      const existingW = mergedWeeksMap.get(w.n);
+      const mergedDays = mergeWeekDays(existingW.days, clonedW.days);
+      if (mergedDays !== undefined) {
+        clonedW.days = mergedDays;
+      }
+    }
+    mergedWeeksMap.set(w.n, clonedW);
   });
 
   const mergedWeeks = Array.from(mergedWeeksMap.values()).sort((a, b) => a.n - b.n);
@@ -603,10 +640,12 @@ export function mergeProjects(current, incoming) {
     }
   });
 
+  const mergedStartDate = current.module?.startDate || normIncoming.module?.startDate;
   const mergedProject = {
     ...current,
     module: {
       ...current.module,
+      ...(mergedStartDate ? { startDate: mergedStartDate } : {}),
       weekdays: mergedWeekdays
     },
     sections: mergedSections,
