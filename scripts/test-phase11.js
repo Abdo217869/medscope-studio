@@ -1,4 +1,5 @@
 import assert from 'node:assert';
+import fs from 'node:fs';
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 const { chromium } = require('D:/Medscope Site/node_modules/playwright-core');
@@ -134,16 +135,37 @@ async function runTests() {
   assert.strictEqual(rowsW1Start[2].isOff, false);
 
   const rowsW2 = buildWeekSchedule(projNoDaysStart.module, projNoDaysStart.sections[0], projNoDaysStart.weeks[1]);
-  assert.deepStrictEqual(rowsW2.map(r => r.dateStr), ['2026-11-14', '2026-11-15'], 'Week 2 without "days" must start from first module weekday (Sat 2026-11-14)');
+  assert.deepStrictEqual(
+    rowsW2.map(r => r.dateStr),
+    ['2026-11-14', '2026-11-15', '2026-11-16', '2026-11-17', '2026-11-18', '2026-11-19'],
+    'Week 2 without "days" renders full calendar week (Sat..Thu)'
+  );
   assert.strictEqual(rowsW2[0].weekdayShort, 'Sat');
   assert.strictEqual(rowsW2[0].isOff, true, 'Sat before Sun session must render as OFF');
   assert.strictEqual(rowsW2[1].weekdayShort, 'Sun');
   assert.strictEqual(rowsW2[1].isOff, false);
+  assert.strictEqual(rowsW2[2].isOff, true, 'Mon without session must render as OFF');
 
   const projNoDaysNoStart = makeSection11Json({ withDays: false, startDate: null });
   const rowsW1Fallback = buildWeekSchedule(projNoDaysNoStart.module, projNoDaysNoStart.sections[0], projNoDaysNoStart.weeks[0]);
-  assert.deepStrictEqual(rowsW1Fallback.map(r => r.dateStr), ['2026-11-12'], 'Week 1 without "days" or startDate must start from earliest session date');
-  console.log('✓ Missing "days" fallback handles module.startDate (Week 1) and Saturday calendar start (Week 2)');
+  assert.deepStrictEqual(
+    rowsW1Fallback.map(r => r.dateStr),
+    ['2026-11-07', '2026-11-08', '2026-11-09', '2026-11-10', '2026-11-11', '2026-11-12'],
+    'Week 1 without "days" or startDate renders the full calendar week'
+  );
+  console.log('✓ Missing "days" builds full calendar week (Sat..Thu) with empty days as OFF days');
+
+  console.log('3b. Testing explicit-days case for GIT_all_sections.json (week 1 = 3 days)...');
+  const gitJson = JSON.parse(fs.readFileSync('src/samples/GIT_all_sections.json', 'utf8'));
+  const gitSec11 = gitJson.sections.find(s => s.id === '11') || gitJson.sections[0];
+  const gitWeek1Explicit = {
+    ...gitJson.weeks[0],
+    days: ['2026-11-10', '2026-11-11', '2026-11-12']
+  };
+  const gitRowsExplicit = buildWeekSchedule(gitJson.module, gitSec11, gitWeek1Explicit);
+  assert.strictEqual(gitRowsExplicit.length, 3, 'When explicit days are provided, GIT Week 1 must render exactly 3 days');
+  assert.deepStrictEqual(gitRowsExplicit.map(r => r.weekdayShort), ['Tue', 'Wed', 'Thu']);
+  console.log('✓ GIT_all_sections.json with explicit days renders exactly 3 days: Tue, Wed, Thu');
 
   console.log('4. Testing out-of-range session date handling (kept + flagged)...');
   const projOut = makeSection11Json({ withDays: true, includeOutOfRange: true });
@@ -253,10 +275,14 @@ async function runTests() {
         return { name: el.textContent.trim(), isOff: (parentRow?.innerText || '').includes('OFF') };
       });
     });
+    assert.strictEqual(w2NoDays.length, 6, 'Week 2 without "days" renders full calendar week (6 days)');
     assert.strictEqual(w2NoDays[0].name, 'Saturday');
     assert.strictEqual(w2NoDays[0].isOff, true, 'Week 2 without "days" starts on Saturday OFF');
     assert.strictEqual(w2NoDays[1].name, 'Sunday');
-    console.log('✓ Browser Week 1 starts at module.startDate and Week 2 starts at Sat OFF');
+    assert.strictEqual(w2NoDays[1].isOff, false, 'Sunday has sessions');
+    assert.strictEqual(w2NoDays[2].name, 'Monday');
+    assert.strictEqual(w2NoDays[2].isOff, true, 'Monday is OFF');
+    console.log('✓ Browser Week 1 starts at module.startDate and Week 2 renders full calendar week (Sat..Thu)');
 
     console.log('7.3: Testing out-of-range session date on page AND in Export check...');
     await page.click('button:has-text("Import")');

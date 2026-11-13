@@ -6,6 +6,7 @@ const { chromium } = require('D:/Medscope Site/node_modules/playwright-core');
 import { DEFAULT_SCHEDULE, GIT_SCHEDULE, DEFAULT_THEME } from '../src/constants.js';
 import { validate } from '../src/utils/validatorEngine.js';
 import { mergeThemeWithDefaults } from '../src/utils/themeUtils.js';
+import { buildWeekSchedule } from '../src/utils/dataUtils.js';
 
 (async () => {
   console.log('===========================================================');
@@ -152,15 +153,37 @@ import { mergeThemeWithDefaults } from '../src/utils/themeUtils.js';
     });
   });
 
-  console.log('Rendered Day Rows for Week 1 Section A1:', renderedDayRows);
-  assert.strictEqual(renderedDayRows.length, 3, 'Week 1 must render exactly 3 day rows (Tue, Wed, Thu)');
-  assert.strictEqual(renderedDayRows[0].name, 'Tuesday', 'Row 1 name must be Tuesday');
-  assert.strictEqual(renderedDayRows[0].date, '10/11', 'Row 1 date must be 10/11');
-  assert.strictEqual(renderedDayRows[1].name, 'Wednesday', 'Row 2 name must be Wednesday');
-  assert.strictEqual(renderedDayRows[1].date, '11/11', 'Row 2 date must be 11/11');
-  assert.strictEqual(renderedDayRows[2].name, 'Thursday', 'Row 3 name must be Thursday');
-  assert.strictEqual(renderedDayRows[2].date, '12/11', 'Row 3 date must be 12/11');
-  console.log('✓ Week 1 section A1 renders: Tuesday 10/11, Wednesday 11/11, Thursday 12/11!');
+  console.log('Rendered Day Rows for Week 1 Section A1 (without "days"):', renderedDayRows);
+  assert.strictEqual(renderedDayRows.length, 6, 'Week 1 without "days" must render the full calendar week (6 days: Sat..Thu)');
+  assert.strictEqual(renderedDayRows[0].name, 'Saturday', 'Row 1 name must be Saturday');
+  assert.strictEqual(renderedDayRows[0].date, '7/11', 'Row 1 date must be 7/11');
+  assert.strictEqual(renderedDayRows[1].name, 'Sunday', 'Row 2 name must be Sunday');
+  assert.strictEqual(renderedDayRows[1].date, '8/11', 'Row 2 date must be 8/11');
+  assert.strictEqual(renderedDayRows[2].name, 'Monday', 'Row 3 name must be Monday');
+  assert.strictEqual(renderedDayRows[2].date, '9/11', 'Row 3 date must be 9/11');
+  assert.strictEqual(renderedDayRows[3].name, 'Tuesday', 'Row 4 name must be Tuesday');
+  assert.strictEqual(renderedDayRows[3].date, '10/11', 'Row 4 date must be 10/11');
+  assert.strictEqual(renderedDayRows[4].name, 'Wednesday', 'Row 5 name must be Wednesday');
+  assert.strictEqual(renderedDayRows[4].date, '11/11', 'Row 5 date must be 11/11');
+  assert.strictEqual(renderedDayRows[5].name, 'Thursday', 'Row 6 name must be Thursday');
+  assert.strictEqual(renderedDayRows[5].date, '12/11', 'Row 6 date must be 12/11');
+  console.log('✓ Week 1 without "days" renders full calendar week: Sat 7/11 .. Thu 12/11');
+
+  // Verify explicit-days case for GIT_all_sections.json (week 1 = 3 days)
+  console.log('\n[3D-bis] Verifying explicit-days case for GIT_all_sections.json (week 1 = 3 days)...');
+  const rowsExplicit = buildWeekSchedule(
+    DEFAULT_SCHEDULE.module,
+    DEFAULT_SCHEDULE.sections[0],
+    { ...DEFAULT_SCHEDULE.weeks[0], days: ['2026-11-10', '2026-11-11', '2026-11-12'] }
+  );
+  assert.strictEqual(rowsExplicit.length, 3, 'When explicit days are provided, Week 1 for GIT must render exactly 3 days');
+  assert.strictEqual(rowsExplicit[0].weekdayShort, 'Tue');
+  assert.strictEqual(rowsExplicit[0].dateStr, '2026-11-10');
+  assert.strictEqual(rowsExplicit[1].weekdayShort, 'Wed');
+  assert.strictEqual(rowsExplicit[1].dateStr, '2026-11-11');
+  assert.strictEqual(rowsExplicit[2].weekdayShort, 'Thu');
+  assert.strictEqual(rowsExplicit[2].dateStr, '2026-11-12');
+  console.log('✓ Week 1 with explicit days renders exactly 3 days: Tuesday 10/11, Wednesday 11/11, Thursday 12/11!');
 
   // E. Check Import > Load sample offers only "GIT (all 12 sections)"
   console.log('\n[3E] Checking Import Modal Load Sample Options...');
