@@ -145,7 +145,8 @@ export function SchedulePage({
   subjects = [],
   sessionTypes = [],
   pageRef,
-  pageNumber = 1
+  pageNumber = 1,
+  showOffDays = true
 }) {
   const [qrDataUrl, setQrDataUrl] = useState('');
   const [overflowCount, setOverflowCount] = useState(0);
@@ -217,7 +218,7 @@ export function SchedulePage({
   }, [t.assets?.showQr, t.assets?.qrType, t.assets?.qrUrl, t.assets?.qrImage]);
 
   // Process schedule rows for this section and week
-  const dayRows = buildWeekSchedule(moduleInfo, section, week);
+  const dayRows = buildWeekSchedule(moduleInfo, section, week, { showOffDays });
 
   // Subject color mapping
   const subjectColorMap = {

@@ -281,14 +281,13 @@ async function runTests() {
     console.log('7.4: Testing Editor "Days shown" control without deleting sessions...');
     await page.click('[data-testid="rail-data-btn"]');
     await page.waitForSelector('[data-testid="days-shown-control"]');
-    await page.fill('[data-testid="days-shown-first"]', '2026-11-09');
-    await page.fill('[data-testid="days-shown-last"]', '2026-11-12');
+    await page.click('[data-testid="day-chip-2026-11-14"]');
     await page.waitForTimeout(300);
 
     const editedDays = await page.evaluate(() => {
       return Array.from(document.querySelectorAll('.preview-container .schedule-page [data-testid="day-name-text"]')).map(el => el.textContent.trim());
     });
-    assert.ok(editedDays[0] === 'Monday' && editedDays.includes('Thursday'), `Expected Monday..Thursday after range edit, got ${editedDays}`);
+    assert.ok(editedDays.includes('Saturday') && editedDays.includes('Thursday'), `Expected Saturday & Thursday after chip toggle, got ${editedDays}`);
     const pageAfterEdit = await page.locator('.preview-container .schedule-page').innerText();
     assert.ok(pageAfterEdit.includes('Extra Makeup Tutorial') && pageAfterEdit.includes('Oral Cavity'), 'Editing Days shown must NEVER delete sessions');
     console.log('✓ Editor "Days shown" updates week days inclusively without deleting sessions');

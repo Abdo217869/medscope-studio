@@ -169,7 +169,7 @@ export function getCalendarWeekStartDate(dateStr, firstWeekdayShort = 'Sat') {
  * Group and process all sessions for a specific section and week.
  * The weekday of each row comes from its real date.
  */
-export function buildWeekSchedule(moduleInfo, section, weekData) {
+export function buildWeekSchedule(moduleInfo, section, weekData, { showOffDays = true } = {}) {
   const allowedWeekdays = (moduleInfo && moduleInfo.weekdays) || ["Sat", "Sun", "Mon", "Tue", "Wed", "Thu"];
   const allowedSet = new Set(allowedWeekdays.map(getShortDayName).filter(Boolean));
   const allSessions = (weekData && weekData.sessions) || [];
@@ -349,6 +349,57 @@ export function buildWeekSchedule(moduleInfo, section, weekData) {
     };
   });
 
+  if (!showOffDays) {
+    const nonOff = dayRows.filter(r => !r.isOff);
+    if (nonOff.length > 0) {
+      return nonOff;
+    }
+    // If a week would have no days at all, draw one OFF row with the week's first date, so the table is never empty.
+    if (dayRows.length > 0) {
+      return [dayRows[0]];
+    }
+  }
+
   return dayRows;
 }
+
+/**
+ * Compute the full list of dates in the calendar week for chip selectors.
+ * Combines explicit days, session dates, and module weekdays starting from the week start date.
+ */
+export function getWeekCalendarDates(moduleInfo, weekData) {
+  const allowedWeekdays = (moduleInfo && moduleInfo.weekdays) || ["Sat", "Sun", "Mon", "Tue", "Wed", "Thu"];
+  const allowedSet = new Set(allowedWeekdays.map(getShortDayName).filter(Boolean));
+
+  const sessionDates = (weekData?.sessions || [])
+    .map(s => (typeof s.date === 'string' ? s.date.trim() : ''))
+    .filter(isValidDate);
+  const explicitDays = Array.isArray(weekData?.days) ? weekData.days.filter(isValidDate) : [];
+
+  const allKnownDates = [...new Set([...sessionDates, ...explicitDays])].sort();
+
+  let weekStartDate = '';
+  if (weekData?.n === 1 && isValidDate(moduleInfo?.startDate)) {
+    weekStartDate = moduleInfo.startDate.trim();
+  } else if (allKnownDates.length > 0) {
+    const firstModuleWd = getShortDayName(allowedWeekdays[0] || 'Sat') || 'Sat';
+    weekStartDate = getCalendarWeekStartDate(allKnownDates[0], firstModuleWd);
+  } else if (isValidDate(moduleInfo?.startDate)) {
+    weekStartDate = addDaysUTC(moduleInfo.startDate.trim(), ((weekData?.n || 1) - 1) * 7);
+  }
+
+  const candidateDates = new Set(allKnownDates);
+  if (weekStartDate) {
+    for (let i = 0; i < 7; i++) {
+      const d = addDaysUTC(weekStartDate, i);
+      const wd = getWeekdayFromDate(d);
+      if (allowedSet.size === 0 || allowedSet.has(wd)) {
+        candidateDates.add(d);
+      }
+    }
+  }
+
+  return Array.from(candidateDates).sort();
+}
+
 

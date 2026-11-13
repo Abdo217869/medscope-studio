@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'preact/hooks';
 import { Plus, Trash2, Copy, ChevronDown, ChevronUp, Clock, MapPin, Tag, AlertCircle, Calendar } from 'lucide-preact';
-import { isValidDate, buildWeekSchedule, generateDateRange } from '../utils/dataUtils.js';
+import { isValidDate, buildWeekSchedule, getWeekCalendarDates, getWeekdayFromDate, formatDateAsDM } from '../utils/dataUtils.js';
 
 export function MobileSessionList({
   schedule,
@@ -15,79 +15,51 @@ export function MobileSessionList({
   const sessionTypes = schedule?.sessionTypes || [];
   const [expandedIndex, setExpandedIndex] = useState(null);
 
-  const explicitDays = Array.isArray(currentWeek?.days) && currentWeek.days.length > 0 ? currentWeek.days : null;
-  const fallbackValidDates = !explicitDays
-    ? buildWeekSchedule(schedule?.module, currentSection, currentWeek).map(r => r.dateStr).filter(isValidDate)
-    : [];
-  const computedFirstDate = explicitDays ? explicitDays[0] : (fallbackValidDates[0] || '');
-  const computedLastDate = explicitDays ? explicitDays[explicitDays.length - 1] : (fallbackValidDates[fallbackValidDates.length - 1] || '');
+  const showOffDays = schedule?.settings?.showOffDays ?? true;
+  const calendarDates = getWeekCalendarDates(schedule?.module, currentWeek);
+  const explicitDaysSet = Array.isArray(currentWeek?.days) && currentWeek.days.length > 0
+    ? new Set(currentWeek.days)
+    : null;
 
-  const firstInputRef = useRef(null);
-  const lastInputRef = useRef(null);
-  const lastSyncedComputedRef = useRef({
-    weekNum: selectedWeekNum,
-    first: computedFirstDate,
-    last: computedLastDate
-  });
-
-  const [daysDraft, setDaysDraft] = useState({ first: computedFirstDate, last: computedLastDate });
-  const daysDraftRef = useRef({ first: computedFirstDate, last: computedLastDate });
-
-  useEffect(() => {
-    const prev = lastSyncedComputedRef.current;
-    const weekChanged = prev.weekNum !== selectedWeekNum;
-    const datesChanged = prev.first !== computedFirstDate || prev.last !== computedLastDate;
-
-    if (weekChanged || datesChanged) {
-      lastSyncedComputedRef.current = {
-        weekNum: selectedWeekNum,
-        first: computedFirstDate,
-        last: computedLastDate
-      };
-
-      const activeEl = typeof document !== 'undefined' ? document.activeElement : null;
-      const isEditingInputs = activeEl === firstInputRef.current || activeEl === lastInputRef.current;
-
-      if (weekChanged || !isEditingInputs) {
-        const synced = { first: computedFirstDate, last: computedLastDate };
-        daysDraftRef.current = synced;
-        setDaysDraft(synced);
+  const handleToggleShowOffDays = () => {
+    onUpdateSchedule(prev => ({
+      ...prev,
+      settings: {
+        ...prev?.settings,
+        showOffDays: !showOffDays
       }
-    }
-  }, [selectedWeekNum, computedFirstDate, computedLastDate]);
+    }));
+  };
 
-  const updateDaysField = (field, rawVal) => {
-    const val = rawVal || '';
-    const domFirst = firstInputRef.current?.value;
-    const domLast = lastInputRef.current?.value;
-    const nextFirst = field === 'first' ? val : (domFirst !== undefined ? domFirst : daysDraftRef.current.first);
-    const nextLast = field === 'last' ? val : (domLast !== undefined ? domLast : daysDraftRef.current.last);
-    const nextDraft = { first: nextFirst, last: nextLast };
-    daysDraftRef.current = nextDraft;
-    setDaysDraft(nextDraft);
+  const toggleDay = (dateStr) => {
+    onUpdateSchedule(prev => {
+      const next = JSON.parse(JSON.stringify(prev));
+      const targetWeek = next.weeks.find(w => w.n === selectedWeekNum);
+      if (!targetWeek) return prev;
 
-    if (isValidDate(nextDraft.first) && isValidDate(nextDraft.last)) {
-      const range = generateDateRange(nextDraft.first, nextDraft.last);
-      if (range.length > 0) {
-        onUpdateSchedule(prev => {
-          const next = JSON.parse(JSON.stringify(prev));
-          const targetWeek = next.weeks.find(w => w.n === selectedWeekNum);
-          if (targetWeek) {
-            const existingDays = targetWeek.days;
-            if (
-              Array.isArray(existingDays) &&
-              existingDays.length === range.length &&
-              existingDays.every((d, i) => d === range[i])
-            ) {
-              return prev;
-            }
-            targetWeek.days = range;
-            return next;
-          }
-          return prev;
-        });
+      const currentDays = Array.isArray(targetWeek.days) && targetWeek.days.length > 0
+        ? [...targetWeek.days]
+        : [...calendarDates];
+
+      let nextDays;
+      if (currentDays.includes(dateStr)) {
+        nextDays = currentDays.filter(d => d !== dateStr);
+      } else {
+        nextDays = [...currentDays, dateStr].sort();
       }
-    }
+      targetWeek.days = nextDays;
+      return next;
+    });
+  };
+
+  const resetDaysToDefault = () => {
+    onUpdateSchedule(prev => {
+      const next = JSON.parse(JSON.stringify(prev));
+      const targetWeek = next.weeks.find(w => w.n === selectedWeekNum);
+      if (!targetWeek) return prev;
+      delete targetWeek.days;
+      return next;
+    });
   };
 
   const getSubjectColor = (name) => {
@@ -184,36 +156,57 @@ export function MobileSessionList({
         </button>
       </div>
 
-      {/* Days shown control per week */}
+      {/* Show OFF days & Days shown control */}
       <div
         data-testid="days-shown-control"
-        className="px-3 py-2 border-b border-[var(--border)] bg-[var(--surface-2)]/30 flex flex-wrap items-center gap-2 text-xs"
+        className="px-3 py-2 border-b border-[var(--border)] bg-[var(--surface-2)]/30 space-y-2 text-xs"
       >
-        <span className="flex items-center gap-1 text-[11px] font-semibold text-[#ffb347]">
-          <Calendar className="w-3.5 h-3.5" />
-          <span>Days shown:</span>
-        </span>
-        <input
-          ref={firstInputRef}
-          type="date"
-          data-testid="days-shown-first"
-          value={daysDraft.first}
-          onInput={(e) => updateDaysField('first', e.target.value)}
-          onChange={(e) => updateDaysField('first', e.target.value)}
-          className="input-field px-2 py-1 text-[11px] font-mono [color-scheme:dark]"
-          aria-label="Days shown first date"
-        />
-        <span className="text-[11px] text-[var(--muted)]">to</span>
-        <input
-          ref={lastInputRef}
-          type="date"
-          data-testid="days-shown-last"
-          value={daysDraft.last}
-          onInput={(e) => updateDaysField('last', e.target.value)}
-          onChange={(e) => updateDaysField('last', e.target.value)}
-          className="input-field px-2 py-1 text-[11px] font-mono [color-scheme:dark]"
-          aria-label="Days shown last date"
-        />
+        <div className="flex items-center justify-between">
+          <label className="flex items-center gap-2 cursor-pointer select-none text-[11px] font-semibold text-[var(--text)]">
+            <input
+              type="checkbox"
+              checked={showOffDays}
+              onChange={handleToggleShowOffDays}
+              data-testid="toggle-show-off-days"
+              className="accent-[var(--gold)] w-3.5 h-3.5 cursor-pointer"
+            />
+            <span>Show OFF days</span>
+          </label>
+          <button
+            type="button"
+            onClick={resetDaysToDefault}
+            data-testid="reset-days-default-btn"
+            className="text-[10px] text-[#ffb347] hover:underline"
+          >
+            Reset to default
+          </button>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-1.5">
+          <span className="text-[10px] text-[var(--muted)] shrink-0">Days shown:</span>
+          {calendarDates.map(d => {
+            const isIncluded = explicitDaysSet ? explicitDaysSet.has(d) : true;
+            const shortWd = getWeekdayFromDate(d);
+            const label = `${shortWd} ${formatDateAsDM(d)}`;
+            return (
+              <button
+                key={d}
+                type="button"
+                data-testid={`day-chip-${d}`}
+                data-included={isIncluded ? 'true' : 'false'}
+                onClick={() => toggleDay(d)}
+                className={`px-2 py-0.5 rounded-full text-[11px] font-medium transition select-none ${
+                  isIncluded
+                    ? 'bg-[var(--gold)]/20 text-[var(--gold)] border border-[var(--gold)]/60'
+                    : 'bg-white/[0.04] text-[var(--muted)] border border-white/[0.08] line-through opacity-60'
+                }`}
+                title={`Click to ${isIncluded ? 'exclude' : 'include'} ${label}`}
+              >
+                {label}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* Card List */}
@@ -238,13 +231,20 @@ export function MobileSessionList({
             const isLeave = s.status === 'leave';
 
             const isInvalidDate = !isValidDate(s.date);
+            const isNotInDaysShown = explicitDaysSet && !explicitDaysSet.has(s.date);
+            const needsFixing = isInvalidDate || isNotInDaysShown;
+            const needsFixingReason = !isValidDate(s.date) ? 'date not valid' : isNotInDaysShown ? 'date not in days shown' : '';
 
             return (
               <div
                 key={idx}
-                data-testid={isInvalidDate ? 'needs-fixing-row' : undefined}
+                data-testid={needsFixing ? 'needs-fixing-row' : undefined}
                 className={`medscope-card border transition-all ${
-                  isExpanded ? 'border-[var(--gold)] shadow-lg' : isInvalidDate ? 'border-rose-500/60 bg-rose-950/20' : 'border-[var(--border)] hover:border-[var(--border)]/80'
+                  isExpanded
+                    ? 'border-[var(--gold)] shadow-lg'
+                    : needsFixing
+                    ? 'border-amber-500/80 bg-amber-950/20'
+                    : 'border-[var(--border)] hover:border-[var(--border)]/80'
                 }`}
               >
                 {/* Collapsed Card Summary (Tap to expand) */}
@@ -268,6 +268,13 @@ export function MobileSessionList({
                         {isLeave ? (s.note || 'Study Leave') : s.subject}
                       </span>
                     </div>
+
+                    {/* Needs fixing plain words badge */}
+                    {needsFixing && (
+                      <span className="text-[10px] text-amber-400 font-semibold px-1.5 py-0.5 rounded bg-amber-500/10 border border-amber-500/30 whitespace-nowrap">
+                        Needs fixing: {needsFixingReason}
+                      </span>
+                    )}
 
                     {/* Quick Info (Place & Time) */}
                     {!isLeave && (

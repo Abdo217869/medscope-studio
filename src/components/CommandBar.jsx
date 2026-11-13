@@ -34,7 +34,8 @@ export function CommandBar({
   isPageVerified = false,
   onSelectPreset,
   onPrintMode,
-  onGoHome
+  onGoHome,
+  onToggleShowOffDays
 }) {
   const [query, setQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -82,6 +83,16 @@ export function CommandBar({
         action: () => {
           onClose();
           if (onGoHome) onGoHome();
+        }
+      },
+      {
+        id: 'cmd-toggle-off-days',
+        category: 'Settings',
+        label: 'Toggle OFF days',
+        icon: <Calendar className="w-4 h-4 text-[#ffb347]" />,
+        action: () => {
+          onClose();
+          if (onToggleShowOffDays) onToggleShowOffDays();
         }
       },
       {

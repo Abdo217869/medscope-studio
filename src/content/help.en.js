@@ -79,6 +79,10 @@ export const HELP_EN = {
     title: "Browser Print Mode Steps",
     desc: "For native vector printing directly from Google Chrome or Edge:\n1. Open browser print dialog (Ctrl+P or Print Mode in More menu).\n2. Set Destination: 'Save as PDF'.\n3. Set Margins: 'None'.\n4. Set Scale: '100%'.\n5. Check 'Background graphics' ON.\nAll weeks for the active section will print cleanly, one A4 page per week without clipping."
   },
+  show_off_days: {
+    title: "Show OFF Days",
+    desc: "Controls whether days with no sessions are displayed in the timetable. When turned OFF, unscheduled days are hidden and the remaining active days expand to fill the table height. If all days in a week are OFF, one placeholder row is kept so the table is never empty."
+  },
   browser_storage_note: {
     title: "Browser Storage & Privacy",
     desc: "All timetable data and themes live 100% inside your local browser storage (localStorage). No data is ever sent to external servers. Use 'Export JSON' to back up or share your projects."

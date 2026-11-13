@@ -93,7 +93,15 @@ export function ExportModal({
   const [namingTemplate, setNamingTemplate] = useState('{module}_Group_{group}_Section_{section}_Week_{week}');
   const [quality, setQuality] = useState(0.98);
   const [includeValidationReport, setIncludeValidationReport] = useState(true);
+  const [includeOffDays, setIncludeOffDays] = useState(() => schedule?.settings?.showOffDays ?? true);
   const [exportError, setExportError] = useState('');
+
+  // Sync includeOffDays when modal opens or schedule.settings changes
+  useEffect(() => {
+    if (isOpen) {
+      setIncludeOffDays(schedule?.settings?.showOffDays ?? true);
+    }
+  }, [isOpen, schedule?.settings?.showOffDays]);
 
   // Close modal on Escape key
   useEffect(() => {
@@ -204,6 +212,7 @@ export function ExportModal({
         namingTemplate,
         quality,
         includeValidationReport,
+        includeOffDays,
         validationReportText: buildValidationReportText()
       });
     } catch (err) {
@@ -439,6 +448,23 @@ export function ExportModal({
               </div>
             </div>
           )}
+
+          {/* Include OFF days Checkbox */}
+          <div className="p-3 rounded-xl bg-[var(--surface-2)]/50 border border-[var(--border)]">
+            <label className="flex items-center gap-2.5 cursor-pointer">
+              <input
+                type="checkbox"
+                data-testid="export-include-off-days-checkbox"
+                checked={includeOffDays}
+                onChange={(e) => setIncludeOffDays(e.target.checked)}
+                className="accent-[var(--gold)] w-4 h-4 cursor-pointer"
+              />
+              <div>
+                <div className="font-semibold text-xs text-[var(--text)]">Include OFF days</div>
+                <div className="text-[10px] text-[var(--muted)]">When unchecked, days with no sessions for the section are omitted from export</div>
+              </div>
+            </label>
+          </div>
 
           {/* Filename Preview Box */}
           <div className="p-3 rounded-xl bg-[var(--surface-2)]/50 border border-[var(--border)] space-y-1">

@@ -1,25 +1,31 @@
-import { useState, useEffect, useRef } from 'preact/hooks';
+import { useState, useEffect, useRef, useMemo } from 'preact/hooks';
 import {
   Plus,
   Copy,
   Trash2,
   Calendar,
-  Layers,
-  Users,
   X,
-  FileSpreadsheet,
-  AlertCircle
+  ChevronLeft,
+  ChevronRight,
+  ChevronDown,
+  ChevronUp,
+  AlertTriangle,
+  Clock,
+  MapPin,
+  Tag,
+  Check,
+  MoreHorizontal
 } from 'lucide-preact';
 import {
   isSessionForSection,
-  getShortDayName,
   getWeekdayFromDate,
+  getFullDayName,
   isValidDate,
-  buildWeekSchedule,
-  generateDateRange
+  formatDateAsDM,
+  getWeekCalendarDates,
+  normalizePlace
 } from '../utils/dataUtils';
 import { MobileSessionList } from './MobileSessionList';
-import { HelpTooltip } from './HelpTooltip';
 
 export function SessionEditor({
   schedule,
@@ -30,189 +36,220 @@ export function SessionEditor({
   onUpdateSchedule,
   highlightedSessionIndex = null,
   onOpenSetup,
-  onOpenImport
+  onOpenImport,
+  onClose
 }) {
   const [isMobile, setIsMobile] = useState(() => (typeof window !== 'undefined' ? window.innerWidth < 768 : false));
   const [filterMode, setFilterMode] = useState('all'); // 'all' | 'section'
-  const [editingScopeIdx, setEditingScopeIdx] = useState(null);
+  const [moreMenuOpen, setMoreMenuOpen] = useState(false);
+  const [expandedIndex, setExpandedIndex] = useState(null);
+  const [localSession, setLocalSession] = useState(null);
+  const isDirtyRef = useRef(false);
 
   useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Scroll to highlighted session row when requested
+  // Close ... menu when clicking outside
   useEffect(() => {
-    if (highlightedSessionIndex !== null && highlightedSessionIndex !== undefined) {
-      const el = document.getElementById(`session-row-${highlightedSessionIndex}`);
-      if (el) {
-        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    if (!moreMenuOpen) return;
+    const handleClickOutside = (e) => {
+      if (!e.target.closest('[data-role="week-more-menu"]')) {
+        setMoreMenuOpen(false);
       }
-    }
-  }, [highlightedSessionIndex, selectedWeekNum]);
+    };
+    window.addEventListener('mousedown', handleClickOutside);
+    return () => window.removeEventListener('mousedown', handleClickOutside);
+  }, [moreMenuOpen]);
 
   const activeWeek = schedule?.weeks?.find(w => w.n === selectedWeekNum) || schedule?.weeks?.[0];
   const activeWeekIdx = schedule?.weeks?.findIndex(w => w.n === selectedWeekNum) ?? 0;
   const currentSection = schedule?.sections?.find(s => s.id === selectedSectionId) || schedule?.sections?.[0];
+  const weeks = schedule?.weeks || [];
+  const subjects = schedule?.subjects || [];
+  const sessionTypes = schedule?.sessionTypes || [];
+  const sessions = activeWeek?.sessions || [];
 
-  const explicitDays = Array.isArray(activeWeek?.days) && activeWeek.days.length > 0 ? activeWeek.days : null;
-  const fallbackValidDates = !explicitDays
-    ? buildWeekSchedule(schedule?.module, currentSection, activeWeek)
-        .map(r => r.dateStr)
-        .filter(isValidDate)
-    : [];
-  const computedFirstDate = explicitDays ? explicitDays[0] : (fallbackValidDates[0] || '');
-  const computedLastDate = explicitDays ? explicitDays[explicitDays.length - 1] : (fallbackValidDates[fallbackValidDates.length - 1] || '');
+  const showOffDays = schedule?.settings?.showOffDays ?? true;
+  const calendarDates = useMemo(() => {
+    return getWeekCalendarDates(schedule?.module, activeWeek);
+  }, [schedule?.module, activeWeek]);
 
-  const firstInputRef = useRef(null);
-  const lastInputRef = useRef(null);
-  const pendingResetSyncRef = useRef(false);
-  const lastSyncedComputedRef = useRef({
-    weekNum: selectedWeekNum,
-    first: computedFirstDate,
-    last: computedLastDate
-  });
+  const explicitDaysSet = useMemo(() => {
+    return Array.isArray(activeWeek?.days) && activeWeek.days.length > 0
+      ? new Set(activeWeek.days)
+      : null;
+  }, [activeWeek?.days]);
 
-  const [daysDraft, setDaysDraft] = useState({
-    first: computedFirstDate,
-    last: computedLastDate
-  });
-  const daysDraftRef = useRef({
-    first: computedFirstDate,
-    last: computedLastDate
-  });
-
+  // Jump / scroll to highlighted session
   useEffect(() => {
-    const prev = lastSyncedComputedRef.current;
-    const weekChanged = prev.weekNum !== selectedWeekNum;
-    const datesChanged = prev.first !== computedFirstDate || prev.last !== computedLastDate;
+    if (highlightedSessionIndex !== null && highlightedSessionIndex !== undefined) {
+      setExpandedIndex(highlightedSessionIndex);
+      const sessionToEdit = sessions[highlightedSessionIndex]
+        ? JSON.parse(JSON.stringify(sessions[highlightedSessionIndex]))
+        : null;
+      setLocalSession(sessionToEdit);
+      isDirtyRef.current = false;
 
-    if (weekChanged || datesChanged || pendingResetSyncRef.current) {
-      lastSyncedComputedRef.current = {
-        weekNum: selectedWeekNum,
-        first: computedFirstDate,
-        last: computedLastDate
-      };
-
-      const activeEl = typeof document !== 'undefined' ? document.activeElement : null;
-      const isEditingInputs = activeEl === firstInputRef.current || activeEl === lastInputRef.current;
-
-      if (weekChanged || pendingResetSyncRef.current || !isEditingInputs) {
-        pendingResetSyncRef.current = false;
-        const synced = {
-          first: computedFirstDate,
-          last: computedLastDate
-        };
-        daysDraftRef.current = synced;
-        setDaysDraft(synced);
-      }
+      setTimeout(() => {
+        const el = document.getElementById(`session-card-${highlightedSessionIndex}`);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 100);
     }
-  }, [selectedWeekNum, computedFirstDate, computedLastDate]);
+  }, [highlightedSessionIndex, selectedWeekNum]);
 
-  const updateDaysField = (field, rawVal) => {
-    const val = rawVal || '';
-    const domFirst = firstInputRef.current?.value;
-    const domLast = lastInputRef.current?.value;
-    const nextFirst = field === 'first' ? val : (domFirst !== undefined ? domFirst : daysDraftRef.current.first);
-    const nextLast = field === 'last' ? val : (domLast !== undefined ? domLast : daysDraftRef.current.last);
-    const nextDraft = {
-      first: nextFirst,
-      last: nextLast
-    };
-    daysDraftRef.current = nextDraft;
-    setDaysDraft(nextDraft);
-
-    if (isValidDate(nextDraft.first) && isValidDate(nextDraft.last)) {
-      const range = generateDateRange(nextDraft.first, nextDraft.last);
-      if (range.length > 0) {
-        const targetWeekNum = activeWeek?.n ?? selectedWeekNum;
-        onUpdateSchedule(prev => {
-          const nextWeeks = [...(prev?.weeks || [])];
-          const wIdx = nextWeeks.findIndex(w => w.n === targetWeekNum);
-          if (wIdx >= 0 && nextWeeks[wIdx]) {
-            const existingDays = nextWeeks[wIdx].days;
-            if (
-              Array.isArray(existingDays) &&
-              existingDays.length === range.length &&
-              existingDays.every((d, i) => d === range[i])
-            ) {
-              return prev;
-            }
-            nextWeeks[wIdx] = {
-              ...nextWeeks[wIdx],
-              days: range
-            };
-            return {
-              ...prev,
-              weeks: nextWeeks
-            };
-          }
-          return prev;
-        });
-      }
+  // Handle accordion toggle
+  const handleOpenSession = (idx) => {
+    if (expandedIndex === idx) return;
+    if (isDirtyRef.current && localSession && expandedIndex !== null) {
+      commitLocalSession(expandedIndex, localSession);
     }
+    setExpandedIndex(idx);
+    const sessionToEdit = sessions[idx] ? JSON.parse(JSON.stringify(sessions[idx])) : null;
+    setLocalSession(sessionToEdit);
+    isDirtyRef.current = false;
   };
 
-  const resetExplicitDays = () => {
-    pendingResetSyncRef.current = true;
+  const handleCloseSession = () => {
+    if (isDirtyRef.current && localSession && expandedIndex !== null) {
+      commitLocalSession(expandedIndex, localSession);
+    }
+    setExpandedIndex(null);
+    setLocalSession(null);
+    isDirtyRef.current = false;
+  };
+
+  const commitLocalSession = (idx, sessionData) => {
+    if (idx === null || !sessionData) return;
     onUpdateSchedule(prev => {
-      const nextWeeks = [...(prev?.weeks || [])];
-      const wIdx = nextWeeks.findIndex(w => w.n === (activeWeek?.n ?? selectedWeekNum));
-      if (wIdx >= 0 && nextWeeks[wIdx]) {
-        const { days, ...restWeek } = nextWeeks[wIdx];
-        nextWeeks[wIdx] = restWeek;
-        return {
-          ...prev,
-          weeks: nextWeeks
-        };
+      const next = JSON.parse(JSON.stringify(prev));
+      const targetWeek = next.weeks.find(w => w.n === selectedWeekNum);
+      if (targetWeek && targetWeek.sessions[idx]) {
+        targetWeek.sessions[idx] = sessionData;
       }
-      return prev;
+      return next;
     });
+    isDirtyRef.current = false;
   };
 
-  const sessions = activeWeek ? (activeWeek.sessions || []) : [];
-
-  // Filtered sessions
-  const displayedSessions = filterMode === 'section'
-    ? sessions.map((s, idx) => ({ session: s, originalIdx: idx })).filter(item => isSessionForSection(item.session, currentSection))
-    : sessions.map((s, idx) => ({ session: s, originalIdx: idx }));
-
-  // Helper to update sessions in active week
-  const updateSessions = (updater) => {
-    const nextSessions = typeof updater === 'function' ? updater(sessions) : updater;
-    const nextWeeks = [...(schedule?.weeks || [])];
-    if (activeWeekIdx >= 0 && nextWeeks[activeWeekIdx]) {
-      nextWeeks[activeWeekIdx] = {
-        ...activeWeek,
-        sessions: nextSessions
-      };
-      onUpdateSchedule({
-        ...schedule,
-        weeks: nextWeeks
-      });
+  const handleCancelEdit = () => {
+    if (expandedIndex !== null && sessions[expandedIndex]) {
+      setLocalSession(JSON.parse(JSON.stringify(sessions[expandedIndex])));
+      isDirtyRef.current = false;
     }
   };
 
-  const updateSessionField = (sessionIdx, field, val) => {
-    updateSessions(prev => {
-      const next = [...prev];
-      next[sessionIdx] = { ...next[sessionIdx], [field]: val };
+  const updateLocalField = (field, value) => {
+    setLocalSession(prev => {
+      if (!prev) return prev;
+      return { ...prev, [field]: value };
+    });
+    isDirtyRef.current = true;
+  };
+
+  const handleBlurField = () => {
+    if (isDirtyRef.current && localSession && expandedIndex !== null) {
+      commitLocalSession(expandedIndex, localSession);
+    }
+  };
+
+  const handleKeyDownField = (e) => {
+    if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
+      e.target.blur();
+    } else if (e.key === 'Escape') {
+      handleCancelEdit();
+    }
+  };
+
+  // Toggle "Show OFF days"
+  const handleToggleShowOffDays = () => {
+    onUpdateSchedule(prev => ({
+      ...prev,
+      settings: {
+        ...prev?.settings,
+        showOffDays: !showOffDays
+      }
+    }));
+  };
+
+  // Days shown toggle per day chip
+  const toggleDay = (dateStr) => {
+    onUpdateSchedule(prev => {
+      const next = JSON.parse(JSON.stringify(prev));
+      const targetWeek = next.weeks.find(w => w.n === selectedWeekNum);
+      if (!targetWeek) return prev;
+
+      const currentDays = Array.isArray(targetWeek.days) && targetWeek.days.length > 0
+        ? [...targetWeek.days]
+        : [...calendarDates];
+
+      let nextDays;
+      if (currentDays.includes(dateStr)) {
+        nextDays = currentDays.filter(d => d !== dateStr);
+      } else {
+        nextDays = [...currentDays, dateStr].sort();
+      }
+      targetWeek.days = nextDays;
       return next;
     });
   };
 
-  // Add session
-  const addSession = () => {
+  const resetDaysToDefault = () => {
+    onUpdateSchedule(prev => {
+      const next = JSON.parse(JSON.stringify(prev));
+      const targetWeek = next.weeks.find(w => w.n === selectedWeekNum);
+      if (!targetWeek) return prev;
+      delete targetWeek.days;
+      return next;
+    });
+  };
+
+  // Week Operations
+  const handleDuplicateWeek = () => {
+    setMoreMenuOpen(false);
+    const maxN = weeks.reduce((max, w) => Math.max(max, w.n), 0);
+    const newWeekNum = maxN + 1;
+    const clonedSessions = JSON.parse(JSON.stringify(sessions));
+    const newWeek = {
+      n: newWeekNum,
+      ...(activeWeek?.days ? { days: [...activeWeek.days] } : {}),
+      sessions: clonedSessions
+    };
+    onUpdateSchedule({
+      ...schedule,
+      weeks: [...weeks, newWeek]
+    });
+    onSelectWeek(newWeekNum);
+  };
+
+  const handleDeleteWeek = () => {
+    setMoreMenuOpen(false);
+    if (weeks.length <= 1) {
+      alert('Cannot delete the last remaining week.');
+      return;
+    }
+    if (!confirm(`Delete Week ${selectedWeekNum} and all its sessions?`)) return;
+    const nextWeeks = weeks.filter(w => w.n !== selectedWeekNum);
+    onUpdateSchedule({
+      ...schedule,
+      weeks: nextWeeks
+    });
+    onSelectWeek(nextWeeks[0].n);
+  };
+
+  // Session Operations
+  const handleAddSession = () => {
     const lastSession = sessions[sessions.length - 1];
-    const defaultDate = lastSession?.date || (schedule?.module?.weekdays?.[0] ? '2026-09-12' : '2026-09-12');
+    const defaultDate = lastSession?.date || calendarDates[0] || '2026-11-10';
     const newSession = {
       date: defaultDate,
-      type: schedule?.sessionTypes?.[0]?.key || 'tut',
+      type: sessionTypes[0]?.key || 'tut',
       number: (lastSession?.number || 0) + 1,
-      subject: schedule?.subjects?.[0]?.name || 'Anatomy',
+      subject: subjects[0]?.name || 'Anatomy',
       topics: ['New Topic Description'],
       scope: { letter: currentSection?.letter || 'A' },
       start: '08:00',
@@ -221,137 +258,68 @@ export function SessionEditor({
       status: 'normal',
       note: ''
     };
-    updateSessions(prev => [...prev, newSession]);
-  };
 
-  // Duplicate session
-  const duplicateSession = (idx) => {
-    const toClone = JSON.parse(JSON.stringify(sessions[idx]));
-    if (typeof toClone.number === 'number') toClone.number += 1;
-    updateSessions(prev => {
-      const next = [...prev];
-      next.splice(idx + 1, 0, toClone);
+    onUpdateSchedule(prev => {
+      const next = JSON.parse(JSON.stringify(prev));
+      const targetWeek = next.weeks.find(w => w.n === selectedWeekNum);
+      if (targetWeek) {
+        targetWeek.sessions.push(newSession);
+      }
       return next;
     });
+
+    const newIdx = sessions.length;
+    setExpandedIndex(newIdx);
+    setLocalSession(newSession);
+    isDirtyRef.current = false;
   };
 
-  // Delete session
-  const deleteSession = (idx) => {
+  const handleDuplicateSession = (idx, e) => {
+    if (e) e.stopPropagation();
+    const toClone = JSON.parse(JSON.stringify(sessions[idx]));
+    if (typeof toClone.number === 'number') toClone.number += 1;
+
+    onUpdateSchedule(prev => {
+      const next = JSON.parse(JSON.stringify(prev));
+      const targetWeek = next.weeks.find(w => w.n === selectedWeekNum);
+      if (targetWeek) {
+        targetWeek.sessions.splice(idx + 1, 0, toClone);
+      }
+      return next;
+    });
+
+    setExpandedIndex(idx + 1);
+    setLocalSession(toClone);
+    isDirtyRef.current = false;
+  };
+
+  const handleDeleteSession = (idx, e) => {
+    if (e) e.stopPropagation();
     if (!confirm('Delete this session?')) return;
-    updateSessions(prev => prev.filter((_, i) => i !== idx));
-  };
-
-  // Add / Duplicate / Delete Week
-  const addWeek = () => {
-    const maxN = (schedule?.weeks || []).reduce((max, w) => Math.max(max, w.n), 0);
-    const newWeekNum = maxN + 1;
-    const newWeek = {
-      n: newWeekNum,
-      sessions: []
-    };
-    onUpdateSchedule({
-      ...schedule,
-      weeks: [...(schedule?.weeks || []), newWeek]
+    onUpdateSchedule(prev => {
+      const next = JSON.parse(JSON.stringify(prev));
+      const targetWeek = next.weeks.find(w => w.n === selectedWeekNum);
+      if (targetWeek) {
+        targetWeek.sessions.splice(idx, 1);
+      }
+      return next;
     });
-    onSelectWeek(newWeekNum);
-  };
-
-  const duplicateWeek = () => {
-    const maxN = (schedule?.weeks || []).reduce((max, w) => Math.max(max, w.n), 0);
-    const newWeekNum = maxN + 1;
-    const clonedSessions = JSON.parse(JSON.stringify(sessions));
-    const newWeek = {
-      n: newWeekNum,
-      sessions: clonedSessions
-    };
-    onUpdateSchedule({
-      ...schedule,
-      weeks: [...(schedule?.weeks || []), newWeek]
-    });
-    onSelectWeek(newWeekNum);
-  };
-
-  const deleteCurrentWeek = () => {
-    if ((schedule?.weeks?.length || 0) <= 1) {
-      alert('Cannot delete the last remaining week.');
-      return;
+    if (expandedIndex === idx) {
+      setExpandedIndex(null);
+      setLocalSession(null);
+      isDirtyRef.current = false;
     }
-    if (!confirm(`Delete Week ${selectedWeekNum} and all its sessions?`)) return;
-    const nextWeeks = schedule.weeks.filter(w => w.n !== selectedWeekNum);
-    onUpdateSchedule({
-      ...schedule,
-      weeks: nextWeeks
-    });
-    onSelectWeek(nextWeeks[0].n);
   };
 
-  // Topics editor (supports string or {label, text})
-  const parseTopicsString = (text) => {
-    return text.split('\n').map(l => l.trim()).filter(Boolean);
+  const getSubjectColor = (name) => {
+    const s = subjects.find(sub => sub.name?.toLowerCase() === name?.toLowerCase());
+    return s?.color || '#a01040';
   };
 
-  const formatTopicsForDisplay = (topics) => {
-    if (!Array.isArray(topics)) return topics || '';
-    return topics.map(t => {
-      if (typeof t === 'string') return t;
-      if (t && t.label) return `${t.label}: ${t.text}`;
-      return t?.text || '';
-    }).join('\n');
-  };
-
-  // Render mobile card view if screen is mobile
+  // If mobile, keep mobile list
   if (isMobile) {
     return (
-      <div className="flex flex-col h-full bg-[var(--surface)] text-[var(--text)]">
-        {/* Mobile Sub-toolbar */}
-        <div className="p-2.5 bg-[var(--surface-2)] border-b border-[var(--border)] flex items-center justify-between gap-2">
-          <div className="flex items-center gap-1 overflow-x-auto custom-scrollbar">
-            {schedule?.weeks?.map(w => (
-              <button
-                key={w.n}
-                onClick={() => onSelectWeek(w.n)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap min-h-[44px] transition ${
-                  w.n === selectedWeekNum
-                    ? 'bg-[var(--gold)] text-[var(--on-gold)]'
-                    : 'text-[var(--muted)] hover:text-white bg-[var(--surface)]'
-                }`}
-              >
-                W{w.n}
-              </button>
-            ))}
-            <button
-              onClick={addWeek}
-              className="px-3 py-1.5 rounded-lg text-xs font-bold text-[var(--gold)] border border-[var(--border)] bg-[var(--surface)] min-h-[44px]"
-            >
-              +
-            </button>
-          </div>
-
-          <div className="flex items-center gap-1 shrink-0">
-            {onOpenSetup && (
-              <button
-                type="button"
-                onClick={onOpenSetup}
-                className="btn-secondary px-2.5 py-1.5 text-xs min-h-[44px]"
-                title="Module Setup"
-              >
-                Setup
-              </button>
-            )}
-            {onOpenImport && (
-              <button
-                type="button"
-                data-testid="mobile-import-btn"
-                onClick={onOpenImport}
-                className="btn-secondary px-2.5 py-1.5 text-xs min-h-[44px]"
-                title="Import JSON"
-              >
-                Import
-              </button>
-            )}
-          </div>
-        </div>
-
+      <div className="flex-1 flex flex-col h-full bg-[var(--surface)] text-[var(--text)] overflow-hidden">
         <MobileSessionList
           schedule={schedule}
           selectedWeekNum={selectedWeekNum}
@@ -362,580 +330,658 @@ export function SessionEditor({
     );
   }
 
-  // Desktop / Tablet Spreadsheet Table View
+  // Filtered session list with original index preserved
+  const visibleSessionsWithIndex = sessions
+    .map((s, idx) => ({ ...s, _originalIdx: idx }))
+    .filter(s => filterMode === 'all' || isSessionForSection(s, currentSection));
+
+  // Group visible sessions by date
+  const groupedSessions = useMemo(() => {
+    const groups = new Map();
+
+    visibleSessionsWithIndex.forEach(item => {
+      const dateKey = isValidDate(item.date) ? item.date : '__invalid__';
+      if (!groups.has(dateKey)) {
+        groups.set(dateKey, []);
+      }
+      groups.get(dateKey).push(item);
+    });
+
+    // Order date keys: calendar dates first, then any extra session dates, then invalid dates
+    const orderedKeys = [];
+    const seen = new Set();
+
+    calendarDates.forEach(d => {
+      if (groups.has(d)) {
+        orderedKeys.push(d);
+        seen.add(d);
+      }
+    });
+
+    Array.from(groups.keys()).forEach(d => {
+      if (!seen.has(d) && d !== '__invalid__') {
+        orderedKeys.push(d);
+        seen.add(d);
+      }
+    });
+
+    if (groups.has('__invalid__')) {
+      orderedKeys.push('__invalid__');
+    }
+
+    return orderedKeys.map(key => ({
+      dateKey: key,
+      sessions: groups.get(key) || []
+    }));
+  }, [visibleSessionsWithIndex, calendarDates]);
+
   return (
-    <div className="flex flex-col h-full bg-[#0d0f14]/90 backdrop-blur-xl border-l border-white/[0.08] select-none overflow-hidden text-white">
-      {/* Top Header: Week Tabs & Actions */}
-      <div className="bg-white/[0.02] px-3 py-2 border-b border-white/[0.08] flex items-center justify-between gap-2">
-        {/* Week Tabs */}
-        <div className="flex items-center gap-1.5 overflow-x-auto custom-scrollbar">
-          {(schedule?.weeks || []).map(w => {
-            const isSelected = w.n === selectedWeekNum;
-            return (
-              <button
-                key={w.n}
-                onClick={() => onSelectWeek(w.n)}
-                className={`px-3 py-1 rounded-full text-xs font-medium transition whitespace-nowrap ${
-                  isSelected
-                    ? 'bg-gradient-to-r from-[#ff2f3a] to-[#ff6b4a] text-white shadow-sm'
-                    : 'text-[#9c9c9d] hover:text-white hover:bg-white/[0.04]'
-                }`}
-              >
-                Week {w.n}
-                <span className="ml-1 text-[10px] font-mono opacity-80">({w.sessions?.length || 0})</span>
-              </button>
-            );
-          })}
-          <button
-            onClick={addWeek}
-            className="px-2.5 py-1 bg-white/[0.04] hover:bg-white/[0.08] text-[#ffb347] rounded-full text-xs font-bold border border-white/[0.08] transition"
-            title="Add empty week"
-          >
-            + Week
-          </button>
-        </div>
-
-        {/* Week Actions */}
-        <div className="flex items-center gap-1.5 shrink-0">
-          <button
-            onClick={duplicateWeek}
-            className="btn-secondary px-2 py-1 text-[11px]"
-            title="Duplicate current week sessions"
-          >
-            <Copy className="w-3 h-3" />
-            <span>Duplicate Week</span>
-          </button>
-          <button
-            onClick={deleteCurrentWeek}
-            className="px-2 py-1 bg-[var(--danger)]/15 hover:bg-[var(--danger)]/25 text-[var(--danger)] rounded-lg text-[11px] border border-[var(--danger)]/30 transition flex items-center gap-1"
-            title="Delete current week"
-          >
-            <Trash2 className="w-3 h-3" />
-            <span>Delete Week</span>
-          </button>
-        </div>
-      </div>
-
-      {/* Subheader: Filter & Session Add */}
-      <div className="px-3 py-2 bg-[var(--surface)]/90 border-b border-[var(--border)] flex items-center justify-between gap-3 text-xs">
-        <div className="flex items-center gap-2">
-          <span className="text-[11px] text-[var(--muted)] font-semibold">Filter:</span>
-          <div className="flex rounded-lg border border-[var(--border)] overflow-hidden bg-[var(--surface-2)]">
-            <button
-              onClick={() => setFilterMode('all')}
-              className={`px-2.5 py-1 text-[11px] font-semibold transition ${
-                filterMode === 'all' ? 'bg-[var(--gold)] text-[var(--on-gold)]' : 'text-[var(--muted)] hover:text-[var(--text)]'
-              }`}
-            >
-              All Sessions ({sessions.length})
-            </button>
-            <button
-              onClick={() => setFilterMode('section')}
-              className={`px-2.5 py-1 text-[11px] font-semibold transition ${
-                filterMode === 'section' ? 'bg-[var(--gold)] text-[var(--on-gold)]' : 'text-[var(--muted)] hover:text-[var(--text)]'
-              }`}
-            >
-              Section {currentSection?.id} Only
-            </button>
-          </div>
-        </div>
-
-        <button
-          onClick={addSession}
-          className="btn-primary px-3 py-1 text-xs"
-        >
-          <Plus className="w-3.5 h-3.5" />
-          <span>Add Session</span>
-        </button>
-      </div>
-
-      {/* Days shown control per week (first date to last date, all calendar days between included) */}
-      <div
-        data-testid="days-shown-control"
-        className="px-3 py-1.5 bg-white/[0.02] border-b border-white/[0.08] flex flex-wrap items-center justify-between gap-2 text-xs"
-      >
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="flex items-center gap-1 text-[11px] font-semibold text-[#ffb347]">
-            <Calendar className="w-3.5 h-3.5" />
-            <span>Days shown</span>
-          </span>
-          <label className="flex items-center gap-1 text-[11px] text-[#9c9c9d]">
-            <span>From</span>
-            <input
-              ref={firstInputRef}
-              type="date"
-              data-testid="days-shown-first"
-              value={daysDraft.first}
-              onInput={(e) => updateDaysField('first', e.target.value)}
-              onChange={(e) => updateDaysField('first', e.target.value)}
-              className="input-field px-1.5 py-0.5 text-[11px] font-mono [color-scheme:dark]"
-              aria-label="Days shown first date"
-            />
-          </label>
-          <label className="flex items-center gap-1 text-[11px] text-[#9c9c9d]">
-            <span>To</span>
-            <input
-              ref={lastInputRef}
-              type="date"
-              data-testid="days-shown-last"
-              value={daysDraft.last}
-              onInput={(e) => updateDaysField('last', e.target.value)}
-              onChange={(e) => updateDaysField('last', e.target.value)}
-              className="input-field px-1.5 py-0.5 text-[11px] font-mono [color-scheme:dark]"
-              aria-label="Days shown last date"
-            />
-          </label>
-          {daysDraft.first && daysDraft.last && isValidDate(daysDraft.first) && isValidDate(daysDraft.last) && daysDraft.first > daysDraft.last && (
-            <span className="text-[10px] text-rose-400">First date must be on or before last date</span>
-          )}
-        </div>
-
-        <div className="flex items-center gap-2 text-[11px]">
-          <span className="font-mono text-[#9c9c9d]" data-testid="days-shown-count">
-            {explicitDays
-              ? `${explicitDays.length} day${explicitDays.length === 1 ? '' : 's'} (explicit)`
-              : `${fallbackValidDates.length} day${fallbackValidDates.length === 1 ? '' : 's'} (auto)`}
-          </span>
-          {explicitDays && (
+    <div className="flex-1 flex flex-col h-full bg-[var(--surface)] text-[var(--text)] overflow-x-hidden overflow-y-auto select-none custom-scrollbar">
+      {/* ============================================================== */}
+      {/* STICKY TOP BAR (TWO ROWS)                                     */}
+      {/* ============================================================== */}
+      <div className="sticky top-0 z-30 bg-[#0d0f14]/95 backdrop-blur-xl border-b border-white/[0.08] p-3 space-y-2.5 shadow-md">
+        {/* ROW 1: Week Selector, "..." Menu, Add Session, Collapse Button */}
+        <div className="flex items-center justify-between gap-2">
+          {/* Week Selector Compact Control */}
+          <div className="flex items-center gap-1 bg-[var(--surface-2)]/80 border border-[var(--border)] rounded-lg p-0.5">
             <button
               type="button"
-              data-testid="days-shown-reset-btn"
-              onClick={resetExplicitDays}
-              className="px-2 py-0.5 rounded border border-white/[0.08] text-[10px] text-[#9c9c9d] hover:text-white hover:bg-white/[0.06] transition"
-              title="Clear custom days list (never deletes sessions)"
+              disabled={activeWeekIdx <= 0}
+              onClick={() => onSelectWeek(weeks[activeWeekIdx - 1]?.n || 1)}
+              className="p-1.5 rounded hover:bg-white/[0.08] disabled:opacity-30 disabled:hover:bg-transparent text-[var(--muted)] hover:text-white transition"
+              title="Previous Week"
+              aria-label="Previous Week"
             >
-              Auto
+              <ChevronLeft className="w-3.5 h-3.5" />
+            </button>
+
+            <select
+              value={selectedWeekNum}
+              onChange={(e) => onSelectWeek(parseInt(e.target.value, 10))}
+              className="bg-transparent text-xs font-semibold text-[var(--gold)] font-mono px-1.5 py-1 focus:outline-none cursor-pointer"
+              aria-label="Select Week"
+            >
+              {weeks.map(w => (
+                <option key={w.n} value={w.n} className="bg-[#12151c] text-white">
+                  Week {w.n}
+                </option>
+              ))}
+            </select>
+
+            <button
+              type="button"
+              disabled={activeWeekIdx >= weeks.length - 1}
+              onClick={() => onSelectWeek(weeks[activeWeekIdx + 1]?.n || 1)}
+              className="p-1.5 rounded hover:bg-white/[0.08] disabled:opacity-30 disabled:hover:bg-transparent text-[var(--muted)] hover:text-white transition"
+              title="Next Week"
+              aria-label="Next Week"
+            >
+              <ChevronRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
+          {/* "..." Menu (Duplicate Week / Delete Week) */}
+          <div className="relative" data-role="week-more-menu">
+            <button
+              type="button"
+              onClick={() => setMoreMenuOpen(prev => !prev)}
+              className="p-2 rounded-lg border border-[var(--border)] hover:bg-[var(--surface-2)] text-[var(--muted)] hover:text-white transition"
+              title="Week Actions"
+              aria-label="Week Actions Menu"
+            >
+              <MoreHorizontal className="w-4 h-4" />
+            </button>
+
+            {moreMenuOpen && (
+              <div className="absolute left-0 mt-1 w-44 rounded-xl bg-[#12151c] border border-white/[0.1] shadow-2xl p-1 z-40 animate-in fade-in zoom-in-95 duration-150">
+                <button
+                  type="button"
+                  onClick={handleDuplicateWeek}
+                  className="w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-xs text-[var(--text)] hover:bg-white/[0.06] hover:text-white transition"
+                >
+                  <Copy className="w-3.5 h-3.5 text-[#ffb347]" />
+                  <span>Duplicate week</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDeleteWeek}
+                  className="w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-xs text-[var(--danger)] hover:bg-[var(--danger)]/15 transition"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>Delete week</span>
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Add Session Button */}
+          <button
+            type="button"
+            onClick={handleAddSession}
+            data-testid="add-session-btn"
+            className="btn-primary min-h-[36px] px-3 text-xs flex items-center gap-1.5 ml-auto"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span>Add session</span>
+          </button>
+
+          {/* Collapse Button */}
+          {onClose && (
+            <button
+              type="button"
+              onClick={onClose}
+              className="p-2 rounded-lg border border-[var(--border)] hover:bg-white/[0.08] text-[var(--muted)] hover:text-white transition ml-1"
+              title="Collapse Editor"
+              aria-label="Collapse Editor"
+            >
+              <X className="w-4 h-4" />
             </button>
           )}
         </div>
-      </div>
 
-      {/* Needs fixing alert banner for invalid dates in current week */}
-      {sessions.some(s => !isValidDate(s.date)) && (
-        <div
-          data-testid="needs-fixing-alert"
-          className="mx-3 my-2 p-2.5 bg-rose-500/15 border border-rose-500/40 rounded-xl text-xs text-rose-300 flex items-center justify-between gap-2"
-        >
-          <div className="flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
-            <span>
-              <strong>Needs fixing:</strong> {sessions.filter(s => !isValidDate(s.date)).length} session(s) have an invalid date (must be YYYY-MM-DD).
-            </span>
+        {/* ROW 2: "Show OFF days" switch, "Days shown" chips, Filter */}
+        <div className="space-y-2 pt-1 border-t border-white/[0.05]">
+          <div className="flex items-center justify-between gap-2">
+            {/* Show OFF days toggle */}
+            <label className="flex items-center gap-2 cursor-pointer select-none text-xs font-semibold text-[var(--text)]">
+              <input
+                type="checkbox"
+                checked={showOffDays}
+                onChange={handleToggleShowOffDays}
+                data-testid="toggle-show-off-days"
+                className="accent-[var(--gold)] w-3.5 h-3.5 cursor-pointer"
+              />
+              <span>Show OFF days</span>
+            </label>
+
+            {/* Filter: All sessions / Section N only */}
+            <select
+              value={filterMode}
+              onChange={(e) => setFilterMode(e.target.value)}
+              className="input-field text-[11px] py-1 px-2 bg-[var(--surface-2)] font-medium max-w-[160px]"
+              data-testid="session-filter-select"
+              aria-label="Filter Sessions"
+            >
+              <option value="all">All sessions</option>
+              <option value="section">Section {currentSection?.id || selectedSectionId} only</option>
+            </select>
           </div>
-          <span className="text-[10px] text-rose-300/80">Never dropped silently</span>
-        </div>
-      )}
 
-      {/* Spreadsheet Table View */}
-      <div className="flex-1 overflow-auto custom-scrollbar">
-        <table className="w-full border-collapse text-left text-xs min-w-[760px]">
-          <thead className="bg-[var(--surface-2)] sticky top-0 z-10 border-b border-[var(--border)] text-[10px] uppercase font-bold text-[var(--muted)] select-none">
-            <tr>
-              <th className="p-2 w-28">
-                <span className="flex items-center gap-1">
-                  <span>Date / Day</span>
-                  <HelpTooltip topicKey="week" />
-                </span>
-              </th>
-              <th className="p-2 w-20">Type</th>
-              <th className="p-2 w-14">No.</th>
-              <th className="p-2 w-28">Subject</th>
-              <th className="p-2">
-                <span className="flex items-center gap-1">
-                  <span>Topics (one/line)</span>
-                  <HelpTooltip topicKey="topics" />
-                </span>
-              </th>
-              <th className="p-2 w-28">
-                <span className="flex items-center gap-1">
-                  <span>Scope</span>
-                  <HelpTooltip topicKey="scope" />
-                </span>
-              </th>
-              <th className="p-2 w-28">Time</th>
-              <th className="p-2 w-20">Place</th>
-              <th className="p-2 w-20">
-                <span className="flex items-center gap-1">
-                  <span>Status</span>
-                  <HelpTooltip topicKey="status" />
-                </span>
-              </th>
-              <th className="p-2 w-16 text-center">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-[var(--border)]">
-            {displayedSessions.length === 0 ? (
-              <tr>
-                <td colSpan={10} className="p-8 text-center text-[var(--muted)] italic">
-                  No sessions found for this week / filter. Click "+ Add Session" to create one.
-                </td>
-              </tr>
-            ) : (
-              displayedSessions.map(({ session: s, originalIdx: idx }) => {
-                const dayName = getShortDayName(getWeekdayFromDate(s.date));
-                const subjectObj = schedule?.subjects?.find(sub => sub.name?.toLowerCase() === (s.subject || '').toLowerCase());
-                const subjColor = subjectObj ? subjectObj.color : '#dfc274';
+          {/* Days Shown Chips */}
+          <div data-testid="days-shown-control" className="space-y-1">
+            <div className="flex items-center justify-between text-[11px]">
+              <span className="text-[var(--muted)] font-medium">Days shown:</span>
+              <button
+                type="button"
+                onClick={resetDaysToDefault}
+                data-testid="reset-days-default-btn"
+                className="text-[10px] text-[#ffb347] hover:underline"
+              >
+                Reset to default
+              </button>
+            </div>
 
-                const isHighlighted = highlightedSessionIndex === idx;
-                const isDateInvalid = !isValidDate(s.date);
-
+            <div className="flex flex-wrap items-center gap-1.5">
+              {calendarDates.map(d => {
+                const isIncluded = explicitDaysSet ? explicitDaysSet.has(d) : true;
+                const shortWd = getWeekdayFromDate(d);
+                const label = `${shortWd} ${formatDateAsDM(d)}`;
                 return (
-                  <tr
-                    key={idx}
-                    id={`session-row-${idx}`}
-                    data-testid={isDateInvalid ? "needs-fixing-row" : undefined}
-                    className={`transition-all duration-300 ${
-                      isHighlighted
-                        ? 'bg-[var(--gold)]/20 ring-2 ring-[var(--gold)] ring-amber-400 shadow-md'
-                        : isDateInvalid
-                        ? 'bg-rose-950/20 hover:bg-rose-950/30 border-l-4 border-rose-500'
-                        : 'hover:bg-[var(--surface-2)]/40'
+                  <button
+                    key={d}
+                    type="button"
+                    data-testid={`day-chip-${d}`}
+                    data-included={isIncluded ? 'true' : 'false'}
+                    onClick={() => toggleDay(d)}
+                    className={`px-2 py-0.5 rounded-full text-[11px] font-medium transition select-none ${
+                      isIncluded
+                        ? 'bg-[var(--gold)]/20 text-[var(--gold)] border border-[var(--gold)]/60'
+                        : 'bg-white/[0.04] text-[var(--muted)] border border-white/[0.08] line-through opacity-60'
                     }`}
+                    title={`Click to ${isIncluded ? 'exclude' : 'include'} ${label}`}
                   >
-                    {/* 1. Date & Day Name */}
-                    <td className="p-1.5 align-top">
-                      <div className="flex flex-col gap-0.5">
-                        <input
-                          type="text"
-                          value={s.date || ''}
-                          onInput={(e) => updateSessionField(idx, 'date', e.target.value)}
-                          className={`input-field w-full px-1.5 py-0.5 text-[11px] font-mono ${
-                            isDateInvalid ? 'border-rose-500 bg-rose-950/40 text-rose-200' : ''
-                          }`}
-                          placeholder="YYYY-MM-DD"
-                        />
-                        <span className="text-[10px] text-[var(--gold)] font-bold px-1">
-                          {dayName || (isDateInvalid ? 'Invalid Date' : 'Unknown Day')}
-                        </span>
-                        {isDateInvalid && (
-                          <span
-                            data-testid="needs-fixing-badge"
-                            className="inline-block mt-0.5 px-1.5 py-0.5 rounded text-[10px] font-bold bg-rose-500/25 text-rose-300 border border-rose-500/40"
-                          >
-                            Needs fixing: date not valid
-                          </span>
-                        )}
-                      </div>
-                    </td>
-
-                    {/* 2. Type */}
-                    <td className="p-1.5 align-top">
-                      <select
-                        value={s.type}
-                        onChange={(e) => updateSessionField(idx, 'type', e.target.value)}
-                        className="input-field w-full px-1.5 py-1 text-xs font-semibold text-[var(--gold)]"
-                      >
-                        {(schedule?.sessionTypes || []).map(st => (
-                          <option key={st.key} value={st.key}>{st.label}</option>
-                        ))}
-                      </select>
-                    </td>
-
-                    {/* 3. Number */}
-                    <td className="p-1.5 align-top">
-                      <input
-                        type="number"
-                        value={s.number !== undefined && s.number !== null ? s.number : ''}
-                        onInput={(e) => {
-                          const val = e.target.value.trim();
-                          updateSessionField(idx, 'number', val === '' ? undefined : (parseInt(val, 10) || 0));
-                        }}
-                        placeholder="—"
-                        className="input-field w-full px-1 py-1 text-center font-bold"
-                      />
-                    </td>
-
-                    {/* 4. Subject */}
-                    <td className="p-1.5 align-top">
-                      <div className="flex items-center gap-1.5">
-                        <span
-                          className="w-2.5 h-2.5 rounded-full shrink-0 shadow-sm"
-                          style={{ backgroundColor: subjColor }}
-                        />
-                        <select
-                          value={s.subject}
-                          onChange={(e) => updateSessionField(idx, 'subject', e.target.value)}
-                          className="input-field w-full px-1.5 py-1 text-xs font-semibold truncate"
-                        >
-                          {(schedule?.subjects || []).map(sub => (
-                            <option key={sub.name} value={sub.name}>{sub.name}</option>
-                          ))}
-                        </select>
-                      </div>
-                    </td>
-
-                    {/* 5. Topics */}
-                    <td className="p-1.5 align-top">
-                      <textarea
-                        value={formatTopicsForDisplay(s.topics)}
-                        onInput={(e) => updateSessionField(idx, 'topics', parseTopicsString(e.target.value))}
-                        rows={2}
-                        className="input-field w-full px-2 py-1 text-xs resize-y custom-scrollbar"
-                        placeholder="Topics (one per line)"
-                      />
-                    </td>
-
-                    {/* 6. Scope Editor */}
-                    <td className="p-1.5 align-top relative">
-                      <ScopeCell
-                        scope={s.scope}
-                        sections={schedule?.sections || []}
-                        isOpen={editingScopeIdx === idx}
-                        onToggleOpen={() => setEditingScopeIdx(editingScopeIdx === idx ? null : idx)}
-                        onChangeScope={(newScope) => updateSessionField(idx, 'scope', newScope)}
-                      />
-                    </td>
-
-                    {/* 7. Time Start & End */}
-                    <td className="p-1.5 align-top">
-                      <div className="flex items-center gap-1">
-                        <input
-                          type="text"
-                          value={s.start || ''}
-                          onInput={(e) => updateSessionField(idx, 'start', e.target.value)}
-                          placeholder="08:00"
-                          className="input-field w-12 px-1 py-0.5 text-center font-mono text-[11px]"
-                        />
-                        <span className="text-[var(--muted)]">-</span>
-                        <input
-                          type="text"
-                          value={s.end || ''}
-                          onInput={(e) => updateSessionField(idx, 'end', e.target.value)}
-                          placeholder="09:30"
-                          className="input-field w-12 px-1 py-0.5 text-center font-mono text-[11px]"
-                        />
-                      </div>
-                    </td>
-
-                    {/* 8. Place */}
-                    <td className="p-1.5 align-top">
-                      <input
-                        type="text"
-                        value={s.place || ''}
-                        onInput={(e) => updateSessionField(idx, 'place', e.target.value)}
-                        className="input-field w-full px-1.5 py-1 text-xs font-semibold"
-                        placeholder="Hall 4"
-                      />
-                    </td>
-
-                    {/* 9. Status & Note */}
-                    <td className="p-1.5 align-top">
-                      <div className="flex flex-col gap-1">
-                        <select
-                          value={s.status || 'normal'}
-                          onChange={(e) => updateSessionField(idx, 'status', e.target.value)}
-                          className={`input-field w-full px-1.5 py-0.5 text-[11px] font-bold ${
-                            s.status === 'leave'
-                              ? 'border-[var(--danger)] text-[var(--danger)]'
-                              : s.status === 'recorded'
-                              ? 'border-[var(--ok)] text-[var(--ok)]'
-                              : 'text-[var(--text)]'
-                          }`}
-                        >
-                          <option value="normal">Normal</option>
-                          <option value="recorded">Recorded</option>
-                          <option value="leave">Leave / Holiday</option>
-                        </select>
-                        {(s.status === 'leave' || s.note) && (
-                          <input
-                            type="text"
-                            value={s.note || ''}
-                            onInput={(e) => updateSessionField(idx, 'note', e.target.value)}
-                            placeholder="Note / Reason"
-                            className="input-field w-full px-1 py-0.5 text-[10px]"
-                          />
-                        )}
-                      </div>
-                    </td>
-
-                    {/* 10. Actions */}
-                    <td className="p-1.5 align-top text-center">
-                      <div className="flex items-center justify-center gap-1 pt-1">
-                        <button
-                          onClick={() => duplicateSession(idx)}
-                          className="p-1.5 bg-[var(--surface-2)] hover:bg-[var(--surface-2)]/80 text-[var(--muted)] hover:text-white rounded-lg text-[11px] transition"
-                          title="Duplicate session"
-                        >
-                          <Copy className="w-3.5 h-3.5" />
-                        </button>
-                        <button
-                          onClick={() => deleteSession(idx)}
-                          className="p-1.5 bg-[var(--danger)]/15 hover:bg-[var(--danger)]/25 text-[var(--danger)] rounded-lg text-[11px] transition"
-                          title="Delete session"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
+                    {label}
+                  </button>
                 );
-              })
-            )}
-          </tbody>
-        </table>
+              })}
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
-  );
-}
 
-/**
- * Interactive Scope Selector Cell
- */
-function ScopeCell({ scope = {}, sections = [], isOpen, onToggleOpen, onChangeScope }) {
-  // Label for scope
-  let label = 'Everyone';
-  if (scope?.letter) {
-    label = `Group (${scope.letter})`;
-  } else if (Array.isArray(scope?.practicalGroups) && scope.practicalGroups.length > 0) {
-    label = `Pr. ${scope.practicalGroups.join(',')}`;
-  } else if (Array.isArray(scope?.sections) && scope.sections.length > 0) {
-    label = `Sec. ${scope.sections.join(',')}`;
-  }
-
-  // Available unique letters
-  const letters = Array.from(new Set(sections.map(s => s.letter).filter(Boolean)));
-  // Available practical groups
-  const practicalGroups = Array.from(new Set(sections.map(s => s.practicalGroup).filter(g => g !== undefined))).sort((a,b)=>a-b);
-
-  return (
-    <div>
-      <button
-        type="button"
-        onClick={onToggleOpen}
-        className="w-full px-2 py-1 rounded-lg bg-[var(--surface-2)] border border-[var(--border)] text-[var(--gold)] font-semibold text-[11px] truncate text-left hover:border-[var(--gold)] transition"
-      >
-        {label} ▾
-      </button>
-
-      {isOpen && (
-        <div className="absolute left-0 top-10 z-30 w-64 bg-[var(--surface-2)] border border-[var(--border)] rounded-xl shadow-2xl p-3 space-y-2 text-xs medscope-card">
-          <div className="font-bold text-[11px] text-[var(--gold)] border-b border-[var(--border)] pb-1.5 flex justify-between items-center">
-            <span>Select Session Scope:</span>
-            <button onClick={onToggleOpen} className="text-[var(--muted)] hover:text-white">
-              <X className="w-3.5 h-3.5" />
+      {/* ============================================================== */}
+      {/* SESSION LIST: Grouped by Date (Accordion Cards)                */}
+      {/* ============================================================== */}
+      <div className="p-3 space-y-4 pb-20">
+        {groupedSessions.length === 0 ? (
+          <div className="text-center py-12 text-[var(--muted)] space-y-3">
+            <p className="text-xs">No sessions scheduled for Week {selectedWeekNum}.</p>
+            <button
+              type="button"
+              onClick={handleAddSession}
+              className="btn-primary text-xs px-4 py-2"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Add First Session</span>
             </button>
           </div>
+        ) : (
+          groupedSessions.map(group => {
+            const isInvalidGroup = group.dateKey === '__invalid__';
+            const shortWd = isInvalidGroup ? 'Fix' : getWeekdayFromDate(group.dateKey);
+            const fullWd = isInvalidGroup ? 'Date Error' : getFullDayName(shortWd);
+            const dateStr = isInvalidGroup ? 'Unscheduled' : formatDateAsDM(group.dateKey);
+            const groupHeaderTitle = `${fullWd} ${dateStr}`.trim();
 
-          {/* Option 1: Everyone */}
-          <label className="flex items-center gap-2 cursor-pointer p-1.5 rounded-lg hover:bg-[var(--surface)] transition">
-            <input
-              type="radio"
-              name="scopeType"
-              checked={scope?.all === true}
-              onChange={() => onChangeScope({ all: true })}
-              className="accent-[var(--gold)]"
-            />
-            <span className="font-semibold text-[var(--text)]">Everyone (All Sections)</span>
-          </label>
+            return (
+              <div key={group.dateKey} className="space-y-2">
+                {/* Date Group Header */}
+                <div className="text-[11px] font-bold text-[var(--gold)] flex items-center justify-between px-1">
+                  <div className="flex items-center gap-1.5">
+                    <Calendar className="w-3 h-3 text-[#ffb347]" />
+                    <span>{groupHeaderTitle}</span>
+                  </div>
+                  <span className="text-[10px] text-[var(--muted)] font-normal">
+                    {group.sessions.length} session{group.sessions.length !== 1 ? 's' : ''}
+                  </span>
+                </div>
 
-          {/* Option 2: Letter Group */}
-          <div className="p-1.5 rounded-lg hover:bg-[var(--surface)]/60 space-y-1">
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="radio"
-                name="scopeType"
-                checked={!!scope?.letter}
-                onChange={() => onChangeScope({ letter: letters[0] || 'A' })}
-                className="accent-[var(--gold)]"
-              />
-              <span className="font-semibold text-[var(--text)]">Letter Group:</span>
-            </label>
-            {scope?.letter && (
-              <div className="flex gap-1.5 pl-5">
-                {letters.map(ltr => (
-                  <button
-                    key={ltr}
-                    type="button"
-                    onClick={() => onChangeScope({ letter: ltr })}
-                    className={`px-2 py-0.5 rounded-lg text-xs font-bold border transition ${
-                      scope.letter === ltr ? 'bg-[var(--gold)] text-[var(--on-gold)] border-[var(--gold)]' : 'bg-[var(--surface)] text-[var(--text)] border-[var(--border)]'
-                    }`}
-                  >
-                    Group ({ltr})
-                  </button>
-                ))}
+                {/* Session Cards for this Date */}
+                <div className="space-y-2">
+                  {group.sessions.map(item => {
+                    const origIdx = item._originalIdx;
+                    const isOpen = expandedIndex === origIdx;
+                    const subColor = getSubjectColor(item.subject);
+                    const isRecorded = item.status === 'recorded';
+                    const isLeave = item.status === 'leave';
+
+                    const isInvalidDate = !isValidDate(item.date);
+                    const isNotInDaysShown = explicitDaysSet && !explicitDaysSet.has(item.date);
+                    const needsFixing = isInvalidDate || isNotInDaysShown;
+                    const needsFixingReason = !isValidDate(item.date)
+                      ? 'date not valid'
+                      : isNotInDaysShown
+                      ? 'date not in days shown'
+                      : '';
+
+                    // Scope concise chip display
+                    const renderScopeBadge = (scope) => {
+                      if (!scope || scope.all) {
+                        return <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-blue-500/15 text-blue-300 border border-blue-500/30">All</span>;
+                      }
+                      if (scope.letter) {
+                        return <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">Grp {scope.letter}</span>;
+                      }
+                      if (Array.isArray(scope.practicalGroups) && scope.practicalGroups.length > 0) {
+                        return <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-purple-500/15 text-purple-300 border border-purple-500/30">PG {scope.practicalGroups.join(',')}</span>;
+                      }
+                      if (Array.isArray(scope.sections) && scope.sections.length > 0) {
+                        return <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-amber-500/15 text-amber-300 border border-amber-500/30">Sec {scope.sections.join(',')}</span>;
+                      }
+                      return null;
+                    };
+
+                    return (
+                      <div
+                        key={origIdx}
+                        id={`session-card-${origIdx}`}
+                        data-testid={needsFixing ? 'needs-fixing-row' : `session-card-${origIdx}`}
+                        className={`medscope-card rounded-xl border transition-all overflow-hidden ${
+                          isOpen
+                            ? 'border-[var(--gold)] bg-[#12151c] shadow-xl ring-1 ring-[var(--gold)]/50'
+                            : needsFixing
+                            ? 'border-amber-500/80 bg-amber-950/20 shadow-[0_0_12px_rgba(245,158,11,0.15)] hover:border-amber-400'
+                            : 'border-white/[0.08] bg-[#0d0f14]/80 hover:border-white/[0.18]'
+                        }`}
+                      >
+                        {/* ================================================== */}
+                        {/* COMPACT CARD HEADER (Always visible)              */}
+                        {/* ================================================== */}
+                        <div
+                          onClick={() => (isOpen ? handleCloseSession() : handleOpenSession(origIdx))}
+                          className="p-2.5 flex items-center justify-between cursor-pointer select-none gap-2 hover:bg-white/[0.02]"
+                        >
+                          <div className="flex items-center gap-2 min-w-0 flex-1">
+                            {/* Type + Number Badge */}
+                            <span className="px-1.5 py-0.5 rounded text-[11px] font-bold font-mono bg-[var(--surface-2)] text-[var(--gold)] border border-[var(--border)] shrink-0">
+                              {isLeave ? 'Leave' : `${item.type || 'tut'} ${item.number !== undefined ? item.number : ''}`.trim()}
+                            </span>
+
+                            {/* Subject with Color Dot */}
+                            <div className="flex items-center gap-1.5 min-w-0">
+                              <span
+                                className="w-2.5 h-2.5 rounded-full shrink-0"
+                                style={{ backgroundColor: subColor }}
+                              />
+                              <span className="text-xs font-semibold truncate text-[var(--text)]">
+                                {isLeave ? (item.note || 'Study Leave') : item.subject}
+                              </span>
+                            </div>
+
+                            {/* Time & Place */}
+                            {!isLeave && (
+                              <div className="flex items-center gap-1.5 text-[11px] text-[var(--muted)] ml-auto shrink-0 font-mono">
+                                <span>{isRecorded ? 'Recorded' : `${item.start || ''}-${item.end || ''}`}</span>
+                                <span>•</span>
+                                <span className="truncate max-w-[90px]">{isRecorded ? 'Online' : item.place || '—'}</span>
+                              </div>
+                            )}
+
+                            {/* Scope Chips */}
+                            <div className="shrink-0">
+                              {renderScopeBadge(item.scope)}
+                            </div>
+                          </div>
+
+                          <div className="text-[var(--muted)] shrink-0">
+                            {isOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                          </div>
+                        </div>
+
+                        {/* Needs Fixing Banner (if any) */}
+                        {needsFixing && !isOpen && (
+                          <div className="px-3 py-1 bg-amber-500/10 border-t border-amber-500/20 text-[11px] font-semibold text-amber-400 flex items-center gap-1.5">
+                            <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
+                            <span>Needs fixing: {needsFixingReason}</span>
+                          </div>
+                        )}
+
+                        {/* ================================================== */}
+                        {/* OPENED ACCORDION FORM (Two-Column Grid)            */}
+                        {/* ================================================== */}
+                        {isOpen && localSession && (
+                          <div className="p-3 border-t border-white/[0.08] bg-[#0a0c10]/90 space-y-3.5 text-xs animate-in fade-in duration-150">
+                            {needsFixing && (
+                              <div className="p-2 rounded-lg bg-amber-500/10 border border-amber-500/30 text-[11px] font-semibold text-amber-400 flex items-center gap-1.5">
+                                <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
+                                <span>Needs fixing: {needsFixingReason}</span>
+                              </div>
+                            )}
+
+                            {/* 1. WHEN: Date, Start, End */}
+                            <div className="space-y-1.5">
+                              <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--gold)]">
+                                When
+                              </span>
+                              <div className="grid grid-cols-3 gap-2">
+                                <div>
+                                  <label className="block text-[10px] text-[var(--muted)] mb-0.5">Date</label>
+                                  <input
+                                    type="date"
+                                    value={localSession.date || ''}
+                                    onChange={(e) => updateLocalField('date', e.target.value)}
+                                    onBlur={handleBlurField}
+                                    onKeyDown={handleKeyDownField}
+                                    className="input-field w-full py-1 text-xs font-mono [color-scheme:dark] focus:border-[#ffb347] focus:ring-1 focus:ring-[#ffb347]"
+                                    aria-label="Session Date"
+                                  />
+                                </div>
+                                <div>
+                                  <label className="block text-[10px] text-[var(--muted)] mb-0.5">Start Time</label>
+                                  <input
+                                    type="text"
+                                    placeholder="08:00"
+                                    value={localSession.start || ''}
+                                    disabled={localSession.status === 'recorded' || localSession.status === 'leave'}
+                                    onChange={(e) => updateLocalField('start', e.target.value)}
+                                    onBlur={handleBlurField}
+                                    onKeyDown={handleKeyDownField}
+                                    className="input-field w-full py-1 text-xs font-mono disabled:opacity-40 disabled:cursor-not-allowed focus:border-[#ffb347] focus:ring-1 focus:ring-[#ffb347]"
+                                    aria-label="Start Time"
+                                  />
+                                </div>
+                                <div>
+                                  <label className="block text-[10px] text-[var(--muted)] mb-0.5">End Time</label>
+                                  <input
+                                    type="text"
+                                    placeholder="09:30"
+                                    value={localSession.end || ''}
+                                    disabled={localSession.status === 'recorded' || localSession.status === 'leave'}
+                                    onChange={(e) => updateLocalField('end', e.target.value)}
+                                    onBlur={handleBlurField}
+                                    onKeyDown={handleKeyDownField}
+                                    className="input-field w-full py-1 text-xs font-mono disabled:opacity-40 disabled:cursor-not-allowed focus:border-[#ffb347] focus:ring-1 focus:ring-[#ffb347]"
+                                    aria-label="End Time"
+                                  />
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* 2. WHAT: Type, Number, Subject, Topics */}
+                            <div className="space-y-1.5">
+                              <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--gold)]">
+                                What
+                              </span>
+                              <div className="grid grid-cols-3 gap-2">
+                                <div>
+                                  <label className="block text-[10px] text-[var(--muted)] mb-0.5">Type</label>
+                                  <select
+                                    value={localSession.type || 'tut'}
+                                    onChange={(e) => {
+                                      updateLocalField('type', e.target.value);
+                                      commitLocalSession(origIdx, { ...localSession, type: e.target.value });
+                                    }}
+                                    className="input-field w-full py-1 text-xs focus:border-[#ffb347] focus:ring-1 focus:ring-[#ffb347]"
+                                  >
+                                    {sessionTypes.map(st => (
+                                      <option key={st.key} value={st.key}>
+                                        {st.label || st.key}
+                                      </option>
+                                    ))}
+                                    {!sessionTypes.some(st => st.key === localSession.type) && (
+                                      <option value={localSession.type}>{localSession.type}</option>
+                                    )}
+                                  </select>
+                                </div>
+                                <div>
+                                  <label className="block text-[10px] text-[var(--muted)] mb-0.5">Number</label>
+                                  <input
+                                    type="number"
+                                    value={localSession.number !== undefined && localSession.number !== null ? localSession.number : ''}
+                                    onChange={(e) => updateLocalField('number', e.target.value === '' ? '' : parseInt(e.target.value, 10))}
+                                    onBlur={handleBlurField}
+                                    onKeyDown={handleKeyDownField}
+                                    className="input-field w-full py-1 text-xs font-mono focus:border-[#ffb347] focus:ring-1 focus:ring-[#ffb347]"
+                                  />
+                                </div>
+                                <div>
+                                  <label className="block text-[10px] text-[var(--muted)] mb-0.5">Subject</label>
+                                  <select
+                                    value={localSession.subject || ''}
+                                    onChange={(e) => {
+                                      updateLocalField('subject', e.target.value);
+                                      commitLocalSession(origIdx, { ...localSession, subject: e.target.value });
+                                    }}
+                                    className="input-field w-full py-1 text-xs focus:border-[#ffb347] focus:ring-1 focus:ring-[#ffb347]"
+                                  >
+                                    {subjects.map(sub => (
+                                      <option key={sub.name} value={sub.name}>
+                                        {sub.name}
+                                      </option>
+                                    ))}
+                                    {!subjects.some(sub => sub.name === localSession.subject) && (
+                                      <option value={localSession.subject}>{localSession.subject}</option>
+                                    )}
+                                  </select>
+                                </div>
+                              </div>
+
+                              {/* Topics: multi-line box (at least 4 lines tall, full width) */}
+                              <div>
+                                <label className="block text-[10px] text-[var(--muted)] mb-0.5">
+                                  Topics (one topic per line)
+                                </label>
+                                <textarea
+                                  rows={4}
+                                  value={
+                                    Array.isArray(localSession.topics)
+                                      ? localSession.topics.map(t => (typeof t === 'string' ? t : `${t.label || ''}: ${t.text || ''}`.trim())).join('\n')
+                                      : localSession.topics || ''
+                                  }
+                                  onChange={(e) => {
+                                    const lines = e.target.value.split('\n').map(l => l.trim()).filter(Boolean);
+                                    updateLocalField('topics', lines);
+                                  }}
+                                  onBlur={handleBlurField}
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Escape') handleCancelEdit();
+                                  }}
+                                  placeholder="Enter topic titles (one per line)..."
+                                  className="input-field w-full text-xs font-sans py-1.5 px-2.5 focus:border-[#ffb347] focus:ring-1 focus:ring-[#ffb347] custom-scrollbar"
+                                />
+                              </div>
+                            </div>
+
+                            {/* 3. WHO: Scope Chips Selector */}
+                            <div className="space-y-1.5">
+                              <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--gold)]">
+                                Who (Attending Sections)
+                              </span>
+                              <div className="flex flex-wrap gap-1.5">
+                                {/* All Sections Chip */}
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const nextScope = { all: true };
+                                    updateLocalField('scope', nextScope);
+                                    commitLocalSession(origIdx, { ...localSession, scope: nextScope });
+                                  }}
+                                  className={`px-2.5 py-1 rounded-lg text-xs font-semibold border transition ${
+                                    localSession.scope?.all
+                                      ? 'bg-blue-600/30 text-blue-200 border-blue-400'
+                                      : 'bg-white/[0.04] text-[var(--muted)] border-white/[0.08] hover:text-white'
+                                  }`}
+                                >
+                                  Everyone (All)
+                                </button>
+
+                                {/* Letter Group Chips */}
+                                {['A', 'B', 'C', 'D'].map(letter => {
+                                  const isSelected = localSession.scope?.letter === letter && !localSession.scope?.all;
+                                  return (
+                                    <button
+                                      key={letter}
+                                      type="button"
+                                      onClick={() => {
+                                        const nextScope = { letter };
+                                        updateLocalField('scope', nextScope);
+                                        commitLocalSession(origIdx, { ...localSession, scope: nextScope });
+                                      }}
+                                      className={`px-2.5 py-1 rounded-lg text-xs font-semibold border transition ${
+                                        isSelected
+                                          ? 'bg-emerald-600/30 text-emerald-200 border-emerald-400'
+                                          : 'bg-white/[0.04] text-[var(--muted)] border-white/[0.08] hover:text-white'
+                                      }`}
+                                    >
+                                      Group {letter}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            </div>
+
+                            {/* 4. WHERE: Place */}
+                            <div className="space-y-1.5">
+                              <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--gold)]">
+                                Where
+                              </span>
+                              <input
+                                type="text"
+                                placeholder="Hall 1, Morgue 2, Lab 9..."
+                                value={localSession.place || ''}
+                                onChange={(e) => updateLocalField('place', e.target.value)}
+                                onBlur={handleBlurField}
+                                onKeyDown={handleKeyDownField}
+                                className="input-field w-full py-1 text-xs focus:border-[#ffb347] focus:ring-1 focus:ring-[#ffb347]"
+                                aria-label="Place"
+                              />
+                            </div>
+
+                            {/* 5. STATUS: Normal, Recorded, Leave, Note */}
+                            <div className="space-y-1.5">
+                              <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--gold)]">
+                                Status
+                              </span>
+                              <div className="grid grid-cols-3 gap-1.5 bg-[var(--surface-2)]/60 p-1 rounded-lg border border-[var(--border)]">
+                                {['normal', 'recorded', 'leave'].map(st => (
+                                  <button
+                                    key={st}
+                                    type="button"
+                                    onClick={() => {
+                                      const nextSession = { ...localSession, status: st };
+                                      setLocalSession(nextSession);
+                                      commitLocalSession(origIdx, nextSession);
+                                    }}
+                                    className={`py-1 rounded text-xs font-semibold capitalize transition ${
+                                      localSession.status === st
+                                        ? 'bg-[var(--gold)] text-black shadow-sm'
+                                        : 'text-[var(--muted)] hover:text-white'
+                                    }`}
+                                  >
+                                    {st}
+                                  </button>
+                                ))}
+                              </div>
+
+                              <div>
+                                <label className="block text-[10px] text-[var(--muted)] mb-0.5">
+                                  Note (displayed for Leave/Special)
+                                </label>
+                                <input
+                                  type="text"
+                                  placeholder="e.g. Study Leave, National Holiday..."
+                                  value={localSession.note || ''}
+                                  onChange={(e) => updateLocalField('note', e.target.value)}
+                                  onBlur={handleBlurField}
+                                  onKeyDown={handleKeyDownField}
+                                  className="input-field w-full py-1 text-xs focus:border-[#ffb347] focus:ring-1 focus:ring-[#ffb347]"
+                                />
+                              </div>
+                            </div>
+
+                            {/* 6. BUTTONS: Duplicate, Delete (confirm), Close */}
+                            <div className="pt-2 border-t border-white/[0.08] flex items-center justify-between gap-2">
+                              <div className="flex items-center gap-2">
+                                <button
+                                  type="button"
+                                  onClick={(e) => handleDuplicateSession(origIdx, e)}
+                                  className="btn-secondary px-2.5 py-1.5 text-xs flex items-center gap-1.5"
+                                  title="Duplicate this session"
+                                >
+                                  <Copy className="w-3.5 h-3.5" />
+                                  <span>Duplicate</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={(e) => handleDeleteSession(origIdx, e)}
+                                  className="px-2.5 py-1.5 rounded-lg bg-[var(--danger)]/15 hover:bg-[var(--danger)]/25 text-[var(--danger)] text-xs font-semibold flex items-center gap-1.5 border border-[var(--danger)]/30 transition"
+                                  title="Delete this session"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                  <span>Delete</span>
+                                </button>
+                              </div>
+
+                              <button
+                                type="button"
+                                onClick={handleCloseSession}
+                                className="btn-primary px-3 py-1.5 text-xs"
+                              >
+                                Close
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
-            )}
-          </div>
-
-          {/* Option 3: Practical Groups */}
-          <div className="p-1.5 rounded-lg hover:bg-[var(--surface)]/60 space-y-1">
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="radio"
-                name="scopeType"
-                checked={Array.isArray(scope?.practicalGroups)}
-                onChange={() => onChangeScope({ practicalGroups: [practicalGroups[0] || 1] })}
-                className="accent-[var(--gold)]"
-              />
-              <span className="font-semibold text-[var(--text)]">Practical Groups:</span>
-            </label>
-            {Array.isArray(scope?.practicalGroups) && (
-              <div className="flex flex-wrap gap-1 pl-5">
-                {practicalGroups.map(pg => {
-                  const isChecked = scope.practicalGroups.includes(pg);
-                  return (
-                    <button
-                      key={pg}
-                      type="button"
-                      onClick={() => {
-                        const next = isChecked
-                          ? scope.practicalGroups.filter(g => g !== pg)
-                          : [...scope.practicalGroups, pg];
-                        onChangeScope({ practicalGroups: next.length ? next : [pg] });
-                      }}
-                      className={`px-2 py-0.5 rounded-lg text-[10px] font-bold border transition ${
-                        isChecked ? 'bg-[var(--gold)] text-[var(--on-gold)] border-[var(--gold)]' : 'bg-[var(--surface)] text-[var(--text)] border-[var(--border)]'
-                      }`}
-                    >
-                      Grp {pg}
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-
-          {/* Option 4: Specific Sections */}
-          <div className="p-1.5 rounded-lg hover:bg-[var(--surface)]/60 space-y-1">
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="radio"
-                name="scopeType"
-                checked={Array.isArray(scope?.sections)}
-                onChange={() => onChangeScope({ sections: [sections[0]?.id || 'A1'] })}
-                className="accent-[var(--gold)]"
-              />
-              <span className="font-semibold text-[var(--text)]">Specific Sections:</span>
-            </label>
-            {Array.isArray(scope?.sections) && (
-              <div className="flex flex-wrap gap-1 pl-5 max-h-24 overflow-y-auto custom-scrollbar">
-                {sections.map(sec => {
-                  const isChecked = scope.sections.includes(sec.id);
-                  return (
-                    <button
-                      key={sec.id}
-                      type="button"
-                      onClick={() => {
-                        const next = isChecked
-                          ? scope.sections.filter(s => s !== sec.id)
-                          : [...scope.sections, sec.id];
-                        onChangeScope({ sections: next.length ? next : [sec.id] });
-                      }}
-                      className={`px-2 py-0.5 rounded-lg text-[10px] font-bold border transition ${
-                        isChecked ? 'bg-[var(--gold)] text-[var(--on-gold)] border-[var(--gold)]' : 'bg-[var(--surface)] text-[var(--text)] border-[var(--border)]'
-                      }`}
-                    >
-                      {sec.id}
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-
-        </div>
-      )}
+            );
+          })
+        )}
+      </div>
     </div>
   );
 }

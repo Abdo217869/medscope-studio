@@ -530,8 +530,13 @@ export function App() {
   const isEmpty = totalSessions === 0;
 
   // Helper to render an arbitrary section & week into offscreen ref and capture dataUrl
-  const captureOffscreen = async (sec, wk, pgNum, renderOptions) => {
-    setOffscreenParams({ section: sec, week: wk, pageNumber: pgNum });
+  const captureOffscreen = async (sec, wk, pgNum, renderOptions, showOffDaysOverride) => {
+    setOffscreenParams({
+      section: sec,
+      week: wk,
+      pageNumber: pgNum,
+      showOffDays: showOffDaysOverride !== undefined ? showOffDaysOverride : (schedule?.settings?.showOffDays ?? true)
+    });
     await new Promise(r => setTimeout(r, 70));
     if (document.fonts && document.fonts.ready) {
       await document.fonts.ready;
@@ -674,11 +679,11 @@ export function App() {
         });
 
         let dataUrl;
-        if (scope === 'current') {
+        if (scope === 'current' && (options.includeOffDays === undefined || options.includeOffDays === (schedule?.settings?.showOffDays ?? true))) {
           const targetNode = pageElementRef.current?.querySelector('.schedule-page') || pageElementRef.current;
           dataUrl = await renderElementToPng(targetNode, renderOptions);
         } else {
-          dataUrl = await captureOffscreen(item.section, item.week, item.pageNumber, renderOptions);
+          dataUrl = await captureOffscreen(item.section, item.week, item.pageNumber, renderOptions, options.includeOffDays);
         }
 
         capturedImages.push({
@@ -840,6 +845,23 @@ export function App() {
       return;
     }
     triggerPrintMode();
+  };
+
+  // Handle Toggle Show OFF days
+  const handleToggleShowOffDays = () => {
+    const curVal = schedule?.settings?.showOffDays ?? true;
+    setSchedule(prev => ({
+      ...prev,
+      settings: {
+        ...prev?.settings,
+        showOffDays: !curVal
+      }
+    }));
+    addToast({
+      type: 'info',
+      title: 'Show OFF Days',
+      message: `Show OFF days is now ${!curVal ? 'ON' : 'OFF'}`
+    });
   };
 
   // Handle Preset switching (GIT)
@@ -1049,26 +1071,35 @@ export function App() {
                   subjects={schedule.subjects}
                   sessionTypes={schedule.sessionTypes}
                   pageNumber={pageNumber}
+                  showOffDays={schedule?.settings?.showOffDays ?? true}
                 />
               </LivePreview>
             )}
 
             {/* Desktop / Tablet Active Step Panels */}
-            {/* Step 1: Data Editor Split Panel */}
+            {/* Step 1: Data Editor Split Panel (~460px side panel on xl >=1280px, overlay drawer below 1280px) */}
             {!isMobile && activeStep === 'data' && (
-              <div className="w-[50%] max-w-[680px] h-full flex flex-col border-l border-[var(--border)] bg-[var(--surface)] z-20 shadow-2xl">
-                <SessionEditor
-                  schedule={schedule}
-                  selectedWeekNum={selectedWeekNum}
-                  onSelectWeek={setSelectedWeekNum}
-                  selectedSectionId={selectedSectionId}
-                  onSelectSection={setSelectedSectionId}
-                  onUpdateSchedule={setSchedule}
-                  highlightedSessionIndex={highlightedSessionIndex}
-                  onOpenSetup={() => setIsSetupOpen(true)}
-                  onOpenImport={() => setIsImportOpen(true)}
+              <>
+                <div
+                  className="fixed inset-0 bg-black/60 backdrop-blur-xs z-40 xl:hidden"
+                  onClick={() => setActiveStep(null)}
+                  aria-hidden="true"
                 />
-              </div>
+                <div className="fixed inset-y-0 right-0 z-40 w-[460px] max-w-[90vw] h-full flex flex-col border-l border-[var(--border)] bg-[var(--surface)] shadow-2xl xl:relative xl:inset-auto xl:z-20 xl:w-[460px] xl:max-w-none overflow-x-hidden animate-in slide-in-from-right-4 duration-200">
+                  <SessionEditor
+                    schedule={schedule}
+                    selectedWeekNum={selectedWeekNum}
+                    onSelectWeek={setSelectedWeekNum}
+                    selectedSectionId={selectedSectionId}
+                    onSelectSection={setSelectedSectionId}
+                    onUpdateSchedule={setSchedule}
+                    highlightedSessionIndex={highlightedSessionIndex}
+                    onOpenSetup={() => setIsSetupOpen(true)}
+                    onOpenImport={() => setIsImportOpen(true)}
+                    onClose={() => setActiveStep(null)}
+                  />
+                </div>
+              </>
             )}
 
 
@@ -1203,6 +1234,7 @@ export function App() {
         onSelectPreset={handleSelectPreset}
         onPrintMode={handlePrintMode}
         onGoHome={handleGoHome}
+        onToggleShowOffDays={handleToggleShowOffDays}
       />
 
       {/* 5. Offscreen DOM Element for High-Resolution Batch Captures */}
@@ -1228,6 +1260,7 @@ export function App() {
             subjects={schedule.subjects}
             sessionTypes={schedule.sessionTypes}
             pageNumber={offscreenParams.pageNumber}
+            showOffDays={offscreenParams.showOffDays ?? (schedule?.settings?.showOffDays ?? true)}
           />
         )}
       </div>
@@ -1244,6 +1277,7 @@ export function App() {
               subjects={schedule.subjects}
               sessionTypes={schedule.sessionTypes}
               pageNumber={idx + 1}
+              showOffDays={schedule?.settings?.showOffDays ?? true}
             />
           </div>
         ))}
