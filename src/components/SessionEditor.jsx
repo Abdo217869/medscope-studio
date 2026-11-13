@@ -44,6 +44,7 @@ export function SessionEditor({
   const [moreMenuOpen, setMoreMenuOpen] = useState(false);
   const [expandedIndex, setExpandedIndex] = useState(null);
   const [localSession, setLocalSession] = useState(null);
+  const localSessionRef = useRef(null);
   const isDirtyRef = useRef(false);
 
   useEffect(() => {
@@ -91,6 +92,7 @@ export function SessionEditor({
         ? JSON.parse(JSON.stringify(sessions[highlightedSessionIndex]))
         : null;
       setLocalSession(sessionToEdit);
+      localSessionRef.current = sessionToEdit;
       isDirtyRef.current = false;
 
       setTimeout(() => {
@@ -105,21 +107,25 @@ export function SessionEditor({
   // Handle accordion toggle
   const handleOpenSession = (idx) => {
     if (expandedIndex === idx) return;
-    if (isDirtyRef.current && localSession && expandedIndex !== null) {
-      commitLocalSession(expandedIndex, localSession);
+    const sessionToCommit = localSessionRef.current || localSession;
+    if (isDirtyRef.current && sessionToCommit && expandedIndex !== null) {
+      commitLocalSession(expandedIndex, sessionToCommit);
     }
     setExpandedIndex(idx);
     const sessionToEdit = sessions[idx] ? JSON.parse(JSON.stringify(sessions[idx])) : null;
     setLocalSession(sessionToEdit);
+    localSessionRef.current = sessionToEdit;
     isDirtyRef.current = false;
   };
 
   const handleCloseSession = () => {
-    if (isDirtyRef.current && localSession && expandedIndex !== null) {
-      commitLocalSession(expandedIndex, localSession);
+    const sessionToCommit = localSessionRef.current || localSession;
+    if (isDirtyRef.current && sessionToCommit && expandedIndex !== null) {
+      commitLocalSession(expandedIndex, sessionToCommit);
     }
     setExpandedIndex(null);
     setLocalSession(null);
+    localSessionRef.current = null;
     isDirtyRef.current = false;
   };
 
@@ -138,22 +144,31 @@ export function SessionEditor({
 
   const handleCancelEdit = () => {
     if (expandedIndex !== null && sessions[expandedIndex]) {
-      setLocalSession(JSON.parse(JSON.stringify(sessions[expandedIndex])));
+      const restored = JSON.parse(JSON.stringify(sessions[expandedIndex]));
+      setLocalSession(restored);
+      localSessionRef.current = restored;
       isDirtyRef.current = false;
     }
   };
 
   const updateLocalField = (field, value) => {
+    let nextSession = null;
     setLocalSession(prev => {
       if (!prev) return prev;
-      return { ...prev, [field]: value };
+      nextSession = { ...prev, [field]: value };
+      localSessionRef.current = nextSession;
+      return nextSession;
     });
+    if (nextSession) {
+      localSessionRef.current = nextSession;
+    }
     isDirtyRef.current = true;
   };
 
   const handleBlurField = () => {
-    if (isDirtyRef.current && localSession && expandedIndex !== null) {
-      commitLocalSession(expandedIndex, localSession);
+    const sessionToCommit = localSessionRef.current || localSession;
+    if (isDirtyRef.current && sessionToCommit && expandedIndex !== null) {
+      commitLocalSession(expandedIndex, sessionToCommit);
     }
   };
 
@@ -167,13 +182,16 @@ export function SessionEditor({
 
   // Toggle "Show OFF days"
   const handleToggleShowOffDays = () => {
-    onUpdateSchedule(prev => ({
-      ...prev,
-      settings: {
-        ...prev?.settings,
-        showOffDays: !showOffDays
-      }
-    }));
+    onUpdateSchedule(prev => {
+      const current = prev?.settings?.showOffDays ?? true;
+      return {
+        ...prev,
+        settings: {
+          ...prev?.settings,
+          showOffDays: !current
+        }
+      };
+    });
   };
 
   // Days shown toggle per day chip

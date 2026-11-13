@@ -11,8 +11,8 @@ const { chromium } = require('D:/Medscope Site/node_modules/playwright-core');
   page.on('console', msg => console.log('BROWSER CONSOLE:', msg.type(), msg.text()));
   page.on('pageerror', err => console.log('BROWSER ERROR:', err));
 
-  console.log('Navigating to http://localhost:4173 ...');
-  await page.goto('http://localhost:4173/', { waitUntil: 'networkidle' });
+  console.log('Navigating to http://localhost:4173/#/app ...');
+  await page.goto('http://localhost:4173/#/app', { waitUntil: 'networkidle' });
   await page.evaluate(() => document.fonts.ready);
   await page.waitForTimeout(1000);
 

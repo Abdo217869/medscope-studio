@@ -183,6 +183,15 @@ if (!fs.existsSync(SCREENSHOT_DIR)) {
   }
 
   // Screen 12: Tablet Step 3 Theme
+  // Close Editor drawer before clicking next rail button
+  const editorCloseBtn = tabletPage.locator('button[data-testid="editor-close-btn"]');
+  if (await editorCloseBtn.isVisible()) {
+    await editorCloseBtn.click();
+    await tabletPage.waitForTimeout(300);
+  } else {
+    await tabletPage.click('.fixed.inset-0.bg-black\\/60', { position: { x: 50, y: 50 } }).catch(() => {});
+    await tabletPage.waitForTimeout(300);
+  }
   await tabletPage.click('button[data-testid="rail-style-btn"]');
   await tabletPage.waitForTimeout(500);
   await tabletPage.screenshot({ path: path.join(SCREENSHOT_DIR, 'tablet_768_theme.png') });
@@ -268,7 +277,12 @@ if (!fs.existsSync(SCREENSHOT_DIR)) {
   console.log('Opening Phone Import Modal...');
   await phonePage.click('button[data-testid="mobile-tab-data"]');
   await phonePage.waitForTimeout(300);
-  await phonePage.click('button[data-testid="mobile-import-btn"], button:has-text("Import"):visible');
+  const mobileMoreBtn = phonePage.locator('button[data-testid="header-more-btn"]');
+  if (await mobileMoreBtn.isVisible()) {
+    await mobileMoreBtn.click();
+    await phonePage.waitForTimeout(200);
+  }
+  await phonePage.click('button[data-testid="import-nav-btn"]:visible, button:has-text("Import"):visible');
   await phonePage.waitForTimeout(500);
   await phonePage.screenshot({ path: path.join(SCREENSHOT_DIR, 'phone_390_import.png') });
   console.log('✓ Captured phone_390_import.png');

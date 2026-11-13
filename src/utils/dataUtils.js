@@ -213,29 +213,12 @@ export function buildWeekSchedule(moduleInfo, section, weekData, { showOffDays =
       };
     });
   } else {
-    // Fallback when "days" is missing: derive from sessions, fixing Week 1 startDate & other weeks Sat start
-    const validWeekDates = [...new Set(allSessions.map(s => (typeof s.date === 'string' ? s.date.trim() : '')).filter(isValidDate))].sort();
+    // When a week has no "days", build the full calendar week (all days from the
+    // week start to its end, as in getWeekCalendarDates), not only the days that have sessions.
+    const fullWeekDates = getWeekCalendarDates(moduleInfo, weekData);
 
-    if (validWeekDates.length > 0) {
-      const earliestSessionDate = validWeekDates[0];
-      const firstModuleWd = getShortDayName(allowedWeekdays[0] || 'Sat') || 'Sat';
-      const startDate = weekData?.n === 1
-        ? (isValidDate(moduleInfo?.startDate) ? moduleInfo.startDate.trim() : earliestSessionDate)
-        : getCalendarWeekStartDate(earliestSessionDate, firstModuleWd);
-
-      const finalDateSet = new Set(validWeekDates);
-      if (startDate && startDate < earliestSessionDate) {
-        const leadingRange = generateDateRange(startDate, addDaysUTC(earliestSessionDate, -1), 13);
-        leadingRange.forEach(d => {
-          const wd = getWeekdayFromDate(d);
-          if (allowedSet.size === 0 || allowedSet.has(wd)) {
-            finalDateSet.add(d);
-          }
-        });
-      }
-
-      const combinedDates = Array.from(finalDateSet).sort();
-      daysToBuild = combinedDates.map(dateStr => {
+    if (fullWeekDates.length > 0) {
+      daysToBuild = fullWeekDates.map(dateStr => {
         const shortWd = getWeekdayFromDate(dateStr);
         const fullDayName = getFullDayName(shortWd);
         return {
@@ -390,11 +373,15 @@ export function getWeekCalendarDates(moduleInfo, weekData) {
 
   const candidateDates = new Set(allKnownDates);
   if (weekStartDate) {
+    const firstModuleWd = getShortDayName(allowedWeekdays[0] || 'Sat') || 'Sat';
+    const calWeekStart = getCalendarWeekStartDate(weekStartDate, firstModuleWd);
     for (let i = 0; i < 7; i++) {
-      const d = addDaysUTC(weekStartDate, i);
-      const wd = getWeekdayFromDate(d);
-      if (allowedSet.size === 0 || allowedSet.has(wd)) {
-        candidateDates.add(d);
+      const d = addDaysUTC(calWeekStart, i);
+      if (d >= weekStartDate) {
+        const wd = getWeekdayFromDate(d);
+        if (allowedSet.size === 0 || allowedSet.has(wd)) {
+          candidateDates.add(d);
+        }
       }
     }
   }

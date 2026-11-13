@@ -199,15 +199,18 @@ const { chromium } = require('D:/Medscope Site/node_modules/playwright-core');
   });
   console.log('Overflow Warning Badge displayed on preview:', warningBadgeVisible);
 
-  // Reset to default fixture
-  console.log('Resetting to default fixture...');
-  const moreBtn = page.locator('button[data-testid="header-more-btn"], button[title="More actions"]');
-  if (await moreBtn.isVisible()) {
-    await moreBtn.click();
-    await page.waitForTimeout(200);
+  // Reset to default fixture via Load sample
+  console.log('Resetting to default fixture via Load sample...');
+  const importNavBtn = page.locator('button[data-testid="import-nav-btn"], button:has-text("Import")');
+  if (await importNavBtn.isVisible()) {
+    await importNavBtn.click();
+    await page.waitForTimeout(300);
+    const sampleSelect = page.locator('select:has-text("Load sample")');
+    if (await sampleSelect.isVisible()) {
+      await sampleSelect.selectOption('GIT');
+      await page.waitForTimeout(600);
+    }
   }
-  await page.click('button:has-text("Reset Fixture")');
-  await page.waitForTimeout(500);
 
   await browser.close();
   console.log('--- PHASE 2 PART B ACCEPTANCE VERIFIED WITH 100% SUCCESS! ---');

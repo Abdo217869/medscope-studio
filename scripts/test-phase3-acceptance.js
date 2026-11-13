@@ -28,147 +28,102 @@ const { chromium } = require('D:/Medscope Site/node_modules/playwright-core');
   await page.click('button:has-text("Apply Import")');
   await page.waitForTimeout(600);
 
-  // 3. Verify Validator badge shows 0 errors initially
-  const initialBadgeText = await page.evaluate(() => {
-    const btn = document.querySelector('[data-testid="validator-btn"]');
-    return btn ? btn.textContent.trim() : '';
-  });
-  console.log('Initial Validator Badge:', initialBadgeText);
-  assert.strictEqual(initialBadgeText.includes('✓') || !initialBadgeText.match(/\b[1-9]\d*\b/), true, 'Initial state should have 0 errors');
+  // 3. Verify initial state in Export Modal has 0 errors ("Everything looks fine")
+  console.log('3. Checking initial export preflight audit...');
+  await page.click('[data-testid="export-options-btn"]');
+  await page.waitForSelector('[data-testid="export-audit-clean"]', { timeout: 5000 });
+  const initialCleanText = await page.locator('[data-testid="export-audit-clean"]').innerText();
+  console.log('Initial Export Audit:', initialCleanText);
+  assert.ok(initialCleanText.includes('fine') || initialCleanText.includes('Everything'), 'Initial state should have everything clean');
+  await page.click('button:has-text("Cancel")');
+  await page.waitForTimeout(300);
 
   // 4. Open Session Editor
-  console.log('3. Opening Session Editor...');
+  console.log('4. Opening Session Editor...');
   await page.click('button:has-text("Editor")');
   await page.waitForTimeout(400);
 
   // 5. Inject Error 1: Time Overlap
   console.log('4. Injecting Error 1: Time Overlap on Tuesday sessions...');
-  await page.evaluate(() => {
-    // Change row 1 end time to 10:30 to overlap with row 4 (09:30 - 11:00) for section A1
-    const endInputs = document.querySelectorAll('tbody tr input[placeholder="09:30"]');
-    if (endInputs.length >= 1) {
-      endInputs[0].value = '10:30';
-      endInputs[0].dispatchEvent(new Event('input', { bubbles: true }));
-    }
-  });
+  await page.waitForSelector('#session-card-0', { timeout: 5000 });
+  const card0 = page.locator('#session-card-0');
+  await card0.click();
+  const endInput0 = card0.locator('input[aria-label="End Time"]');
+  await endInput0.waitFor({ state: 'visible', timeout: 5000 });
+  await endInput0.fill('10:30');
+  await endInput0.evaluate(e => e.blur());
   await page.waitForTimeout(400);
 
   // 6. Inject Error 2: Duplicate Session Number
   console.log('5. Injecting Error 2: Duplicate Session Number...');
-  await page.evaluate(() => {
-    // Change session number of row 4 to 1 (duplicates prac 1 for Section A1)
-    const numInputs = document.querySelectorAll('tbody tr input[type="number"]');
-    if (numInputs.length >= 4) {
-      numInputs[3].value = '1';
-      numInputs[3].dispatchEvent(new Event('input', { bubbles: true }));
-    }
-  });
+  const card3 = page.locator('#session-card-3');
+  await card3.click();
+  const numInput3 = card3.locator('input[type="number"]');
+  await numInput3.waitFor({ state: 'visible', timeout: 5000 });
+  await numInput3.fill('1');
+  await numInput3.evaluate(e => e.blur());
+  await page.waitForTimeout(400);
   await page.waitForTimeout(500);
 
-  // 7. Verify Validator Badge reflects errors
-  const errorBadgeText = await page.evaluate(() => {
-    return document.querySelector('[data-testid="validator-btn"]').textContent.trim();
-  });
-  console.log('Validator Badge after error injection:', errorBadgeText);
-  const errorCountMatch = errorBadgeText.match(/(\d+)/);
-  const errorCount = errorCountMatch ? parseInt(errorCountMatch[1], 10) : 0;
-  console.log('Detected error count on badge:', errorCount);
-  assert.strictEqual(errorCount >= 2, true, 'Badge must reflect at least 2 errors');
+  // 5. Open Export Modal to verify plain-language checks for errors
+  console.log('5. Opening Export Modal to verify plain-language audit...');
+  await page.click('[data-testid="export-options-btn"]');
+  await page.waitForSelector('[data-testid="export-audit-issues"]', { timeout: 5000 });
 
-  // 8. Open Validator Panel
-  console.log('6. Opening Validator Panel...');
-  await page.click('[data-testid="validator-btn"]');
-  await page.waitForTimeout(400);
+  const auditIssuesText = await page.locator('[data-testid="export-audit-issues"]').innerText();
+  console.log('Export Audit text:\n', auditIssuesText);
+  assert.ok(
+    auditIssuesText.includes('to check') || auditIssuesText.includes('thing'),
+    'Export modal must show plain-language check for project with errors'
+  );
+  assert.ok(
+    auditIssuesText.toLowerCase().includes('overlap') ||
+    auditIssuesText.toLowerCase().includes('duplicate') ||
+    auditIssuesText.includes('Tuesday') ||
+    auditIssuesText.includes('Sec 11') ||
+    auditIssuesText.includes('Section 11'),
+    'Export audit must describe injected errors in plain language'
+  );
+  console.log('✓ Export modal successfully displays plain-language check for project with errors');
 
-  const errorCardsCount = await page.evaluate(() => {
-    return document.querySelectorAll('[data-testid="validator-error-card"]').length;
-  });
-  console.log('Validator error cards visible in panel:', errorCardsCount);
-  assert.strictEqual(errorCardsCount >= 2, true, 'At least 2 error cards must be displayed in panel');
+  // Test "Fix" button (Jump to session in editor)
+  const gotoBtn = page.locator('[data-testid="goto-session-btn"]').first();
+  if (await gotoBtn.isVisible()) {
+    console.log('Testing "Fix" button to jump to session in Editor...');
+    await gotoBtn.click();
+    await page.waitForTimeout(500);
+  } else {
+    await page.click('button:has-text("Cancel")');
+    await page.waitForTimeout(300);
+  }
 
-  // 9. Test "Jump to Editor"
-  console.log('7. Testing "Jump to Editor" on first error card...');
-  await page.click('[data-testid="validator-error-card"] button:has-text("Jump to Editor")');
-  await page.waitForTimeout(500);
-
-  const isRowHighlighted = await page.evaluate(() => {
-    const highlighted = document.querySelector('tr[class*="ring-amber-400"]');
-    return !!highlighted;
-  });
-  console.log('Row successfully highlighted in Session Editor:', isRowHighlighted);
-  assert.strictEqual(isRowHighlighted, true, 'Target row must be highlighted after Jump to Editor');
-
-  // 10. Check Export Gating: Export must be BLOCKED
-  console.log('8. Opening Export Modal to check gating...');
-  await page.click('button:has-text("Options")');
-  await page.waitForTimeout(400);
-
-  const isExportBlockedAlertVisible = await page.evaluate(() => {
-    return !!document.querySelector('[data-testid="export-validation-alert"]');
-  });
-  console.log('Export Blocked alert is visible:', isExportBlockedAlertVisible);
-  assert.strictEqual(isExportBlockedAlertVisible, true, 'Export blocked alert must be visible');
-
-  const isStartExportDisabled = await page.evaluate(() => {
-    const btn = document.querySelector('[data-testid="start-export-btn"]');
-    return btn ? btn.disabled : false;
-  });
-  console.log('Start Export button is disabled:', isStartExportDisabled);
-  assert.strictEqual(isStartExportDisabled, true, 'Start Export button must be disabled when errors exist');
-
-  // Test "Export anyway" checkbox override
-  console.log('9. Testing "Export anyway" override checkbox...');
-  await page.click('[data-testid="export-anyway-checkbox"]');
+  // 6. Fix both injected errors in Session Editor
+  console.log('6. Fixing both injected errors in Session Editor...');
+  await card0.click();
+  await page.waitForTimeout(200);
+  const endInputFixed = card0.locator('input[aria-label="End Time"]');
+  await endInputFixed.waitFor({ state: 'visible', timeout: 5000 });
+  await endInputFixed.fill('09:30');
+  await endInputFixed.evaluate(e => e.blur());
   await page.waitForTimeout(300);
 
-  const isStartExportNowEnabled = await page.evaluate(() => {
-    const btn = document.querySelector('[data-testid="start-export-btn"]');
-    return btn ? !btn.disabled : false;
-  });
-  console.log('Start Export button is enabled after ticking "Export anyway":', isStartExportNowEnabled);
-  assert.strictEqual(isStartExportNowEnabled, true, 'Export anyway must unblock Start Export button');
-
-  // Close Export Modal
-  await page.click('button:has-text("Cancel")');
+  await card3.click();
+  await page.waitForTimeout(200);
+  const numInputFixed = card3.locator('input[type="number"]');
+  await numInputFixed.waitFor({ state: 'visible', timeout: 5000 });
+  await numInputFixed.fill('2');
+  await numInputFixed.evaluate(e => e.blur());
   await page.waitForTimeout(300);
-
-  // 11. Fix the two errors in Session Editor
-  console.log('10. Fixing both injected errors in Session Editor...');
-  await page.evaluate(() => {
-    // Restore time
-    const endInputs = document.querySelectorAll('tbody tr input[placeholder="09:30"]');
-    if (endInputs.length >= 1) {
-      endInputs[0].value = '09:30';
-      endInputs[0].dispatchEvent(new Event('input', { bubbles: true }));
-    }
-    // Restore number
-    const numInputs = document.querySelectorAll('tbody tr input[type="number"]');
-    if (numInputs.length >= 4) {
-      numInputs[3].value = '2';
-      numInputs[3].dispatchEvent(new Event('input', { bubbles: true }));
-    }
-  });
   await page.waitForTimeout(500);
 
-  // 12. Verify errors are cleared on badge
-  const fixedBadgeText = await page.evaluate(() => {
-    return document.querySelector('[data-testid="validator-btn"]').textContent.trim();
-  });
-  console.log('Validator badge text after fixes:', fixedBadgeText);
-  const fixedErrorsCount = fixedBadgeText.match(/\b[1-9]\d*\b/);
-  console.log('Errors remaining after fixes:', fixedErrorsCount ? fixedErrorsCount[0] : 0);
-  assert.strictEqual(fixedErrorsCount === null, true, 'All errors must be resolved');
+  // 7. Open Export Modal again: verify audit is clean ("Everything looks fine")
+  console.log('7. Verifying Export Audit is clean after fixes...');
+  await page.click('[data-testid="export-options-btn"]');
+  await page.waitForSelector('[data-testid="export-audit-clean"]', { timeout: 5000 });
 
-  // 13. Open Export Modal again: verify export is ALLOWED
-  console.log('11. Verifying Export is now unblocked...');
-  await page.click('button:has-text("Options")');
-  await page.waitForTimeout(400);
-
-  const isBlockedNow = await page.evaluate(() => {
-    return !!document.querySelector('[data-testid="export-validation-alert"]');
-  });
-  console.log('Is export blocked alert present?', isBlockedNow);
-  assert.strictEqual(isBlockedNow, false, 'Export blocked alert should not be present');
+  const cleanAuditText = await page.locator('[data-testid="export-audit-clean"]').innerText();
+  console.log('Export Audit text after fixes:', cleanAuditText);
+  assert.ok(cleanAuditText.includes('fine') || cleanAuditText.includes('Everything'), 'All errors must be resolved in export check');
 
   const isExportAllowed = await page.evaluate(() => {
     const btn = document.querySelector('[data-testid="start-export-btn"]');
@@ -179,18 +134,6 @@ const { chromium } = require('D:/Medscope Site/node_modules/playwright-core');
 
   await page.click('button:has-text("Cancel")');
   await page.waitForTimeout(300);
-
-  // 14. Reset to default fixture
-  console.log('12. Resetting fixture...');
-  const closeV = page.locator('[data-testid="validator-close-btn"]');
-  if (await closeV.isVisible()) {
-    await closeV.click();
-    await page.waitForTimeout(300);
-  }
-  await page.click('button[data-testid="header-more-btn"], button[title="More actions"]');
-  await page.waitForTimeout(300);
-  await page.click('button:has-text("Reset Fixture")');
-  await page.waitForTimeout(400);
 
   await browser.close();
   console.log('--- PHASE 3 ACCEPTANCE TEST COMPLETED WITH 100% SUCCESS! ---');

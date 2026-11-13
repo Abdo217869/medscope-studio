@@ -22,13 +22,16 @@ export function MobileSessionList({
     : null;
 
   const handleToggleShowOffDays = () => {
-    onUpdateSchedule(prev => ({
-      ...prev,
-      settings: {
-        ...prev?.settings,
-        showOffDays: !showOffDays
-      }
-    }));
+    onUpdateSchedule(prev => {
+      const current = prev?.settings?.showOffDays ?? true;
+      return {
+        ...prev,
+        settings: {
+          ...prev?.settings,
+          showOffDays: !current
+        }
+      };
+    });
   };
 
   const toggleDay = (dateStr) => {

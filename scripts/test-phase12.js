@@ -24,17 +24,20 @@ async function runTests() {
 
   // Test 1.1: Section 11, Week 1 when showOffDays is true (default ON)
   const rowsOn = buildWeekSchedule(gitJson.module, sec11, gitJson.weeks[0], { showOffDays: true });
-  assert.strictEqual(rowsOn.length, 3, 'When ON, Week 1 for Sec 11 must have 3 days (Tue, Wed, Thu)');
+  assert.strictEqual(rowsOn.length, 6, 'When ON, Week 1 for Sec 11 in a full calendar week has 6 days');
   assert.deepStrictEqual(
     rowsOn.map(r => ({ wd: r.weekdayShort, isOff: r.isOff })),
     [
+      { wd: 'Sat', isOff: true },
+      { wd: 'Sun', isOff: true },
+      { wd: 'Mon', isOff: true },
       { wd: 'Tue', isOff: true },
       { wd: 'Wed', isOff: true },
       { wd: 'Thu', isOff: false }
     ],
-    'Tue and Wed must be OFF rows, Thu must have sessions'
+    'Sat..Wed must be OFF rows, Thu must have sessions'
   );
-  console.log('✓ Show OFF days ON: Section 11, Week 1 shows Tue & Wed (OFF) + Thu');
+  console.log('✓ Show OFF days ON: Section 11, Week 1 shows Sat..Wed (OFF) + Thu');
 
   // Test 1.2: Section 11, Week 1 when showOffDays is false (OFF)
   const rowsOff = buildWeekSchedule(gitJson.module, sec11, gitJson.weeks[0], { showOffDays: false });
@@ -86,12 +89,12 @@ async function runTests() {
     await page1440.click('[data-testid="section-chip-11"]');
     await page1440.waitForTimeout(200);
 
-    // Initial state: default is showOffDays ON -> Section 11 Week 1 shows Tue, Wed, Thu
+    // Initial state: default is showOffDays ON -> Section 11 Week 1 shows all 6 calendar days
     let renderedDays = await page1440.evaluate(() => {
       return Array.from(document.querySelectorAll('.preview-container .schedule-page [data-testid="day-name-text"]'))
         .map(el => el.textContent.trim());
     });
-    assert.deepStrictEqual(renderedDays, ['Tuesday', 'Wednesday', 'Thursday'], 'Default preview must show Tue, Wed, Thu for Sec 11');
+    assert.deepStrictEqual(renderedDays, ['Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday'], 'Default preview must show full calendar week for Sec 11');
 
     // Open Editor panel via Rail step 1
     await page1440.click('[data-testid="rail-data-btn"]');
@@ -124,11 +127,18 @@ async function runTests() {
         .map(el => el.textContent.trim());
     });
     assert.deepStrictEqual(renderedDays, ['Thursday'], 'When Show OFF days is OFF, preview shows only Thursday');
-    console.log('✓ Toggling Show OFF days switch hides OFF days in live preview');
+    console.log('✓ Toggling Show OFF days switch hides OFF days on first click without touching any day chip');
 
     // Turn Show OFF days back ON
     await page1440.click('[data-testid="toggle-show-off-days"]');
     await page1440.waitForTimeout(300);
+
+    renderedDays = await page1440.evaluate(() => {
+      return Array.from(document.querySelectorAll('.preview-container .schedule-page [data-testid="day-name-text"]'))
+        .map(el => el.textContent.trim());
+    });
+    assert.deepStrictEqual(renderedDays, ['Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday'], 'Turning Show OFF days back ON restores all 6 calendar days');
+    console.log('✓ Turning Show OFF days back ON restores all empty days in live preview');
 
     // Test Days Shown Chips: excluding a day
     // Section 11 has a session on Thu (2026-11-12). Click chip for Thu 12/11 to exclude it
@@ -185,6 +195,59 @@ async function runTests() {
     // Save screenshot at 1440x900
     await page1440.screenshot({ path: 'reference/editor-1440x900.png', fullPage: false });
     console.log('✓ Saved reference/editor-1440x900.png');
+
+    // -----------------------------------------------------------------------
+    // Test 3.1b: Freshly imported project without "days" toggling OFF days on first click
+    // -----------------------------------------------------------------------
+    console.log('3.1b: Testing freshly imported project without "days" toggling OFF days on first click...');
+    await page1440.click('button:has-text("Import")');
+    await page1440.waitForSelector('[data-testid="import-json-textarea"]');
+    const sampleNoDays = JSON.parse(fs.readFileSync('src/samples/GIT_all_sections.json', 'utf8'));
+    delete sampleNoDays.settings;
+    sampleNoDays.weeks.forEach(w => delete w.days);
+    await page1440.evaluate((val) => {
+      const ta = document.querySelector('[data-testid="import-json-textarea"]');
+      ta.value = val;
+      ta.dispatchEvent(new Event('input', { bubbles: true }));
+    }, JSON.stringify(sampleNoDays));
+    await page1440.click('input[value="replace"]');
+    page1440.once('dialog', d => d.accept());
+    await page1440.click('[data-testid="apply-import-btn"]');
+    await page1440.waitForSelector('.schedule-page');
+    await page1440.waitForTimeout(400);
+
+    // Switch to Section 11
+    await page1440.click('[data-testid="letter-tab-D"]');
+    await page1440.click('[data-testid="section-chip-11"]');
+    await page1440.waitForTimeout(200);
+
+    let freshDays = await page1440.evaluate(() => {
+      return Array.from(document.querySelectorAll('.preview-container .schedule-page [data-testid="day-name-text"]'))
+        .map(el => el.textContent.trim());
+    });
+    assert.strictEqual(freshDays.length, 6, 'Freshly imported project without days must render full 6 calendar days');
+
+    // Toggle OFF days OFF on very first click without clicking any day chip
+    await page1440.click('[data-testid="toggle-show-off-days"]');
+    await page1440.waitForTimeout(300);
+
+    freshDays = await page1440.evaluate(() => {
+      return Array.from(document.querySelectorAll('.preview-container .schedule-page [data-testid="day-name-text"]'))
+        .map(el => el.textContent.trim());
+    });
+    assert.deepStrictEqual(freshDays, ['Thursday'], 'Empty days disappear on first click after import');
+
+    // Toggle OFF days back ON
+    await page1440.click('[data-testid="toggle-show-off-days"]');
+    await page1440.waitForTimeout(300);
+
+    freshDays = await page1440.evaluate(() => {
+      return Array.from(document.querySelectorAll('.preview-container .schedule-page [data-testid="day-name-text"]'))
+        .map(el => el.textContent.trim());
+    });
+    assert.strictEqual(freshDays.length, 6, 'Empty days come back when toggled ON');
+    console.log('✓ Freshly imported project without "days" toggles OFF days successfully on first click without touching day chips');
+
     await context1440.close();
 
     // -----------------------------------------------------------------------

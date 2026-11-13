@@ -849,14 +849,18 @@ export function App() {
 
   // Handle Toggle Show OFF days
   const handleToggleShowOffDays = () => {
-    const curVal = schedule?.settings?.showOffDays ?? true;
-    setSchedule(prev => ({
-      ...prev,
-      settings: {
-        ...prev?.settings,
-        showOffDays: !curVal
-      }
-    }));
+    let nextVal = false;
+    setSchedule(prev => {
+      const curVal = prev?.settings?.showOffDays ?? true;
+      nextVal = !curVal;
+      return {
+        ...prev,
+        settings: {
+          ...prev?.settings,
+          showOffDays: nextVal
+        }
+      };
+    });
     addToast({
       type: 'info',
       title: 'Show OFF Days',

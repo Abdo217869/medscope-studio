@@ -177,7 +177,15 @@ if (!fs.existsSync(SCREENSHOT_DIR)) {
   await tabletPage.waitForTimeout(500);
   await tabletPage.screenshot({ path: path.join(SCREENSHOT_DIR, 'tablet_768_editor.png') });
   console.log('✓ Captured tablet_768_editor.png');
-  await tabletPage.click('button[data-testid="rail-data-btn"]');
+  // Close editor drawer before next step
+  const editorCloseBtn = tabletPage.locator('button[data-testid="editor-close-btn"]');
+  if (await editorCloseBtn.isVisible()) {
+    await editorCloseBtn.click();
+    await tabletPage.waitForTimeout(300);
+  } else {
+    await tabletPage.click('.fixed.inset-0.bg-black\\/60', { position: { x: 50, y: 50 } }).catch(() => {});
+    await tabletPage.waitForTimeout(300);
+  }
   await tabletPage.waitForTimeout(300);
 
   // Screen 8: Tablet Validator (if present)
