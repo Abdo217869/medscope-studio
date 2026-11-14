@@ -511,7 +511,15 @@ export function mergeSessionsProject(current, incoming) {
     sections: mergedSections,
     subjects: mergedSubjects,
     sessionTypes: mergedSessionTypes,
-    weeks: mergedWeeks
+    weeks: mergedWeeks,
+    settings: {
+      ...(current.settings || {}),
+      ...(normIncoming.settings || {})
+    },
+    verifications: {
+      ...(current.verifications || {}),
+      ...(normIncoming.verifications || {})
+    }
   };
 
   return { mergedProject, summary };
@@ -651,7 +659,15 @@ export function mergeProjects(current, incoming) {
     sections: mergedSections,
     subjects: mergedSubjects,
     sessionTypes: mergedSessionTypes,
-    weeks: mergedWeeks
+    weeks: mergedWeeks,
+    settings: {
+      ...(current.settings || {}),
+      ...(normIncoming.settings || {})
+    },
+    verifications: {
+      ...(current.verifications || {}),
+      ...(normIncoming.verifications || {})
+    }
   };
 
   return { mergedProject, summary };

@@ -1,5 +1,5 @@
 import { useState } from 'preact/hooks';
-import { X, Globe, Search, PlayCircle, ShieldCheck, Sparkles, Database, Copy, Check, Upload } from 'lucide-preact';
+import { X, Globe, Search, PlayCircle, ShieldCheck, Sparkles, Database, Copy, Check, Upload, FileJson } from 'lucide-preact';
 import { HELP_EN } from '../content/help.en';
 import { HELP_AR } from '../content/help.ar';
 import prompt1Text from '../content/prompt-1-format.txt?raw';
@@ -220,6 +220,19 @@ export function HelpDrawer({
                 </p>
               </div>
             </div>
+          </div>
+
+          {/* Project File Note under the 3-Step AI Workflow card */}
+          <div
+            data-testid="help-project-file-note"
+            className="p-2.5 rounded-lg border border-white/[0.08] bg-white/[0.02] text-[11px] text-[#9c9c9d] leading-relaxed flex items-start gap-2"
+          >
+            <FileJson className="w-3.5 h-3.5 text-[#ffb347] shrink-0 mt-0.5" />
+            <p>
+              {helpLang === 'ar'
+                ? 'احتفظ بملف الـ .json. أرسله لأي شخص ليتمكن من فتح نفس الجدول في الاستيراد وتعديله.'
+                : 'Keep the .json file. Send it to anyone and they can open the same timetable in Import and edit it.'}
+            </p>
           </div>
           {topicEntries.length === 0 ? (
             <div className="text-center py-10 text-[var(--muted)] text-xs">

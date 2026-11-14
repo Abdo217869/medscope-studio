@@ -200,3 +200,37 @@ export async function exportSectionPdf(element, filename = 'schedule.pdf', optio
 export function triggerPrintMode() {
   window.print();
 }
+
+/**
+ * Generate a safe project file name: Medscope_<module title>_<YYYY-MM-DD>.json
+ */
+export function buildProjectFilename(moduleTitle, dateStr) {
+  const safeTitle = (moduleTitle || 'timetable')
+    .replace(/[\\/:*?"<>|]/g, '')
+    .trim()
+    .replace(/\s+/g, '_')
+    .replace(/_+/g, '_')
+    .replace(/^_+|_+$/g, '') || 'timetable';
+  const dStr = dateStr || new Date().toISOString().slice(0, 10);
+  return `Medscope_${safeTitle}_${dStr}.json`;
+}
+
+/**
+ * Build complete project data for backup/restore (module, sections, subjects, sessionTypes, weeks with days, settings with showOffDays, verifications, theme)
+ */
+export function buildProjectFileData(schedule, theme) {
+  return {
+    module: schedule?.module || {},
+    sections: schedule?.sections || [],
+    subjects: schedule?.subjects || [],
+    sessionTypes: schedule?.sessionTypes || [],
+    weeks: schedule?.weeks || [],
+    settings: {
+      showOffDays: schedule?.settings?.showOffDays ?? true,
+      ...(schedule?.settings || {})
+    },
+    verifications: schedule?.verifications || {},
+    theme: theme || schedule?.theme || null
+  };
+}
+

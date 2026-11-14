@@ -44,6 +44,10 @@ function formatPlainIssueSentence(issue, schedule) {
   if (dateText) prefixParts.push(dateText);
   const locationPrefix = prefixParts.length > 0 ? prefixParts.join(', ') + ': ' : '';
 
+  if (issue.rule === 'WARN_PRACTICAL_TOO_LONG') {
+    return issue.message;
+  }
+
   if (issue.rule === 'ERR_INVALID_DATE' || issue.message?.toLowerCase().includes('date not valid')) {
     return `${locationPrefix}date not valid.`;
   }
@@ -77,7 +81,9 @@ export function ExportModal({
   onExecuteExport,
   isExporting,
   exportProgress,
-  onJumpToSession
+  onJumpToSession,
+  pendingProjectFile,
+  onSaveProjectFile
 }) {
   if (!isOpen) return null;
 
@@ -94,7 +100,24 @@ export function ExportModal({
   const [quality, setQuality] = useState(0.98);
   const [includeValidationReport, setIncludeValidationReport] = useState(true);
   const [includeOffDays, setIncludeOffDays] = useState(() => schedule?.settings?.showOffDays ?? true);
+  const [saveProjectFile, setSaveProjectFile] = useState(() => {
+    try {
+      const val = localStorage.getItem('medscope_export_save_project_file');
+      return val === null ? true : val === 'true';
+    } catch (e) {
+      return true;
+    }
+  });
   const [exportError, setExportError] = useState('');
+
+  const handleSaveProjectFileChange = (checked) => {
+    setSaveProjectFile(checked);
+    try {
+      localStorage.setItem('medscope_export_save_project_file', String(checked));
+    } catch (e) {
+      // ignore
+    }
+  };
 
   // Sync includeOffDays when modal opens or schedule.settings changes
   useEffect(() => {
@@ -213,6 +236,7 @@ export function ExportModal({
         quality,
         includeValidationReport,
         includeOffDays,
+        saveProjectFile,
         validationReportText: buildValidationReportText()
       });
     } catch (err) {
@@ -465,6 +489,46 @@ export function ExportModal({
               </div>
             </label>
           </div>
+
+          {/* Also save the project file Checkbox (PDF export) */}
+          {format === 'pdf' && (
+            <div className="p-3 rounded-xl bg-[var(--surface-2)]/50 border border-[var(--border)]">
+              <label className="flex items-center gap-2.5 cursor-pointer">
+                <input
+                  type="checkbox"
+                  data-testid="export-save-project-file-checkbox"
+                  checked={saveProjectFile}
+                  onChange={(e) => handleSaveProjectFileChange(e.target.checked)}
+                  className="accent-[var(--gold)] w-4 h-4 cursor-pointer"
+                />
+                <div>
+                  <div className="font-semibold text-xs text-[var(--text)]">Also save the project file</div>
+                  <div className="text-[10px] text-[var(--muted)]">Downloads a .json project file right after the PDF so it can be reopened and edited anytime</div>
+                </div>
+              </label>
+            </div>
+          )}
+
+          {/* Plain-language message and button if browser blocked second download */}
+          {pendingProjectFile && (
+            <div
+              data-testid="save-project-file-fallback"
+              className="p-3 rounded-xl bg-[var(--gold)]/10 border border-[var(--gold)]/30 flex items-center justify-between gap-3 text-xs"
+            >
+              <div className="flex items-center gap-2 text-[var(--text)]">
+                <FolderArchive className="w-4 h-4 text-[var(--gold)] shrink-0" />
+                <span>If your browser blocked the second download:</span>
+              </div>
+              <button
+                type="button"
+                data-testid="save-project-file-btn"
+                onClick={onSaveProjectFile}
+                className="btn-keycap px-3 py-1.5 text-xs font-semibold shrink-0"
+              >
+                Save project file
+              </button>
+            </div>
+          )}
 
           {/* Filename Preview Box */}
           <div className="p-3 rounded-xl bg-[var(--surface-2)]/50 border border-[var(--border)] space-y-1">

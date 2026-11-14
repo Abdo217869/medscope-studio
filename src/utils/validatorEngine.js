@@ -396,6 +396,47 @@ export function validate(project, options = {}) {
         }
       }
 
+      // Check if practical session is too long or broad scope (WARN_PRACTICAL_TOO_LONG)
+      const isPracSession = session.type && String(session.type).toLowerCase().trim().startsWith('prac');
+      if (isPracSession) {
+        const startMin = timeToMinutes(session.start);
+        const endMin = timeToMinutes(session.end);
+        const durationExceeds100 = !isNaN(startMin) && !isNaN(endMin) && (endMin - startMin > 100);
+
+        const pracGroupsCount = Array.isArray(session.scope?.practicalGroups) ? session.scope.practicalGroups.length : 0;
+        const sectionsCount = Array.isArray(session.scope?.sections) ? session.scope.sections.length : 0;
+        const coversMoreThan2Groups = pracGroupsCount > 2 || (pracGroupsCount === 0 && sectionsCount > 2);
+
+        if (durationExceeds100 || coversMoreThan2Groups) {
+          const pracNum = session.number !== undefined && session.number !== null && session.number !== '' ? String(session.number).trim() : '';
+          let pracLabel = 'Practical';
+          if (pracNum) {
+            pracLabel = `Practical ${pracNum}`;
+          } else {
+            const m = session.type.match(/(?:prac|practical)\s*(\d+)/i);
+            if (m) pracLabel = `Practical ${m[1]}`;
+          }
+
+          const shortWd = session.date ? getWeekdayShort(session.date) : '';
+          const parts = session.date ? session.date.split('-') : [];
+          const shortDate = parts.length === 3 ? `${parseInt(parts[2], 10)}/${parseInt(parts[1], 10)}` : (session.date || '');
+          const dateStr = shortWd && shortDate ? `${shortWd} ${shortDate}` : (shortDate || '');
+          const onDate = dateStr ? ` on ${dateStr}` : '';
+
+          issues.push({
+            id: `WARN_PRAC_TOO_LONG_w${wNum}_s${sIdx}`,
+            severity: 'warning',
+            rule: 'WARN_PRACTICAL_TOO_LONG',
+            message: `${pracLabel}${onDate} looks too long, check it against the PDF.`,
+            location: {
+              week: wNum,
+              sessionIndex: sIdx,
+              field: durationExceeds100 ? 'start' : 'scope'
+            }
+          });
+        }
+      }
+
       // Check unknown subject (WARN_UNKNOWN_SUBJECT)
       if (session.subject && knownSubjectNames.size > 0) {
         const subName = session.subject.toLowerCase().trim();

@@ -52,6 +52,18 @@ uses practical group N unless my Notes say otherwise), and rows for everyone. Ig
 4. A row that continues on the next page belongs to the block above it.
 5. "Recorded" sessions have no time and no place.
 
+## Cells that contain two groups
+- A cell such as "Groups 5&6" means groups 5 and 6 BOTH attend in that exact time column.
+  It never means a range, and it never means 5 to 6 only.
+- Every time column is its own session with its own start and end, even when the next
+  column has the same subject and the same hall. NEVER merge adjacent columns into one
+  longer session (for example 8:00-11:00).
+- A practical session lasts exactly one column (usually 1h30). If you wrote a practical
+  longer than its column, you merged columns by mistake: split it again.
+- In JSON, one session per column: scope {"practicalGroups":[5,6]} with that column's
+  times, then another session for the next column with its groups.
+- In Discrepancies, list every cell that holds more than one group.
+
 ## Step 1: print the MAP first (one code block)
 One line per practical per section, in this format:
 Practical 2 | Section 1 | Tue 10/11 | 9:30 - 11 | Lab 9
@@ -95,6 +107,46 @@ Format rules:
 - List every day the table shows for that week, in order. A day with nothing for this section
   is "👉 off". Inside a day, order by time; Recorded last.
 - Dates are day/month, day names as in the table.
+
+## Tricky table cases (read before extracting)
+
+1. Group lists. "Groups 5&6", "Groups 5,6" and "Groups 5-8" all mean every group named.
+   Write them exactly as printed. Never expand a range into a time range.
+2. One column = one session. Never merge two time columns, even when subject, hall and
+   groups look alike. Never stretch a session over a column that is not its own.
+3. A cell spanning several time columns or several rows (a merged cell) is ONE session
+   whose start is the first column and end is the last. Say so in Discrepancies.
+4. Unnumbered group. If a cell says "Group" with no number, or the number is cut, copy it
+   as printed and list it in Discrepancies. Never guess a number.
+5. Date headers. A date (for example "Sunday 15/11/2026") applies to every row below it
+   until the next date header. Read dates as dd/mm/yyyy. A date with an empty row is an
+   OFF day: write "OFF", do not invent sessions.
+6. Page breaks. A row cut by a page break is still one row. Text at the top of a page
+   belongs to the row above it, not to a new session. Ignore page numbers, footers and
+   decorations.
+7. Order. Groups can appear in any order inside a day block (Group 3, 4, 1, 2). Keep the
+   printed order. Never sort.
+8. Time reading. Times 1 to 5 after 12:30 are afternoon (2-3:30 means 14:00-15:30).
+   Write times exactly as printed in the text; the JSON step converts them.
+9. Same subject on several days, or the same practical number in several day blocks, is
+   normal: every group must have exactly one slot for each practical.
+10. Subject and type. "(Biochemistry)" in brackets is the subject. "Practical (6):" is
+    the number. Keep the printed order of lectures L1, L2, L3 inside one session and
+    copy their wording and spelling exactly, even when you think it is a typo.
+11. Special words. Recorded, Online, Leave, Holiday, Exam, Cancelled, Revision: copy the
+    word as printed beside that session. Never replace it with your own wording.
+12. Place. Copy the place exactly (Hall 6, Lab 7, Morgue 1, Main Hall). When a cell shows
+    two places, keep both.
+13. Tutorials and lectures for letters. "A", "A&B", "C, D" or "All" are copied as printed.
+    Each letter must appear exactly once for each tutorial.
+
+## Self-check before you answer (silent, then report only problems)
+- Count: each practical has all groups exactly once. Each tutorial has all letters
+  exactly once. List any group or letter that is missing or repeated.
+- No session of a section overlaps another session of the same section.
+- No practical lasts more than one column (about 1h30).
+- Every date in the output exists in the source, and every day is in the right block.
+Put every doubt in Discrepancies with the date, subject and what looked unclear.
 
 ## Check silently before answering
 Each practical number appears exactly once per section; no two sessions of a section overlap;

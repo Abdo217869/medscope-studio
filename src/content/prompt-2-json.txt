@@ -12,6 +12,18 @@ or reword anything. Output the JSON in ONE code block, then a short "Discrepanci
 - Year comes from the header; dates become YYYY-MM-DD. If a date's real weekday does not match
   the day name in the text, keep the date and list it in Discrepancies.
 
+## Cells that contain two groups
+- A cell such as "Groups 5&6" means groups 5 and 6 BOTH attend in that exact time column.
+  It never means a range, and it never means 5 to 6 only.
+- Every time column is its own session with its own start and end, even when the next
+  column has the same subject and the same hall. NEVER merge adjacent columns into one
+  longer session (for example 8:00-11:00).
+- A practical session lasts exactly one column (usually 1h30). If you wrote a practical
+  longer than its column, you merged columns by mistake: split it again.
+- In JSON, one session per column: scope {"practicalGroups":[5,6]} with that column's
+  times, then another session for the next column with its groups.
+- In Discrepancies, list every cell that holds more than one group.
+
 ## JSON rules
 - "module": {"title", "term", "weekdays": ["Sat","Sun","Mon","Tue","Wed","Thu"]}.
 - "sections": {"id":"4","letter":"B","number":4,"practicalGroup":4,"label":"Group (B) Section 4"}
@@ -40,6 +52,20 @@ or reword anything. Output the JSON in ONE code block, then a short "Discrepanci
 - Scope: {"sections":["4","5","6"]}. If several sections in the text have the SAME date, type,
   number, subject, topics, time and place, write ONE session listing all of them. If anything
   differs, even only the time, write separate sessions.
+
+## JSON safety rules
+- One JSON session per time column. Never merge columns and never create a session whose
+  length is longer than its column.
+- "Groups 5&6" becomes scope {"practicalGroups":[5,6]} with that column's start and end.
+- "All" in a tutorial or lecture becomes scope {"all":true}; letters become {"letter":"A"}
+  or {"sections":[...]} exactly as the text says.
+- Keep status "normal" unless the text says Recorded, Leave or similar. Never invent one.
+- Omit "number" when the text gives none. Never invent numbers.
+- Convert 12-hour times to 24-hour: 2-3:30 after 12:30 = 14:00-15:30.
+- Dates are YYYY-MM-DD from the dd/mm/yyyy in the text, and every week's "days" lists all
+  its dates including OFF days.
+- Count the sessions you created for each practical and tutorial, and report any group,
+  letter or date that is missing, repeated or overlapping, in a short note after the JSON.
 
 ## Check silently before answering
 Every session in the text exists in the JSON and the other way round; counts per section match;

@@ -41,6 +41,8 @@ import {
   createPdfFromImages,
   exportBatchToZip,
   buildFilename,
+  buildProjectFilename,
+  buildProjectFileData,
   downloadDataUrl,
   downloadBlob
 } from './utils/exportPdf';
@@ -172,6 +174,7 @@ export function App() {
   const [isExporting, setIsExporting] = useState(false);
   const [exportNotice, setExportNotice] = useState('');
   const [exportProgress, setExportProgress] = useState({ percent: 0, status: '' });
+  const [pendingProjectFile, setPendingProjectFile] = useState(null);
   const [offscreenParams, setOffscreenParams] = useState(null);
   const [selectedPreset, setSelectedPreset] = useState('GIT');
 
@@ -564,6 +567,24 @@ export function App() {
         canvasHeight: theme?.geometry?.canvasHeight || 2000
       });
 
+      let shouldSaveProject = true;
+      try {
+        const v = localStorage.getItem('medscope_export_save_project_file');
+        shouldSaveProject = v === null ? true : v === 'true';
+      } catch (e) {}
+
+      if (shouldSaveProject) {
+        const projectData = buildProjectFileData(schedule, theme);
+        const projectFilename = buildProjectFilename(schedule.module?.title);
+        const jsonBlob = new Blob([JSON.stringify(projectData, null, 2)], { type: 'application/json' });
+        setPendingProjectFile({ blob: jsonBlob, filename: projectFilename });
+        setTimeout(() => {
+          try {
+            downloadBlob(jsonBlob, projectFilename);
+          } catch (e) {}
+        }, 350);
+      }
+
       setExportNotice(`Exported ${filename} successfully!`);
       addToast({ type: 'success', title: 'Export Finished', message: `Exported ${filename} successfully!` });
       setTimeout(() => setExportNotice(''), 4000);
@@ -705,6 +726,20 @@ export function App() {
             canvasHeight: theme?.geometry?.canvasHeight || 2000
           });
           pdf.save(capturedImages[0].filename);
+
+          if (options.saveProjectFile) {
+            const projectData = buildProjectFileData(schedule, theme);
+            const projectFilename = buildProjectFilename(schedule.module?.title);
+            const jsonBlob = new Blob([JSON.stringify(projectData, null, 2)], { type: 'application/json' });
+            setPendingProjectFile({ blob: jsonBlob, filename: projectFilename });
+            setTimeout(() => {
+              try {
+                downloadBlob(jsonBlob, projectFilename);
+              } catch (e) {
+                console.warn('Second download may have been blocked:', e);
+              }
+            }, 350);
+          }
         } else {
           downloadDataUrl(capturedImages[0].dataUrl, capturedImages[0].filename);
         }
@@ -728,6 +763,21 @@ export function App() {
             combinedName += `Complete_All_Sections_All_Weeks.pdf`;
           }
           pdf.save(combinedName);
+
+          if (options.saveProjectFile) {
+            const projectData = buildProjectFileData(schedule, theme);
+            const projectFilename = buildProjectFilename(schedule.module?.title);
+            const jsonBlob = new Blob([JSON.stringify(projectData, null, 2)], { type: 'application/json' });
+            setPendingProjectFile({ blob: jsonBlob, filename: projectFilename });
+            setTimeout(() => {
+              try {
+                downloadBlob(jsonBlob, projectFilename);
+              } catch (e) {
+                console.warn('Second download may have been blocked:', e);
+              }
+            }, 350);
+          }
+
           setExportNotice(`Exported ${combinedName} (${total} pages) successfully!`);
           addToast({ type: 'success', title: 'Multi-Page PDF Ready', message: `Exported ${combinedName} (${total} pages) successfully!` });
         } else {
@@ -758,6 +808,13 @@ export function App() {
           if (options.includeValidationReport && options.validationReportText) {
             filesToZip.push({ filename: 'validation_report.txt', data: options.validationReportText });
           }
+
+          // Always add project.json inside the ZIP as project.json, next to the PDFs
+          const projectData = buildProjectFileData(schedule, theme);
+          filesToZip.push({
+            filename: 'project.json',
+            data: JSON.stringify(projectData, null, 2)
+          });
 
           await exportBatchToZip(filesToZip, zipName, (prog) => {
             setExportProgress(prog);
@@ -819,13 +876,10 @@ export function App() {
 
   // Export Project JSON (Data + Theme)
   const handleExportProjectJson = () => {
-    const projectData = {
-      ...schedule,
-      theme
-    };
+    const projectData = buildProjectFileData(schedule, theme);
     const jsonStr = JSON.stringify(projectData, null, 2);
     const blob = new Blob([jsonStr], { type: 'application/json' });
-    const filename = `${(schedule.module?.title || 'schedule').toLowerCase().replace(/\s+/g, '_')}_project.json`;
+    const filename = buildProjectFilename(schedule.module?.title);
     downloadBlob(blob, filename);
     addToast({
       type: 'success',
@@ -979,6 +1033,41 @@ export function App() {
         onOpenCommandBar={() => setIsCommandBarOpen(true)}
         onGoHome={handleGoHome}
       />
+
+      {/* Fallback banner if browser blocked project file download */}
+      {pendingProjectFile && (
+        <div
+          data-testid="project-download-fallback-banner"
+          className="bg-[#1a1710] border-b border-[#ffb347]/30 px-4 py-2 flex items-center justify-between gap-3 text-xs text-white z-40 shrink-0"
+        >
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-[#ffb347] animate-pulse" />
+            <span className="text-[#9c9c9d]">If your browser blocked the second download, click to save your project file:</span>
+            <span className="font-mono text-[#ffb347] font-semibold hidden sm:inline">{pendingProjectFile.filename}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              data-testid="save-project-file-btn"
+              onClick={() => {
+                downloadBlob(pendingProjectFile.blob, pendingProjectFile.filename);
+                setPendingProjectFile(null);
+              }}
+              className="px-3 py-1 bg-[#ffb347] hover:bg-[#ffa726] text-black font-semibold rounded text-xs transition"
+            >
+              Save project file
+            </button>
+            <button
+              type="button"
+              onClick={() => setPendingProjectFile(null)}
+              className="p-1 text-[#9c9c9d] hover:text-white"
+              title="Dismiss"
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* 2. Main Middle Workspace Area */}
       <div className="flex-1 min-h-0 flex overflow-hidden relative work-area">
@@ -1212,6 +1301,13 @@ export function App() {
         isExporting={isExporting}
         exportProgress={exportProgress}
         validationIssues={validationIssues}
+        pendingProjectFile={pendingProjectFile}
+        onSaveProjectFile={() => {
+          if (pendingProjectFile) {
+            downloadBlob(pendingProjectFile.blob, pendingProjectFile.filename);
+            setPendingProjectFile(null);
+          }
+        }}
         onJumpToSession={(issue) => {
           setIsExportModalOpen(false);
           handleJumpToIssue(issue);
