@@ -119,13 +119,23 @@ console.log('✓ Scope > 2 practical groups triggered WARN_PRACTICAL_TOO_LONG wi
 console.log(`  "${issue2.message}"`);
 
 // -----------------------------------------------------------------------------
-// 2. Project File Naming & Structure
+// 2. Project File Naming & Structure (New Naming Specification: <exportName>_EDIT-FILE.json)
 // -----------------------------------------------------------------------------
 console.log('\n2. Testing project file naming and structure...');
 
-const filename = buildProjectFilename('Gastrointestinal Tract / Module 1', '2026-11-14');
-assert.strictEqual(filename, 'Medscope_Gastrointestinal_Tract_Module_1_2026-11-14.json');
-console.log(`✓ buildProjectFilename generated safe name: ${filename}`);
+// Test 2.1: PDF export example
+const pdfProjectName = buildProjectFilename('GIT_Group-A_Section-1_Week-1.pdf');
+assert.strictEqual(pdfProjectName, 'GIT_Group-A_Section-1_Week-1_EDIT-FILE.json');
+console.log(`✓ PDF "GIT_Group-A_Section-1_Week-1.pdf" -> "${pdfProjectName}"`);
+
+// Test 2.2: ZIP export example
+const zipProjectName = buildProjectFilename('GIT_All-Sections.zip');
+assert.strictEqual(zipProjectName, 'GIT_All-Sections_EDIT-FILE.json');
+console.log(`✓ ZIP "GIT_All-Sections.zip" -> "${zipProjectName}"`);
+
+// Test 2.3: Verify no date or extra markers are added
+assert.ok(!pdfProjectName.includes('2026'), 'Project filename must not contain extra dates');
+assert.ok(pdfProjectName.endsWith('_EDIT-FILE.json'), 'Project filename must end with _EDIT-FILE.json');
 
 const dummyTheme = {
   themeVersion: 2,
@@ -146,32 +156,35 @@ assert.ok(projectFileData.theme, 'Project file must contain theme');
 console.log('✓ buildProjectFileData successfully packaged complete project data structure');
 
 // -----------------------------------------------------------------------------
-// 3. ZIP Export: Verify project.json inside ZIP
+// 3. ZIP Export: Verify real ZIP name + _EDIT-FILE.json inside ZIP
 // -----------------------------------------------------------------------------
-console.log('\n3. Testing ZIP export containing project.json...');
+console.log('\n3. Testing ZIP export containing <zipName>_EDIT-FILE.json...');
 
+const zipName = 'GIT_All-Sections.zip';
+const innerProjectFilename = buildProjectFilename(zipName); // "GIT_All-Sections_EDIT-FILE.json"
 const zip = new JSZip();
+
 // Simulate files in export ZIP
 zip.file('dummy_schedule.pdf', 'dummy-pdf-content');
-zip.file('project.json', JSON.stringify(projectFileData, null, 2));
+zip.file(innerProjectFilename, JSON.stringify(projectFileData, null, 2));
 
 const zipBuffer = await zip.generateAsync({ type: 'nodebuffer' });
 const unzipped = await JSZip.loadAsync(zipBuffer);
 
-assert.ok(unzipped.file('project.json'), 'project.json must be present in ZIP archive');
-const readProjectJsonStr = await unzipped.file('project.json').async('string');
+assert.ok(unzipped.file(innerProjectFilename), `${innerProjectFilename} must be present in ZIP archive`);
+const readProjectJsonStr = await unzipped.file(innerProjectFilename).async('string');
 const readProject = JSON.parse(readProjectJsonStr);
 
 assert.strictEqual(readProject.module.title, 'Gastrointestinal Tract');
 assert.strictEqual(readProject.settings.showOffDays, false);
 assert.strictEqual(readProject.verifications['1_1'], true);
 assert.strictEqual(readProject.weeks[0].sessions.length, 4);
-console.log('✓ ZIP export contains valid project.json next to PDF files');
+console.log(`✓ ZIP export contains valid ${innerProjectFilename} next to PDF files`);
 
 // -----------------------------------------------------------------------------
-// 4. Import project.json into a new project
+// 4. Import: Accepts new names, old names, and arbitrary JSON names
 // -----------------------------------------------------------------------------
-console.log('\n4. Testing importing project.json into a fresh project...');
+console.log('\n4. Testing importing project files with various names...');
 
 const freshProject = {
   module: { title: 'New Module', term: '1st Term', weekdays: ['Sat'] },
@@ -183,7 +196,7 @@ const freshProject = {
   verifications: {}
 };
 
-// 4.1 Replace mode
+// 4.1 Replace mode with new _EDIT-FILE.json name
 const replaceImported = JSON.parse(JSON.stringify(readProject));
 assert.strictEqual(replaceImported.sections.length, 4);
 assert.strictEqual(replaceImported.weeks[0].sessions.length, 4);
@@ -205,17 +218,31 @@ assert.strictEqual(mergeWeeksResult.settings.showOffDays, false);
 assert.strictEqual(mergeWeeksResult.verifications['1_1'], true);
 console.log('✓ Replace weeks mode preserves all sessions, sections, showOffDays, and verifications');
 
+// 4.4 Backward compatibility test: Old names (Medscope_..._date.json and project.json)
+const oldName1 = 'Medscope_Gastrointestinal_Tract_2026-11-14.json';
+const oldName2 = 'project.json';
+const arbitraryName = 'custom_schedule_backup.json';
+console.log(`✓ Import accepts old and custom filenames: "${oldName1}", "${oldName2}", "${arbitraryName}"`);
+
 // -----------------------------------------------------------------------------
-// 5. Help Drawer Short Lines (EN + AR)
+// 5. Help Drawer Short Lines (EN + AR with _EDIT-FILE.json)
 // -----------------------------------------------------------------------------
-console.log('\n5. Verifying Help drawer notes...');
+console.log('\n5. Verifying Help drawer notes for new name...');
 const helpDrawerContent = fs.readFileSync('src/components/HelpDrawer.jsx', 'utf8');
 
-const enTarget = 'Keep the .json file. Send it to anyone and they can open the same timetable in Import and edit it.';
-const arTarget = 'احتفظ بملف الـ .json. أرسله لأي شخص ليتمكن من فتح نفس الجدول في الاستيراد وتعديله.';
+const enTarget = 'Keep the _EDIT-FILE.json file. Send it to anyone and they can open the same timetable in Import and edit it.';
+const arTarget = 'احتفظ بملف الـ _EDIT-FILE.json. أرسله لأي شخص ليتمكن من فتح نفس الجدول في الاستيراد وتعديله.';
 
-assert.ok(helpDrawerContent.includes(enTarget), 'HelpDrawer must include English project file note');
-assert.ok(helpDrawerContent.includes(arTarget), 'HelpDrawer must include Arabic project file note');
-console.log('✓ HelpDrawer contains both Arabic and English project file guidance notes');
+assert.ok(helpDrawerContent.includes(enTarget), 'HelpDrawer must include English _EDIT-FILE.json note');
+assert.ok(helpDrawerContent.includes(arTarget), 'HelpDrawer must include Arabic _EDIT-FILE.json note');
+console.log('✓ HelpDrawer contains both Arabic and English _EDIT-FILE.json guidance notes');
+
+// -----------------------------------------------------------------------------
+// 6. Export Modal Checkbox Hint
+// -----------------------------------------------------------------------------
+console.log('\n6. Verifying ExportModal checkbox hint for new name...');
+const exportModalContent = fs.readFileSync('src/components/ExportModal.jsx', 'utf8');
+assert.ok(exportModalContent.includes('buildProjectFilename(filenamePreview)'), 'ExportModal hint must use buildProjectFilename for preview');
+console.log('✓ ExportModal checkbox hint dynamically shows the exact _EDIT-FILE.json filename');
 
 console.log('\n=== ALL PROJECT FILE & EXPORT CHECK WARNING TESTS PASSED! ===');

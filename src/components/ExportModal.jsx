@@ -12,7 +12,7 @@ import {
   Printer,
   Sparkles
 } from 'lucide-preact';
-import { buildFilename } from '../utils/exportPdf';
+import { buildFilename, buildProjectFilename } from '../utils/exportPdf';
 import { validate } from '../utils/validatorEngine';
 
 function formatPlainIssueSentence(issue, schedule) {
@@ -503,7 +503,7 @@ export function ExportModal({
                 />
                 <div>
                   <div className="font-semibold text-xs text-[var(--text)]">Also save the project file</div>
-                  <div className="text-[10px] text-[var(--muted)]">Downloads a .json project file right after the PDF so it can be reopened and edited anytime</div>
+                  <div className="text-[10px] text-[var(--muted)]">Downloads an edit file (<span className="font-mono text-[var(--gold)]">{buildProjectFilename(filenamePreview)}</span>) right after the PDF so it can be reopened and edited anytime</div>
                 </div>
               </label>
             </div>

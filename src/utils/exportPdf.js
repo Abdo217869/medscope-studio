@@ -202,17 +202,16 @@ export function triggerPrintMode() {
 }
 
 /**
- * Generate a safe project file name: Medscope_<module title>_<YYYY-MM-DD>.json
+ * Generate a project edit filename matching the exported file: <exportName>_EDIT-FILE.json
+ * Example: "GIT_Group-A_Section-1_Week-1.pdf" -> "GIT_Group-A_Section-1_Week-1_EDIT-FILE.json"
+ * Example: "GIT_All-Sections.zip" -> "GIT_All-Sections_EDIT-FILE.json"
  */
-export function buildProjectFilename(moduleTitle, dateStr) {
-  const safeTitle = (moduleTitle || 'timetable')
-    .replace(/[\\/:*?"<>|]/g, '')
-    .trim()
-    .replace(/\s+/g, '_')
-    .replace(/_+/g, '_')
-    .replace(/^_+|_+$/g, '') || 'timetable';
-  const dStr = dateStr || new Date().toISOString().slice(0, 10);
-  return `Medscope_${safeTitle}_${dStr}.json`;
+export function buildProjectFilename(exportFilename) {
+  if (!exportFilename || typeof exportFilename !== 'string') {
+    return 'timetable_EDIT-FILE.json';
+  }
+  const base = exportFilename.replace(/\.[^/.]+$/, '');
+  return `${base}_EDIT-FILE.json`;
 }
 
 /**

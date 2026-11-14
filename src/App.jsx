@@ -575,7 +575,7 @@ export function App() {
 
       if (shouldSaveProject) {
         const projectData = buildProjectFileData(schedule, theme);
-        const projectFilename = buildProjectFilename(schedule.module?.title);
+        const projectFilename = buildProjectFilename(filename);
         const jsonBlob = new Blob([JSON.stringify(projectData, null, 2)], { type: 'application/json' });
         setPendingProjectFile({ blob: jsonBlob, filename: projectFilename });
         setTimeout(() => {
@@ -729,7 +729,7 @@ export function App() {
 
           if (options.saveProjectFile) {
             const projectData = buildProjectFileData(schedule, theme);
-            const projectFilename = buildProjectFilename(schedule.module?.title);
+            const projectFilename = buildProjectFilename(capturedImages[0].filename);
             const jsonBlob = new Blob([JSON.stringify(projectData, null, 2)], { type: 'application/json' });
             setPendingProjectFile({ blob: jsonBlob, filename: projectFilename });
             setTimeout(() => {
@@ -766,7 +766,7 @@ export function App() {
 
           if (options.saveProjectFile) {
             const projectData = buildProjectFileData(schedule, theme);
-            const projectFilename = buildProjectFilename(schedule.module?.title);
+            const projectFilename = buildProjectFilename(combinedName);
             const jsonBlob = new Blob([JSON.stringify(projectData, null, 2)], { type: 'application/json' });
             setPendingProjectFile({ blob: jsonBlob, filename: projectFilename });
             setTimeout(() => {
@@ -809,10 +809,11 @@ export function App() {
             filesToZip.push({ filename: 'validation_report.txt', data: options.validationReportText });
           }
 
-          // Always add project.json inside the ZIP as project.json, next to the PDFs
+          // Always add edit file inside the ZIP matching ZIP name, next to the PDFs
           const projectData = buildProjectFileData(schedule, theme);
+          const projectFilename = buildProjectFilename(zipName);
           filesToZip.push({
-            filename: 'project.json',
+            filename: projectFilename,
             data: JSON.stringify(projectData, null, 2)
           });
 
@@ -879,7 +880,13 @@ export function App() {
     const projectData = buildProjectFileData(schedule, theme);
     const jsonStr = JSON.stringify(projectData, null, 2);
     const blob = new Blob([jsonStr], { type: 'application/json' });
-    const filename = buildProjectFilename(schedule.module?.title);
+    const baseName = (schedule.module?.title || 'timetable')
+      .replace(/[\\/:*?"<>|]/g, '')
+      .trim()
+      .replace(/\s+/g, '_')
+      .replace(/_+/g, '_')
+      .replace(/^_+|_+$/g, '') || 'timetable';
+    const filename = buildProjectFilename(baseName);
     downloadBlob(blob, filename);
     addToast({
       type: 'success',

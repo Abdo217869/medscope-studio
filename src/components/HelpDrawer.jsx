@@ -230,8 +230,8 @@ export function HelpDrawer({
             <FileJson className="w-3.5 h-3.5 text-[#ffb347] shrink-0 mt-0.5" />
             <p>
               {helpLang === 'ar'
-                ? 'احتفظ بملف الـ .json. أرسله لأي شخص ليتمكن من فتح نفس الجدول في الاستيراد وتعديله.'
-                : 'Keep the .json file. Send it to anyone and they can open the same timetable in Import and edit it.'}
+                ? 'احتفظ بملف الـ _EDIT-FILE.json. أرسله لأي شخص ليتمكن من فتح نفس الجدول في الاستيراد وتعديله.'
+                : 'Keep the _EDIT-FILE.json file. Send it to anyone and they can open the same timetable in Import and edit it.'}
             </p>
           </div>
           {topicEntries.length === 0 ? (
