@@ -38,6 +38,9 @@ import {
   exportSectionPdf,
   triggerPrintMode,
   renderElementToPng,
+  renderElementToImage,
+  dataUrlToBlob,
+  parsePageRange,
   createPdfFromImages,
   exportBatchToZip,
   buildFilename,
@@ -532,6 +535,12 @@ export function App() {
   const totalSessions = (schedule?.weeks || []).reduce((acc, w) => acc + (w.sessions?.length || 0), 0);
   const isEmpty = totalSessions === 0;
 
+  // Export cancellation reference
+  const exportAbortRef = useRef(false);
+  const handleCancelExport = () => {
+    exportAbortRef.current = true;
+  };
+
   // Helper to render an arbitrary section & week into offscreen ref and capture dataUrl
   const captureOffscreen = async (sec, wk, pgNum, renderOptions, showOffDaysOverride) => {
     setOffscreenParams({
@@ -545,7 +554,7 @@ export function App() {
       await document.fonts.ready;
     }
     const targetNode = offscreenElementRef.current?.querySelector('.schedule-page') || offscreenElementRef.current;
-    return await renderElementToPng(targetNode, renderOptions);
+    return await renderElementToImage(targetNode, renderOptions);
   };
 
   // 1-Click Quick Export PDF (Current Page)
@@ -597,155 +606,218 @@ export function App() {
     }
   };
 
-  // Advanced Custom Export (Scopes, Multi-page PDF, ZIP batch, Resolution presets, Naming patterns)
+  // Advanced Custom Export (Scopes, Multi-page PDF, ZIP batch, JPG/PNG images, Resolution presets, Naming patterns)
   const handleExecuteCustomExport = async (options) => {
     setIsExporting(true);
+    exportAbortRef.current = false;
     setExportProgress({ percent: 5, status: 'Preparing export configuration...' });
-    addToast({ type: 'info', title: 'Batch Export Started', message: 'Rendering timetable pages...' });
+    addToast({ type: 'info', title: 'Export Started', message: 'Preparing timetable pages...' });
 
     try {
       const {
         scope,
-        format,
-        multiPdfMode,
-        pixelRatio,
+        pageRange,
+        activePageIndices,
+        format, // 'pdf' | 'jpg' | 'png'
+        multiPdfMode, // 'combined' | 'zip'
+        downloadSeparateImages, // boolean
+        pixelRatio, // 1.0 | 2.0
         pageSize,
         namingTemplate,
-        quality
+        quality,
+        includeValidationReport,
+        includeOffDays,
+        saveProjectFile,
+        validationReportText
       } = options;
 
+      const ext = format === 'jpg' ? 'jpg' : format === 'png' ? 'png' : 'pdf';
+      const isImage = format === 'jpg' || format === 'png';
+
       const renderOptions = {
-        pixelRatio,
-        quality
+        format: format === 'jpg' ? 'jpg' : 'png',
+        pixelRatio: pixelRatio || 1.0,
+        quality: quality || 0.92,
+        backgroundColor: theme?.colors?.background || '#070a14'
       };
 
       const moduleName = schedule.module?.title || theme?.moduleTitle || 'Module';
       const termName = schedule.module?.term?.replace(/\s+/g, '_') || theme?.termText || 'Term';
 
-      // Determine list of pages to render
-      let pagesToRender = [];
+      // 1. Determine list of candidate pages based on scope
+      const candidatePages = [];
 
       if (scope === 'current') {
-        pagesToRender.push({
+        candidatePages.push({
           section: currentSection,
           week: currentWeek,
           pageNumber,
-          filename: buildFilename(namingTemplate, {
+          ctx: {
             module: moduleName,
             term: termName,
             group: currentSection.letter || 'A',
             section: currentSection.id,
             week: String(currentWeek.n)
-          }, format)
+          }
         });
       } else if (scope === 'section_all_weeks') {
-        schedule.weeks.forEach(w => {
-          pagesToRender.push({
+        (schedule.weeks || []).forEach(w => {
+          candidatePages.push({
             section: currentSection,
             week: w,
             pageNumber,
-            filename: buildFilename(namingTemplate, {
+            ctx: {
               module: moduleName,
               term: termName,
               group: currentSection.letter || 'A',
               section: currentSection.id,
               week: String(w.n)
-            }, format)
+            }
           });
         });
       } else if (scope === 'week_all_sections') {
-        schedule.sections.forEach((s, idx) => {
-          pagesToRender.push({
+        (schedule.sections || []).forEach((s, idx) => {
+          candidatePages.push({
             section: s,
             week: currentWeek,
             pageNumber: idx + 1,
-            filename: buildFilename(namingTemplate, {
+            ctx: {
               module: moduleName,
               term: termName,
               group: s.letter || 'A',
               section: s.id,
               week: String(currentWeek.n)
-            }, format)
+            }
           });
         });
       } else if (scope === 'all') {
-        schedule.sections.forEach((s, secIdx) => {
-          schedule.weeks.forEach(w => {
-            pagesToRender.push({
+        (schedule.sections || []).forEach((s, secIdx) => {
+          (schedule.weeks || []).forEach(w => {
+            candidatePages.push({
               section: s,
               week: w,
               pageNumber: secIdx + 1,
-              filename: buildFilename(namingTemplate, {
+              ctx: {
                 module: moduleName,
                 term: termName,
                 group: s.letter || 'A',
                 section: s.id,
                 week: String(w.n)
-              }, format)
+              }
             });
           });
         });
       }
 
-      const total = pagesToRender.length;
-      const capturedImages = [];
+      // 2. Filter pages by activePageIndices or parsePageRange
+      const indices = Array.isArray(activePageIndices) && activePageIndices.length > 0
+        ? activePageIndices
+        : parsePageRange(pageRange, candidatePages.length);
 
-      // Render each page with live progress feedback
+      const pagesToRender = indices.map((idx) => {
+        const item = candidatePages[idx - 1];
+        if (!item) return null;
+        return {
+          ...item,
+          filename: buildFilename(namingTemplate, item.ctx, ext)
+        };
+      }).filter(Boolean);
+
+      const total = pagesToRender.length;
+      if (total === 0) {
+        setIsExporting(false);
+        addToast({ type: 'warning', title: 'No Pages Selected', message: 'No valid pages found in selected range.' });
+        return;
+      }
+
+      const capturedImages = [];
+      const failedPages = [];
+
+      // 3. Render each page one by one with live progress feedback and cancellation support
       for (let i = 0; i < total; i++) {
+        if (exportAbortRef.current) {
+          addToast({ type: 'info', title: 'Export Cancelled', message: `Export cancelled by user after ${i} page(s).` });
+          break;
+        }
+
         const item = pagesToRender[i];
         const percent = Math.round(10 + ((i + 1) / total) * 75);
         setExportProgress({
           percent,
-          status: `Rendering page ${i + 1} of ${total} (${item.section.id} • Week ${item.week.n})...`
+          status: `Exporting ${i + 1} of ${total} (${item.section.id} • Week ${item.week.n})...`,
+          current: i + 1,
+          total
         });
 
-        let dataUrl;
-        if (scope === 'current' && (options.includeOffDays === undefined || options.includeOffDays === (schedule?.settings?.showOffDays ?? true))) {
-          const targetNode = pageElementRef.current?.querySelector('.schedule-page') || pageElementRef.current;
-          dataUrl = await renderElementToPng(targetNode, renderOptions);
-        } else {
-          dataUrl = await captureOffscreen(item.section, item.week, item.pageNumber, renderOptions, options.includeOffDays);
+        try {
+          let dataUrl;
+          if (scope === 'current' && (includeOffDays === undefined || includeOffDays === (schedule?.settings?.showOffDays ?? true))) {
+            const targetNode = pageElementRef.current?.querySelector('.schedule-page') || pageElementRef.current;
+            dataUrl = await renderElementToImage(targetNode, renderOptions);
+          } else {
+            dataUrl = await captureOffscreen(item.section, item.week, item.pageNumber, renderOptions, includeOffDays);
+          }
+
+          const blob = dataUrlToBlob(dataUrl);
+          capturedImages.push({
+            dataUrl,
+            blob,
+            filename: item.filename,
+            section: item.section,
+            week: item.week
+          });
+        } catch (pageErr) {
+          console.error(`Failed to capture page ${i + 1} (${item.filename}):`, pageErr);
+          failedPages.push(item.filename);
         }
 
-        capturedImages.push({
-          dataUrl,
-          filename: item.filename,
-          section: item.section,
-          week: item.week
-        });
+        // Release event loop and memory between pages to keep UI responsive
+        await new Promise(r => setTimeout(r, 20));
+      }
+
+      if (capturedImages.length === 0) {
+        if (exportAbortRef.current) {
+          setIsExporting(false);
+          setOffscreenParams(null);
+          return;
+        }
+        throw new Error('All pages failed to render. Please check the timetable and try again.');
       }
 
       setExportProgress({ percent: 90, status: 'Compiling export package...' });
 
-      // Output Delivery
-      if (scope === 'current') {
+      // 4. Output Delivery
+      if (capturedImages.length === 1) {
+        const single = capturedImages[0];
         if (format === 'pdf') {
-          const pdf = createPdfFromImages([capturedImages[0].dataUrl], {
+          const pdf = createPdfFromImages([single.dataUrl], {
             pageSize,
             canvasWidth: theme?.geometry?.canvasWidth || 1414,
             canvasHeight: theme?.geometry?.canvasHeight || 2000
           });
-          pdf.save(capturedImages[0].filename);
-
-          if (options.saveProjectFile) {
-            const projectData = buildProjectFileData(schedule, theme);
-            const projectFilename = buildProjectFilename(capturedImages[0].filename);
-            const jsonBlob = new Blob([JSON.stringify(projectData, null, 2)], { type: 'application/json' });
-            setPendingProjectFile({ blob: jsonBlob, filename: projectFilename });
-            setTimeout(() => {
-              try {
-                downloadBlob(jsonBlob, projectFilename);
-              } catch (e) {
-                console.warn('Second download may have been blocked:', e);
-              }
-            }, 350);
-          }
+          pdf.save(single.filename);
         } else {
-          downloadDataUrl(capturedImages[0].dataUrl, capturedImages[0].filename);
+          downloadBlob(single.blob, single.filename);
         }
-        setExportNotice(`Exported ${capturedImages[0].filename} successfully!`);
-        addToast({ type: 'success', title: 'Export Finished', message: `Exported ${capturedImages[0].filename} successfully!` });
+
+        if (saveProjectFile) {
+          const projectData = buildProjectFileData(schedule, theme);
+          const projectFilename = buildProjectFilename(single.filename);
+          const jsonBlob = new Blob([JSON.stringify(projectData, null, 2)], { type: 'application/json' });
+          setPendingProjectFile({ blob: jsonBlob, filename: projectFilename });
+          setTimeout(() => {
+            try {
+              downloadBlob(jsonBlob, projectFilename);
+            } catch (e) {
+              console.warn('Second download may have been blocked:', e);
+            }
+          }, 350);
+        }
+
+        setExportNotice(`Exported ${single.filename} successfully!`);
+        addToast({ type: 'success', title: 'Export Finished', message: `Exported ${single.filename} successfully!` });
       } else {
+        // Multi-page export
         if (format === 'pdf' && multiPdfMode === 'combined') {
           const allDataUrls = capturedImages.map(img => img.dataUrl);
           const pdf = createPdfFromImages(allDataUrls, {
@@ -764,7 +836,7 @@ export function App() {
           }
           pdf.save(combinedName);
 
-          if (options.saveProjectFile) {
+          if (saveProjectFile) {
             const projectData = buildProjectFileData(schedule, theme);
             const projectFilename = buildProjectFilename(combinedName);
             const jsonBlob = new Blob([JSON.stringify(projectData, null, 2)], { type: 'application/json' });
@@ -778,9 +850,32 @@ export function App() {
             }, 350);
           }
 
-          setExportNotice(`Exported ${combinedName} (${total} pages) successfully!`);
-          addToast({ type: 'success', title: 'Multi-Page PDF Ready', message: `Exported ${combinedName} (${total} pages) successfully!` });
+          setExportNotice(`Exported ${combinedName} (${capturedImages.length} pages) successfully!`);
+          addToast({ type: 'success', title: 'Multi-Page PDF Ready', message: `Exported ${combinedName} (${capturedImages.length} pages) successfully!` });
+        } else if (isImage && downloadSeparateImages) {
+          // Download as separate individual images
+          for (let k = 0; k < capturedImages.length; k++) {
+            const img = capturedImages[k];
+            downloadBlob(img.blob, img.filename);
+            await new Promise(r => setTimeout(r, 250));
+          }
+
+          if (saveProjectFile) {
+            const projectData = buildProjectFileData(schedule, theme);
+            const projectFilename = buildProjectFilename(capturedImages[0].filename);
+            const jsonBlob = new Blob([JSON.stringify(projectData, null, 2)], { type: 'application/json' });
+            setPendingProjectFile({ blob: jsonBlob, filename: projectFilename });
+            setTimeout(() => {
+              try {
+                downloadBlob(jsonBlob, projectFilename);
+              } catch (e) {}
+            }, 350);
+          }
+
+          setExportNotice(`Exported ${capturedImages.length} images successfully!`);
+          addToast({ type: 'success', title: 'Images Exported', message: `Downloaded ${capturedImages.length} separate image files.` });
         } else {
+          // ZIP Archive (Default for multiple images, or PDF in ZIP mode)
           let zipName = `${moduleName}_${termName}_`;
           if (scope === 'section_all_weeks') {
             zipName += `Section_${currentSection.id}_All_Weeks.zip`;
@@ -801,28 +896,39 @@ export function App() {
               const pdfBlob = pdf.output('blob');
               filesToZip.push({ filename: item.filename, data: pdfBlob });
             } else {
-              filesToZip.push({ filename: item.filename, data: item.dataUrl });
+              filesToZip.push({ filename: item.filename, data: item.blob });
             }
           }
 
-          if (options.includeValidationReport && options.validationReportText) {
-            filesToZip.push({ filename: 'validation_report.txt', data: options.validationReportText });
+          if (includeValidationReport && validationReportText) {
+            filesToZip.push({ filename: 'validation_report.txt', data: validationReportText });
           }
 
-          // Always add edit file inside the ZIP matching ZIP name, next to the PDFs
-          const projectData = buildProjectFileData(schedule, theme);
-          const projectFilename = buildProjectFilename(zipName);
-          filesToZip.push({
-            filename: projectFilename,
-            data: JSON.stringify(projectData, null, 2)
-          });
+          // Always add edit file inside the ZIP matching ZIP name
+          if (saveProjectFile) {
+            const projectData = buildProjectFileData(schedule, theme);
+            const projectFilename = buildProjectFilename(zipName);
+            filesToZip.push({
+              filename: projectFilename,
+              data: JSON.stringify(projectData, null, 2)
+            });
+          }
 
           await exportBatchToZip(filesToZip, zipName, (prog) => {
             setExportProgress(prog);
           });
-          setExportNotice(`Exported ${zipName} (${total} files) successfully!`);
-          addToast({ type: 'success', title: 'ZIP Archive Ready', message: `Exported ${zipName} (${total} files) successfully!` });
+
+          setExportNotice(`Exported ${zipName} (${capturedImages.length} files) successfully!`);
+          addToast({ type: 'success', title: 'ZIP Archive Ready', message: `Exported ${zipName} (${capturedImages.length} files) successfully!` });
         }
+      }
+
+      if (failedPages.length > 0) {
+        addToast({
+          type: 'warning',
+          title: 'Export Warning',
+          message: `${capturedImages.length} pages exported, but ${failedPages.length} failed (${failedPages.slice(0, 2).join(', ')}).`
+        });
       }
 
       setExportProgress({ percent: 100, status: 'Export finished!' });
@@ -1305,6 +1411,7 @@ export function App() {
         selectedWeek={currentWeek}
         theme={theme}
         onExecuteExport={handleExecuteCustomExport}
+        onCancelExport={handleCancelExport}
         isExporting={isExporting}
         exportProgress={exportProgress}
         validationIssues={validationIssues}

@@ -215,8 +215,8 @@ export function HelpDrawer({
                 </div>
                 <p className="text-[11px] leading-relaxed">
                   {helpLang === 'ar'
-                    ? 'اضغط استيراد JSON في التطبيق ثم راجع الجدول وصدر ملفات الـ PDF.'
-                    : 'Import the JSON into Medscope Studio and export publication-ready PDFs.'}
+                    ? 'اضغط استيراد JSON في التطبيق ثم راجع الجدول وصدر ملفات الـ PDF أو صور JPG و PNG.'
+                    : 'Import the JSON into Medscope Studio and export publication-ready PDFs, JPG images, or lossless PNGs.'}
                 </p>
               </div>
             </div>

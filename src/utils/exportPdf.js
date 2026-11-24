@@ -1,4 +1,4 @@
-import { toPng } from 'html-to-image';
+import { toPng, toJpeg } from 'html-to-image';
 import { jsPDF } from 'jspdf';
 import JSZip from 'jszip';
 import { ensureFontsLoaded } from './fontLoader.js';
@@ -66,14 +66,95 @@ export function downloadDataUrl(dataUrl, filename) {
 }
 
 /**
- * Render a schedule DOM element to high-res PNG Data URL
+ * Convert a Data URL to a Blob
  */
-export async function renderElementToPng(element, options = {}) {
+export function dataUrlToBlob(dataUrl) {
+  if (!dataUrl || typeof dataUrl !== 'string') return null;
+  const parts = dataUrl.split(',');
+  if (parts.length < 2) return null;
+  const mimeMatch = parts[0].match(/:(.*?);/);
+  const mime = mimeMatch ? mimeMatch[1] : 'application/octet-stream';
+  const bstr = atob(parts[1]);
+  let n = bstr.length;
+  const u8arr = new Uint8Array(n);
+  while (n--) {
+    u8arr[n] = bstr.charCodeAt(n);
+  }
+  return new Blob([u8arr], { type: mime });
+}
+
+/**
+ * Parse page range string (e.g. "all", "1-3", "2,5,7") into an array of 1-based page numbers.
+ */
+export function parsePageRange(rangeStr, maxPages) {
+  if (!maxPages || maxPages <= 0) return [];
+  if (!rangeStr || typeof rangeStr !== 'string' || !rangeStr.trim() || rangeStr.trim().toLowerCase() === 'all') {
+    return Array.from({ length: maxPages }, (_, i) => i + 1);
+  }
+
+  const clean = rangeStr.trim();
+  const parts = clean.split(/[,;\s]+/).filter(Boolean);
+  const selected = new Set();
+
+  for (const part of parts) {
+    if (part.toLowerCase() === 'all') {
+      for (let i = 1; i <= maxPages; i++) selected.add(i);
+      continue;
+    }
+    const rangeMatch = part.match(/^(\d+)\s*-\s*(\d+)$/);
+    if (rangeMatch) {
+      const start = Math.max(1, parseInt(rangeMatch[1], 10));
+      const end = Math.min(maxPages, parseInt(rangeMatch[2], 10));
+      if (start <= end) {
+        for (let i = start; i <= end; i++) {
+          selected.add(i);
+        }
+      }
+    } else {
+      const num = parseInt(part, 10);
+      if (!isNaN(num) && num >= 1 && num <= maxPages) {
+        selected.add(num);
+      }
+    }
+  }
+
+  return Array.from(selected).sort((a, b) => a - b);
+}
+
+/**
+ * Estimate file size per image based on format, resolution, and quality.
+ */
+export function estimateFileSize(format = 'pdf', pixelRatio = 1.0, quality = 0.92) {
+  const isHigh = pixelRatio >= 1.8;
+  const fmt = (format || 'pdf').toLowerCase();
+
+  if (fmt === 'pdf') {
+    return isHigh ? '~1.5 MB' : '~450 KB';
+  }
+  if (fmt === 'png') {
+    return isHigh ? '~6.5 MB' : '~1.8 MB';
+  }
+  // JPG
+  if (quality >= 0.9) {
+    return isHigh ? '~2.2 MB' : '~600 KB';
+  }
+  if (quality >= 0.75) {
+    return isHigh ? '~1.3 MB' : '~380 KB';
+  }
+  return isHigh ? '~700 KB' : '~200 KB';
+}
+
+/**
+ * Render a schedule DOM element to high-res PNG or JPG Data URL
+ */
+export async function renderElementToImage(element, options = {}) {
   if (!element) throw new Error('No DOM element provided for capture');
 
   const {
-    pixelRatio = 1.5,
-    quality = 0.98,
+    format = 'png', // 'png' | 'jpg' | 'jpeg'
+    pixelRatio = 1.0,
+    quality = 0.92,
+    backgroundColor = '#070a14',
     includeCompare = false
   } = options;
 
@@ -85,17 +166,36 @@ export async function renderElementToPng(element, options = {}) {
   // Small delay for DOM layout settling
   await new Promise(r => setTimeout(r, 60));
 
+  const filter = (node) => {
+    if (!includeCompare && node.hasAttribute && node.hasAttribute('data-no-print')) {
+      return false;
+    }
+    return true;
+  };
+
+  const isJpg = format === 'jpg' || format === 'jpeg';
+  if (isJpg) {
+    return await toJpeg(element, {
+      quality: typeof quality === 'number' ? quality : 0.92,
+      pixelRatio,
+      backgroundColor: backgroundColor || '#070a14',
+      cacheBust: true,
+      filter
+    });
+  }
+
   return await toPng(element, {
-    quality,
     pixelRatio,
     cacheBust: true,
-    filter: (node) => {
-      if (!includeCompare && node.hasAttribute && node.hasAttribute('data-no-print')) {
-        return false;
-      }
-      return true;
-    }
+    filter
   });
+}
+
+/**
+ * Render a schedule DOM element to high-res PNG Data URL (backwards compatible)
+ */
+export async function renderElementToPng(element, options = {}) {
+  return await renderElementToImage(element, { ...options, format: 'png' });
 }
 
 /**
@@ -181,6 +281,16 @@ export async function exportBatchToZip(files = [], zipFilename = 'export.zip', o
   );
 
   downloadBlob(zipBlob, zipFilename);
+}
+
+/**
+ * Export a single section element as an image (JPG or PNG).
+ */
+export async function exportSectionImage(element, filename = 'schedule.png', options = {}) {
+  const isJpg = filename.endsWith('.jpg') || filename.endsWith('.jpeg') || options.format === 'jpg' || options.format === 'jpeg';
+  const dataUrl = await renderElementToImage(element, { ...options, format: isJpg ? 'jpg' : 'png' });
+  downloadDataUrl(dataUrl, filename);
+  return dataUrl;
 }
 
 /**

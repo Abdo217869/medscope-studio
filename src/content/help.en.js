@@ -40,8 +40,8 @@ export const HELP_EN = {
     desc: "• Single Multi-Page PDF: binds all generated weekly pages consecutively into one consolidated PDF file.\n• ZIP of Separate PDFs: bundles individual PDF files for each page into a ZIP archive."
   },
   png: {
-    title: "PNG Image Export",
-    desc: "Renders the timetable pages as lossless high-resolution PNG images, ideal for digital sharing, Telegram, or social media."
+    title: "Image Export (JPG & PNG)",
+    desc: "Export timetable pages as JPG or PNG images: Standard (1414×2000 px) or High (2x). PNG is sharper and lossless; JPG offers quality presets (High 92%, Medium 80%, Small 65%) with smaller file sizes for quick sharing."
   },
   resolution_presets: {
     title: "Resolution Presets",

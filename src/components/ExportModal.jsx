@@ -12,7 +12,12 @@ import {
   Printer,
   Sparkles
 } from 'lucide-preact';
-import { buildFilename, buildProjectFilename } from '../utils/exportPdf';
+import {
+  buildFilename,
+  buildProjectFilename,
+  parsePageRange,
+  estimateFileSize
+} from '../utils/exportPdf';
 import { validate } from '../utils/validatorEngine';
 
 function formatPlainIssueSentence(issue, schedule) {
@@ -79,6 +84,7 @@ export function ExportModal({
   selectedWeek,
   theme,
   onExecuteExport,
+  onCancelExport,
   isExporting,
   exportProgress,
   onJumpToSession,
@@ -87,17 +93,48 @@ export function ExportModal({
 }) {
   if (!isOpen) return null;
 
-  // Detect mobile screen width (< 768px)
-  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+  // Options state with persistent memory
+  const [format, setFormat] = useState(() => {
+    try {
+      const val = localStorage.getItem('medscope_export_format');
+      return (val === 'jpg' || val === 'png' || val === 'pdf') ? val : 'pdf';
+    } catch (e) {
+      return 'pdf';
+    }
+  });
 
-  // Options state (default to 'current' on phones as required by prompt)
   const [scope, setScope] = useState('current'); // 'current' | 'section_all_weeks' | 'week_all_sections' | 'all'
-  const [format, setFormat] = useState('pdf'); // 'pdf' | 'png'
+  const [pageRange, setPageRange] = useState('all');
+
+  const [resolution, setResolution] = useState(() => {
+    try {
+      const val = localStorage.getItem('medscope_export_resolution');
+      return val ? parseFloat(val) : 1.0;
+    } catch (e) {
+      return 1.0;
+    }
+  });
+
+  const [jpgQuality, setJpgQuality] = useState(() => {
+    try {
+      const val = localStorage.getItem('medscope_export_jpg_quality');
+      return val ? parseFloat(val) : 0.92;
+    } catch (e) {
+      return 0.92;
+    }
+  });
+
+  const [downloadSeparateImages, setDownloadSeparateImages] = useState(() => {
+    try {
+      return localStorage.getItem('medscope_export_separate_images') === 'true';
+    } catch (e) {
+      return false;
+    }
+  });
+
   const [multiPdfMode, setMultiPdfMode] = useState('combined'); // 'combined' | 'zip'
-  const [resolution, setResolution] = useState(isMobile ? 1.5 : 1.5); // 1.0 | 1.5 | 2.0
   const [pageSize, setPageSize] = useState('a4'); // 'a4' | 'a3' | 'canvas'
   const [namingTemplate, setNamingTemplate] = useState('{module}_Group_{group}_Section_{section}_Week_{week}');
-  const [quality, setQuality] = useState(0.98);
   const [includeValidationReport, setIncludeValidationReport] = useState(true);
   const [includeOffDays, setIncludeOffDays] = useState(() => schedule?.settings?.showOffDays ?? true);
   const [saveProjectFile, setSaveProjectFile] = useState(() => {
@@ -110,13 +147,43 @@ export function ExportModal({
   });
   const [exportError, setExportError] = useState('');
 
+  // Persist format choice
+  const handleFormatChange = (newFormat) => {
+    setFormat(newFormat);
+    try {
+      localStorage.setItem('medscope_export_format', newFormat);
+    } catch (e) {}
+  };
+
+  // Persist resolution choice
+  const handleResolutionChange = (newRes) => {
+    setResolution(newRes);
+    try {
+      localStorage.setItem('medscope_export_resolution', String(newRes));
+    } catch (e) {}
+  };
+
+  // Persist jpg quality choice
+  const handleJpgQualityChange = (newQuality) => {
+    setJpgQuality(newQuality);
+    try {
+      localStorage.setItem('medscope_export_jpg_quality', String(newQuality));
+    } catch (e) {}
+  };
+
+  // Persist separate images toggle
+  const handleSeparateImagesChange = (val) => {
+    setDownloadSeparateImages(val);
+    try {
+      localStorage.setItem('medscope_export_separate_images', String(val));
+    } catch (e) {}
+  };
+
   const handleSaveProjectFileChange = (checked) => {
     setSaveProjectFile(checked);
     try {
       localStorage.setItem('medscope_export_save_project_file', String(checked));
-    } catch (e) {
-      // ignore
-    }
+    } catch (e) {}
   };
 
   // Sync includeOffDays when modal opens or schedule.settings changes
@@ -156,6 +223,25 @@ export function ExportModal({
       return true;
     });
   }, [allValidationIssues, scope, selectedWeek, selectedSection]);
+
+  // Calculate candidate pages count based on scope
+  const candidatePagesCount = useMemo(() => {
+    const weeksCount = schedule?.weeks?.length || 1;
+    const sectionsCount = schedule?.sections?.length || 1;
+
+    if (scope === 'current') return 1;
+    if (scope === 'section_all_weeks') return weeksCount;
+    if (scope === 'week_all_sections') return sectionsCount;
+    if (scope === 'all') return weeksCount * sectionsCount;
+    return 1;
+  }, [scope, schedule]);
+
+  // Active page indices filtered by pageRange
+  const activePageIndices = useMemo(() => {
+    return parsePageRange(pageRange, candidatePagesCount);
+  }, [pageRange, candidatePagesCount]);
+
+  const totalPagesCount = activePageIndices.length;
 
   // Calculate unverified pages in export scope (Verification marks)
   const unverifiedPages = useMemo(() => {
@@ -197,18 +283,6 @@ export function ExportModal({
     return unverified;
   }, [schedule, scope, selectedWeek, selectedSection]);
 
-  // Compute total pages to export
-  const totalPagesCount = useMemo(() => {
-    const weeksCount = schedule?.weeks?.length || 1;
-    const sectionsCount = schedule?.sections?.length || 1;
-
-    if (scope === 'current') return 1;
-    if (scope === 'section_all_weeks') return weeksCount;
-    if (scope === 'week_all_sections') return sectionsCount;
-    if (scope === 'all') return weeksCount * sectionsCount;
-    return 1;
-  }, [scope, schedule]);
-
   // Live filename preview
   const filenamePreview = useMemo(() => {
     const ctx = {
@@ -219,8 +293,35 @@ export function ExportModal({
       week: String(selectedWeek?.n || 1),
       date: new Date().toISOString().slice(0, 10)
     };
-    return buildFilename(namingTemplate, ctx, format);
+    const ext = format === 'jpg' ? 'jpg' : format === 'png' ? 'png' : 'pdf';
+    return buildFilename(namingTemplate, ctx, ext);
   }, [namingTemplate, schedule, selectedSection, selectedWeek, theme, format]);
+
+  // Live ZIP filename preview
+  const zipFilenamePreview = useMemo(() => {
+    const moduleName = (schedule?.module?.title || theme?.moduleTitle || 'Module').replace(/\s+/g, '_');
+    const termName = (schedule?.module?.term || theme?.termText || 'Term').replace(/\s+/g, '_');
+    let zipName = `${moduleName}_${termName}_`;
+    if (scope === 'section_all_weeks') {
+      zipName += `Section_${selectedSection?.id || '1'}_All_Weeks.zip`;
+    } else if (scope === 'week_all_sections') {
+      zipName += `Week_${selectedWeek?.n || '1'}_All_Sections.zip`;
+    } else {
+      zipName += `All_Sections_All_Weeks.zip`;
+    }
+    return zipName;
+  }, [schedule, theme, scope, selectedSection, selectedWeek]);
+
+  // Effective preview name for the edit file
+  const effectiveExportFilename = useMemo(() => {
+    const willBeZip = totalPagesCount > 1 && (format === 'pdf' ? multiPdfMode === 'zip' : !downloadSeparateImages);
+    return willBeZip ? zipFilenamePreview : filenamePreview;
+  }, [totalPagesCount, format, multiPdfMode, downloadSeparateImages, zipFilenamePreview, filenamePreview]);
+
+  // Estimated file size
+  const estSizePerImage = useMemo(() => {
+    return estimateFileSize(format, resolution, jpgQuality);
+  }, [format, resolution, jpgQuality]);
 
   // Execute export (export is NEVER blocked)
   const handleStartExport = async () => {
@@ -228,12 +329,15 @@ export function ExportModal({
     try {
       await onExecuteExport({
         scope,
+        pageRange,
+        activePageIndices,
         format,
         multiPdfMode,
+        downloadSeparateImages,
         pixelRatio: resolution,
         pageSize,
         namingTemplate,
-        quality,
+        quality: format === 'jpg' ? jpgQuality : 0.98,
         includeValidationReport,
         includeOffDays,
         saveProjectFile,
@@ -281,12 +385,13 @@ export function ExportModal({
               <h2 className="font-semibold text-sm text-white tracking-wide">
                 Export Options & Batch Packaging
               </h2>
-              <p className="text-[11px] text-[#9c9c9d]">Single PDF, multi-page documents, lossless ZIP bundles</p>
+              <p className="text-[11px] text-[#9c9c9d]">Publication-ready PDF documents, JPG images, and lossless PNGs</p>
             </div>
           </div>
           <button
             type="button"
             onClick={onClose}
+            disabled={isExporting}
             className="p-1.5 rounded-full text-[#9c9c9d] hover:text-white hover:bg-white/[0.06] transition"
           >
             <X className="w-4 h-4" />
@@ -295,20 +400,66 @@ export function ExportModal({
 
         {/* Modal Body */}
         <div className="p-4 sm:p-5 space-y-4 overflow-y-auto flex-1 custom-scrollbar text-xs">
-          {/* Mobile Warning note if large batch or print */}
-          {isMobile && totalPagesCount > 4 && (
-            <div className="p-3 rounded-xl bg-[#f0b050]/15 border border-[#f0b050]/40 text-[#f0b050] text-[11px] flex items-start gap-2">
-              <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
-              <span>
-                Note: Generating {totalPagesCount} pages on a phone may take 15–20 seconds. Resolution is capped at 1.5x for device stability.
-              </span>
-            </div>
-          )}
-
-          {/* 1. EXPORT SCOPE */}
+          {/* 1. FORMAT SWITCH AT TOP: PDF | JPG | PNG */}
           <div>
             <label className="block text-[11px] font-semibold text-[var(--gold)] uppercase tracking-wider mb-2">
-              1. Export Scope (Pages to Render)
+              1. Export Format
+            </label>
+            <div className="grid grid-cols-3 gap-2">
+              <button
+                type="button"
+                data-testid="export-format-pdf"
+                onClick={() => handleFormatChange('pdf')}
+                className={`min-h-[44px] py-2 rounded-xl border font-semibold text-center transition flex items-center justify-center gap-2 ${
+                  format === 'pdf'
+                    ? 'bg-[var(--gold)]/20 border-[var(--gold)] text-[var(--gold)] shadow-sm'
+                    : 'bg-[var(--surface-2)]/60 border-[var(--border)] text-[var(--muted)] hover:text-white'
+                }`}
+              >
+                <FileText className="w-4 h-4" />
+                <span>PDF Document</span>
+              </button>
+
+              <button
+                type="button"
+                data-testid="export-format-jpg"
+                onClick={() => handleFormatChange('jpg')}
+                className={`min-h-[44px] py-2 rounded-xl border font-semibold text-center transition flex items-center justify-center gap-2 ${
+                  format === 'jpg'
+                    ? 'bg-[var(--gold)]/20 border-[var(--gold)] text-[var(--gold)] shadow-sm'
+                    : 'bg-[var(--surface-2)]/60 border-[var(--border)] text-[var(--muted)] hover:text-white'
+                }`}
+              >
+                <Image className="w-4 h-4" />
+                <span>JPG Image</span>
+              </button>
+
+              <button
+                type="button"
+                data-testid="export-format-png"
+                onClick={() => handleFormatChange('png')}
+                className={`min-h-[44px] py-2 rounded-xl border font-semibold text-center transition flex items-center justify-center gap-2 ${
+                  format === 'png'
+                    ? 'bg-[var(--gold)]/20 border-[var(--gold)] text-[var(--gold)] shadow-sm'
+                    : 'bg-[var(--surface-2)]/60 border-[var(--border)] text-[var(--muted)] hover:text-white'
+                }`}
+              >
+                <Image className="w-4 h-4" />
+                <span>PNG Image</span>
+              </button>
+            </div>
+            {format === 'png' && (
+              <div className="mt-2 text-[11px] text-[var(--muted)] flex items-center gap-1.5" data-testid="png-quality-note">
+                <Sparkles className="w-3.5 h-3.5 text-[var(--gold)] shrink-0" />
+                <span>PNG is sharper but larger. JPG is smaller and fine for sharing.</span>
+              </div>
+            )}
+          </div>
+
+          {/* 2. EXPORT SCOPE & PAGE RANGE */}
+          <div className="pt-2 border-t border-[var(--border)]">
+            <label className="block text-[11px] font-semibold text-[var(--gold)] uppercase tracking-wider mb-2">
+              2. Export Scope & Page Range
             </label>
             <div className="grid grid-cols-2 gap-2">
               <button
@@ -379,101 +530,173 @@ export function ExportModal({
                 </div>
               </button>
             </div>
-          </div>
 
-          {/* 2. FORMAT & QUALITY */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-[var(--border)]">
-            {/* Format choice */}
-            <div>
-              <label className="block text-[11px] font-semibold text-[var(--gold)] uppercase tracking-wider mb-1.5">
-                2. Output Format
-              </label>
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  onClick={() => setFormat('pdf')}
-                  className={`min-h-[44px] py-2 rounded-xl border font-semibold text-center transition flex items-center justify-center gap-1.5 ${
-                    format === 'pdf'
-                      ? 'bg-[var(--gold)]/20 border-[var(--gold)] text-[var(--gold)]'
-                      : 'bg-[var(--surface-2)]/60 border-[var(--border)] text-[var(--muted)] hover:text-white'
-                  }`}
-                >
-                  <FileText className="w-4 h-4" />
-                  <span>PDF File</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setFormat('png')}
-                  className={`min-h-[44px] py-2 rounded-xl border font-semibold text-center transition flex items-center justify-center gap-1.5 ${
-                    format === 'png'
-                      ? 'bg-[var(--gold)]/20 border-[var(--gold)] text-[var(--gold)]'
-                      : 'bg-[var(--surface-2)]/60 border-[var(--border)] text-[var(--muted)] hover:text-white'
-                  }`}
-                >
-                  <Image className="w-4 h-4" />
-                  <span>PNG Image</span>
-                </button>
+            {/* Page Range Input */}
+            <div className="mt-3 p-3 rounded-xl bg-[var(--surface-2)]/40 border border-[var(--border)] space-y-1.5">
+              <div className="flex items-center justify-between">
+                <label className="text-[11px] font-semibold text-[var(--text)]">
+                  Pages to export (Range):
+                </label>
+                <span className="text-[10px] text-[var(--muted)] font-mono">Pages: all / 1-3 / 2,5,7</span>
+              </div>
+              <input
+                type="text"
+                data-testid="export-page-range-input"
+                value={pageRange}
+                onInput={(e) => setPageRange(e.target.value)}
+                placeholder="all"
+                className="input-field w-full min-h-[38px] text-xs font-mono"
+              />
+              <div className="text-[11px] font-medium text-[var(--gold)]" data-testid="export-pages-count-live">
+                {totalPagesCount === 0
+                  ? '0 pages will be exported (please specify valid page numbers)'
+                  : `${totalPagesCount} ${totalPagesCount === 1 ? 'page' : 'pages'} will be exported`}
               </div>
             </div>
-
-            {/* Resolution / DPI */}
-            <div>
-              <label className="block text-[11px] font-semibold text-[var(--gold)] uppercase tracking-wider mb-1.5">
-                3. Quality / Resolution
-              </label>
-              <select
-                value={resolution}
-                onChange={(e) => setResolution(parseFloat(e.target.value))}
-                className="input-field w-full min-h-[44px] text-xs font-semibold"
-              >
-                <option value="1.0">Standard Web (1x — 1414×2000 px, ~96 DPI)</option>
-                <option value="1.5">High Resolution (1.5x — 2121×3000 px, 250+ DPI)</option>
-                <option value="2.0">Ultra Print Quality (2x — 2828×4000 px, 300+ DPI)</option>
-              </select>
-            </div>
           </div>
 
-          {/* Multi-Page PDF Packaging Choice */}
-          {scope !== 'current' && format === 'pdf' && (
-            <div className="bg-[var(--surface-2)]/60 p-3 rounded-xl border border-[var(--border)] space-y-2">
+          {/* 3. MULTI-PAGE & IMAGE PACKAGING STRATEGY */}
+          {totalPagesCount > 1 && (
+            <div className="p-3 bg-[var(--surface-2)]/60 rounded-xl border border-[var(--border)] space-y-2">
               <label className="block text-[11px] font-semibold text-[var(--muted)]">
                 Multi-Page Packaging Strategy:
               </label>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                <label className="flex items-center gap-2.5 p-2 rounded-lg bg-[var(--surface)] border border-[var(--border)] cursor-pointer min-h-[44px]">
-                  <input
-                    type="radio"
-                    name="multiPdfMode"
-                    value="combined"
-                    checked={multiPdfMode === 'combined'}
-                    onChange={() => setMultiPdfMode('combined')}
-                    className="accent-[var(--gold)] cursor-pointer"
-                  />
-                  <div>
-                    <div className="font-semibold text-xs text-[var(--text)]">Single Multi-Page PDF</div>
-                    <div className="text-[10px] text-[var(--muted)]">All pages bound into one PDF file</div>
-                  </div>
-                </label>
 
-                <label className="flex items-center gap-2.5 p-2 rounded-lg bg-[var(--surface)] border border-[var(--border)] cursor-pointer min-h-[44px]">
-                  <input
-                    type="radio"
-                    name="multiPdfMode"
-                    value="zip"
-                    checked={multiPdfMode === 'zip'}
-                    onChange={() => setMultiPdfMode('zip')}
-                    className="accent-[var(--gold)] cursor-pointer"
-                  />
-                  <div>
-                    <div className="font-semibold text-xs text-[var(--text)]">ZIP Archive of PDFs</div>
-                    <div className="text-[10px] text-[var(--muted)]">Separate PDF files inside a ZIP</div>
+              {format === 'pdf' ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <label className="flex items-center gap-2.5 p-2 rounded-lg bg-[var(--surface)] border border-[var(--border)] cursor-pointer min-h-[44px]">
+                    <input
+                      type="radio"
+                      name="multiPdfMode"
+                      value="combined"
+                      checked={multiPdfMode === 'combined'}
+                      onChange={() => setMultiPdfMode('combined')}
+                      className="accent-[var(--gold)] cursor-pointer"
+                    />
+                    <div>
+                      <div className="font-semibold text-xs text-[var(--text)]">Single Multi-Page PDF</div>
+                      <div className="text-[10px] text-[var(--muted)]">All pages bound into one PDF file</div>
+                    </div>
+                  </label>
+
+                  <label className="flex items-center gap-2.5 p-2 rounded-lg bg-[var(--surface)] border border-[var(--border)] cursor-pointer min-h-[44px]">
+                    <input
+                      type="radio"
+                      name="multiPdfMode"
+                      value="zip"
+                      checked={multiPdfMode === 'zip'}
+                      onChange={() => setMultiPdfMode('zip')}
+                      className="accent-[var(--gold)] cursor-pointer"
+                    />
+                    <div>
+                      <div className="font-semibold text-xs text-[var(--text)]">ZIP Archive of PDFs</div>
+                      <div className="text-[10px] text-[var(--muted)]">Separate PDF files inside a ZIP</div>
+                    </div>
+                  </label>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <label className="flex items-center gap-2.5 p-2 rounded-lg bg-[var(--surface)] border border-[var(--border)] cursor-pointer min-h-[44px]">
+                      <input
+                        type="radio"
+                        name="imageDeliveryMode"
+                        value="zip"
+                        checked={!downloadSeparateImages}
+                        onChange={() => handleSeparateImagesChange(false)}
+                        className="accent-[var(--gold)] cursor-pointer"
+                      />
+                      <div>
+                        <div className="font-semibold text-xs text-[var(--text)]">ZIP Archive (Recommended)</div>
+                        <div className="text-[10px] text-[var(--muted)]">One ZIP with a numbered image for every page</div>
+                      </div>
+                    </label>
+
+                    <label className="flex items-center gap-2.5 p-2 rounded-lg bg-[var(--surface)] border border-[var(--border)] cursor-pointer min-h-[44px]">
+                      <input
+                        type="radio"
+                        name="imageDeliveryMode"
+                        value="separate"
+                        checked={downloadSeparateImages}
+                        onChange={() => handleSeparateImagesChange(true)}
+                        className="accent-[var(--gold)] cursor-pointer"
+                      />
+                      <div>
+                        <div className="font-semibold text-xs text-[var(--text)]">Download as separate images</div>
+                        <div className="text-[10px] text-[var(--muted)]">Direct single image files</div>
+                      </div>
+                    </label>
                   </div>
-                </label>
-              </div>
+
+                  {downloadSeparateImages && totalPagesCount > 6 && (
+                    <div className="p-2.5 rounded-lg bg-[#f0b050]/15 border border-[#f0b050]/30 text-[#f0b050] text-[11px] flex items-start gap-2">
+                      <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+                      <span>
+                        Warning: Downloading {totalPagesCount} separate files may be blocked by browser popup protection. Consider using the ZIP archive.
+                      </span>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           )}
 
-          {/* Include OFF days Checkbox */}
+          {/* 4. QUALITY & RESOLUTION OPTIONS */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-[var(--border)]">
+            {/* Resolution */}
+            <div>
+              <label className="block text-[11px] font-semibold text-[var(--gold)] uppercase tracking-wider mb-1.5">
+                Resolution
+              </label>
+              <select
+                data-testid="export-resolution-select"
+                value={String(resolution)}
+                onChange={(e) => handleResolutionChange(parseFloat(e.target.value))}
+                className="input-field w-full min-h-[44px] text-xs font-semibold"
+              >
+                <option value="1.0">Standard (1414×2000, canvas size)</option>
+                <option value="2.0">High (x2 — 2828×4000 px, 300+ DPI)</option>
+              </select>
+            </div>
+
+            {/* JPG Quality (Hidden when PNG or PDF) */}
+            {format === 'jpg' ? (
+              <div>
+                <label className="block text-[11px] font-semibold text-[var(--gold)] uppercase tracking-wider mb-1.5">
+                  JPG Quality
+                </label>
+                <select
+                  data-testid="export-jpg-quality-select"
+                  value={String(jpgQuality)}
+                  onChange={(e) => handleJpgQualityChange(parseFloat(e.target.value))}
+                  className="input-field w-full min-h-[44px] text-xs font-semibold"
+                >
+                  <option value="0.92">High (92%) — Default</option>
+                  <option value="0.80">Medium (80%)</option>
+                  <option value="0.65">Small (65%)</option>
+                </select>
+              </div>
+            ) : (
+              <div>
+                <label className="block text-[11px] font-semibold text-[var(--muted)] uppercase tracking-wider mb-1.5">
+                  Estimated File Size
+                </label>
+                <div className="input-field w-full min-h-[44px] flex items-center text-xs text-[var(--gold)] font-mono">
+                  {estSizePerImage} per image
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Estimated Size details for JPG */}
+          {format === 'jpg' && (
+            <div className="text-[11px] text-[var(--muted)] flex items-center justify-between px-1">
+              <span>Estimated file size:</span>
+              <span className="font-mono text-[var(--gold)] font-medium">~{estSizePerImage} per image</span>
+            </div>
+          )}
+
+          {/* Include OFF days Checkbox (Shared across all formats) */}
           <div className="p-3 rounded-xl bg-[var(--surface-2)]/50 border border-[var(--border)]">
             <label className="flex items-center gap-2.5 cursor-pointer">
               <input
@@ -490,24 +713,24 @@ export function ExportModal({
             </label>
           </div>
 
-          {/* Also save the project file Checkbox (PDF export) */}
-          {format === 'pdf' && (
-            <div className="p-3 rounded-xl bg-[var(--surface-2)]/50 border border-[var(--border)]">
-              <label className="flex items-center gap-2.5 cursor-pointer">
-                <input
-                  type="checkbox"
-                  data-testid="export-save-project-file-checkbox"
-                  checked={saveProjectFile}
-                  onChange={(e) => handleSaveProjectFileChange(e.target.checked)}
-                  className="accent-[var(--gold)] w-4 h-4 cursor-pointer"
-                />
-                <div>
-                  <div className="font-semibold text-xs text-[var(--text)]">Also save the project file</div>
-                  <div className="text-[10px] text-[var(--muted)]">Downloads an edit file (<span className="font-mono text-[var(--gold)]">{buildProjectFilename(filenamePreview)}</span>) right after the PDF so it can be reopened and edited anytime</div>
+          {/* Also save the project file Checkbox (Shared across all formats: PDF, JPG, PNG) */}
+          <div className="p-3 rounded-xl bg-[var(--surface-2)]/50 border border-[var(--border)]">
+            <label className="flex items-center gap-2.5 cursor-pointer">
+              <input
+                type="checkbox"
+                data-testid="export-save-project-file-checkbox"
+                checked={saveProjectFile}
+                onChange={(e) => handleSaveProjectFileChange(e.target.checked)}
+                className="accent-[var(--gold)] w-4 h-4 cursor-pointer"
+              />
+              <div>
+                <div className="font-semibold text-xs text-[var(--text)]">Also save the project file</div>
+                <div className="text-[10px] text-[var(--muted)]">
+                  Downloads an edit file (<span className="font-mono text-[var(--gold)]">{buildProjectFilename(filenamePreview)}</span>) right after the export so it can be reopened and edited anytime
                 </div>
-              </label>
-            </div>
-          )}
+              </div>
+            </label>
+          </div>
 
           {/* Plain-language message and button if browser blocked second download */}
           {pendingProjectFile && (
@@ -534,7 +757,7 @@ export function ExportModal({
           <div className="p-3 rounded-xl bg-[var(--surface-2)]/50 border border-[var(--border)] space-y-1">
             <div className="flex items-center justify-between text-[11px] text-[var(--muted)]">
               <span>Output Filename Preview:</span>
-              <span className="font-mono text-[var(--gold)] font-semibold">{filenamePreview}</span>
+              <span className="font-mono text-[var(--gold)] font-semibold">{effectiveExportFilename}</span>
             </div>
           </div>
 
@@ -614,12 +837,12 @@ export function ExportModal({
             </div>
           )}
 
-          {/* Progress Indicator */}
+          {/* Progress Indicator with Cancel button */}
           {isExporting && (
             <div className="p-3 bg-[var(--surface-2)]/80 rounded-xl border border-[var(--gold)]/40 space-y-2">
-              <div className="flex justify-between text-xs font-semibold text-[var(--gold)]">
-                <span>{exportProgress?.status || 'Rendering high-resolution pages...'}</span>
-                <span>{exportProgress?.percent || 0}%</span>
+              <div className="flex justify-between items-center text-xs font-semibold text-[var(--gold)]">
+                <span>{exportProgress?.status || `Exporting ${exportProgress?.current || 1} of ${exportProgress?.total || totalPagesCount}...`}</span>
+                <span className="font-mono">{exportProgress?.percent || 0}%</span>
               </div>
               <div className="w-full h-2 bg-[var(--surface)] rounded-full overflow-hidden border border-[var(--border)]">
                 <div
@@ -627,6 +850,17 @@ export function ExportModal({
                   style={{ width: `${exportProgress?.percent || 0}%` }}
                 />
               </div>
+              {onCancelExport && (
+                <div className="flex justify-end pt-1">
+                  <button
+                    type="button"
+                    onClick={onCancelExport}
+                    className="px-3 py-1 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 text-[11px] font-medium transition"
+                  >
+                    Cancel Export
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -640,8 +874,7 @@ export function ExportModal({
           <div className="flex gap-2">
             <button
               type="button"
-              onClick={onClose}
-              disabled={isExporting}
+              onClick={isExporting && onCancelExport ? onCancelExport : onClose}
               className="btn-ghost-pill text-xs min-h-[40px] px-4"
             >
               Cancel
@@ -650,8 +883,8 @@ export function ExportModal({
               type="button"
               data-testid="start-export-btn"
               onClick={handleStartExport}
-              disabled={isExporting}
-              className="btn-keycap text-xs min-h-[40px] px-5"
+              disabled={isExporting || totalPagesCount === 0}
+              className="btn-keycap text-xs min-h-[40px] px-5 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isExporting ? 'Exporting...' : 'Start Export'}
             </button>
