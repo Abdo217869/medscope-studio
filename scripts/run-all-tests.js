@@ -48,6 +48,7 @@ async function main() {
   const serverProc = await startPreviewServer();
 
   const testFiles = [
+    'test-canva-export.js',
     'test-phase13.js',
     'test-export-project-file.js',
     'test-validator-engine.js',

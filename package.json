@@ -20,6 +20,7 @@
     "jspdf": "^2.5.2",
     "jszip": "^3.10.1",
     "lucide-preact": "^0.475.0",
+    "pptxgenjs": "^4.0.1",
     "preact": "^10.25.4",
     "qrcode": "^1.5.4"
   },

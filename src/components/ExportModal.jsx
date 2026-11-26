@@ -97,7 +97,7 @@ export function ExportModal({
   const [format, setFormat] = useState(() => {
     try {
       const val = localStorage.getItem('medscope_export_format');
-      return (val === 'jpg' || val === 'png' || val === 'pdf') ? val : 'pdf';
+      return (val === 'jpg' || val === 'png' || val === 'pdf' || val === 'canva') ? val : 'pdf';
     } catch (e) {
       return 'pdf';
     }
@@ -226,6 +226,7 @@ export function ExportModal({
 
   // Calculate candidate pages count based on scope
   const candidatePagesCount = useMemo(() => {
+    if (format === 'canva') return 1;
     const weeksCount = schedule?.weeks?.length || 1;
     const sectionsCount = schedule?.sections?.length || 1;
 
@@ -234,12 +235,13 @@ export function ExportModal({
     if (scope === 'week_all_sections') return sectionsCount;
     if (scope === 'all') return weeksCount * sectionsCount;
     return 1;
-  }, [scope, schedule]);
+  }, [scope, schedule, format]);
 
   // Active page indices filtered by pageRange
   const activePageIndices = useMemo(() => {
+    if (format === 'canva') return [1];
     return parsePageRange(pageRange, candidatePagesCount);
-  }, [pageRange, candidatePagesCount]);
+  }, [pageRange, candidatePagesCount, format]);
 
   const totalPagesCount = activePageIndices.length;
 
@@ -293,6 +295,10 @@ export function ExportModal({
       week: String(selectedWeek?.n || 1),
       date: new Date().toISOString().slice(0, 10)
     };
+    if (format === 'canva') {
+      const base = buildFilename(namingTemplate, ctx, 'pptx');
+      return base.replace(/\.pptx$/i, '_CANVA.pptx');
+    }
     const ext = format === 'jpg' ? 'jpg' : format === 'png' ? 'png' : 'pdf';
     return buildFilename(namingTemplate, ctx, ext);
   }, [namingTemplate, schedule, selectedSection, selectedWeek, theme, format]);
@@ -448,10 +454,29 @@ export function ExportModal({
                 <span>PNG Image</span>
               </button>
             </div>
+            <button
+              type="button"
+              data-testid="export-format-canva"
+              onClick={() => handleFormatChange('canva')}
+              className={`mt-2 w-full min-h-[42px] px-3 py-2 rounded-xl border font-semibold text-center transition flex items-center justify-center gap-2 ${
+                format === 'canva'
+                  ? 'bg-[var(--gold)]/20 border-[var(--gold)] text-[var(--gold)] shadow-sm'
+                  : 'bg-[var(--surface-2)]/60 border-[var(--border)] text-[var(--muted)] hover:text-white'
+              }`}
+            >
+              <Sparkles className="w-4 h-4 shrink-0" />
+              <span>Canva (editable) - experimental</span>
+            </button>
             {format === 'png' && (
               <div className="mt-2 text-[11px] text-[var(--muted)] flex items-center gap-1.5" data-testid="png-quality-note">
                 <Sparkles className="w-3.5 h-3.5 text-[var(--gold)] shrink-0" />
                 <span>PNG is sharper but larger. JPG is smaller and fine for sharing.</span>
+              </div>
+            )}
+            {format === 'canva' && (
+              <div className="mt-2 p-2.5 rounded-xl bg-[var(--gold)]/10 border border-[var(--gold)]/30 text-[11px] text-[var(--text)] flex items-start gap-2" data-testid="canva-experimental-note">
+                <AlertTriangle className="w-4 h-4 text-[var(--gold)] shrink-0 mt-0.5" />
+                <span>Experimental. Upload to Canva &gt; Create a design &gt; Import file. Small differences from the preview are possible.</span>
               </div>
             )}
           </div>
@@ -461,6 +486,15 @@ export function ExportModal({
             <label className="block text-[11px] font-semibold text-[var(--gold)] uppercase tracking-wider mb-2">
               2. Export Scope & Page Range
             </label>
+            {format === 'canva' ? (
+              <div className="p-3 rounded-xl bg-[var(--gold)]/10 border border-[var(--gold)]/30 text-xs text-[var(--text)]" data-testid="canva-single-page-info">
+                <div className="font-semibold text-[var(--gold)]">Current Page Only (Prototype)</div>
+                <div className="text-[11px] text-[var(--muted)] mt-0.5">
+                  Sec {selectedSection?.id} • Wk {selectedWeek?.n} (1 page) — Exports an editable PPTX slide (1414×2000 ratio).
+                </div>
+              </div>
+            ) : (
+            <>
             <div className="grid grid-cols-2 gap-2">
               <button
                 type="button"
@@ -553,6 +587,8 @@ export function ExportModal({
                   : `${totalPagesCount} ${totalPagesCount === 1 ? 'page' : 'pages'} will be exported`}
               </div>
             </div>
+            </>
+            )}
           </div>
 
           {/* 3. MULTI-PAGE & IMAGE PACKAGING STRATEGY */}
@@ -641,7 +677,9 @@ export function ExportModal({
             </div>
           )}
 
-          {/* 4. QUALITY & RESOLUTION OPTIONS */}
+          {/* 4. QUALITY & RESOLUTION OPTIONS (Hidden for Canva PPTX) */}
+          {format !== 'canva' && (
+          <>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-[var(--border)]">
             {/* Resolution */}
             <div>
@@ -694,6 +732,8 @@ export function ExportModal({
               <span>Estimated file size:</span>
               <span className="font-mono text-[var(--gold)] font-medium">~{estSizePerImage} per image</span>
             </div>
+          )}
+          </>
           )}
 
           {/* Include OFF days Checkbox (Shared across all formats) */}

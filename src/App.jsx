@@ -49,6 +49,7 @@ import {
   downloadDataUrl,
   downloadBlob
 } from './utils/exportPdf';
+import { exportCanvaPptx } from './utils/exportCanvaPptx';
 
 export function App() {
   // Mobile breakpoint detector (< 768px)
@@ -643,6 +644,54 @@ export function App() {
 
       const moduleName = schedule.module?.title || theme?.moduleTitle || 'Module';
       const termName = schedule.module?.term?.replace(/\s+/g, '_') || theme?.termText || 'Term';
+
+      // Handle Canva (editable) - experimental single-page PPTX prototype
+      if (format === 'canva') {
+        setExportProgress({ percent: 35, status: 'Building editable Canva PPTX slide...' });
+        const ctx = {
+          module: moduleName,
+          term: termName,
+          group: currentSection.letter || 'A',
+          section: currentSection.id,
+          week: String(currentWeek.n)
+        };
+        const baseName = buildFilename(namingTemplate, ctx, 'pptx');
+        const canvaFilename = baseName.replace(/\.pptx$/i, '_CANVA.pptx');
+
+        await exportCanvaPptx(
+          {
+            moduleInfo: schedule.module,
+            section: currentSection,
+            week: currentWeek,
+            theme,
+            subjects: schedule.subjects || [],
+            sessionTypes: schedule.sessionTypes || [],
+            pageNumber,
+            showOffDays: includeOffDays !== undefined ? includeOffDays : (schedule?.settings?.showOffDays ?? true)
+          },
+          canvaFilename
+        );
+
+        if (saveProjectFile) {
+          const projectData = buildProjectFileData(schedule, theme);
+          const projectFilename = buildProjectFilename(canvaFilename);
+          const jsonBlob = new Blob([JSON.stringify(projectData, null, 2)], { type: 'application/json' });
+          setPendingProjectFile({ blob: jsonBlob, filename: projectFilename });
+          setTimeout(() => {
+            try {
+              downloadBlob(jsonBlob, projectFilename);
+            } catch (e) {
+              console.warn('Second download may have been blocked:', e);
+            }
+          }, 350);
+        }
+
+        setExportNotice(`Exported ${canvaFilename} successfully!`);
+        addToast({ type: 'success', title: 'Canva PPTX Exported', message: `Exported ${canvaFilename} successfully!` });
+        setExportProgress({ percent: 100, status: 'Complete!' });
+        setIsExporting(false);
+        return;
+      }
 
       // 1. Determine list of candidate pages based on scope
       const candidatePages = [];
